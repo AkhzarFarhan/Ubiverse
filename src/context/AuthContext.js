@@ -1,7 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
+  signInWithCredential,
   signOut,
   onAuthStateChanged,
   updateProfile,
@@ -33,10 +35,27 @@ export function AuthProvider({ children }) {
   const login = (email, password) =>
     signInWithEmailAndPassword(auth, email, password);
 
+  const loginWithGoogleIdToken = async (idToken) => {
+    if (!idToken) {
+      throw new Error('Missing Google ID token.');
+    }
+    const credential = GoogleAuthProvider.credential(idToken);
+    return signInWithCredential(auth, credential);
+  };
+
   const logout = () => signOut(auth);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        loginWithGoogleIdToken,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

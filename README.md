@@ -42,6 +42,19 @@ EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
 EXPO_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
+### 2b. Enable Google Sign-In (optional but recommended)
+
+1. In Firebase Console → **Authentication** → **Sign-in method**, enable **Google**.
+2. Create Google OAuth client IDs for the platforms you target (Android/iOS/Web).
+3. Add the client IDs to your `.env`:
+
+```env
+EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=your_expo_client_id
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=your_ios_client_id
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=your_android_client_id
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your_web_client_id
+```
+
 ### 3. Run the app
 
 ```bash

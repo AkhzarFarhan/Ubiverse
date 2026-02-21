@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,50 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import * as Google from 'expo-auth-session/providers/google';
 import { useAuth } from '../../context/AuthContext';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { login, loginWithGoogleIdToken } = useAuth();
+
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    expoClientId: process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    scopes: ['profile', 'email'],
+  });
+
+  useEffect(() => {
+    const completeGoogleLogin = async () => {
+      if (!response) return;
+
+      if (response.type === 'success') {
+        const idToken =
+          response.authentication?.idToken ||
+          response.params?.id_token ||
+          response.params?.idToken;
+
+        try {
+          setGoogleLoading(true);
+          await loginWithGoogleIdToken(idToken);
+        } catch (error) {
+          Alert.alert('Google Login Failed', error.message);
+        } finally {
+          setGoogleLoading(false);
+        }
+      } else {
+        setGoogleLoading(false);
+      }
+    };
+
+    completeGoogleLogin();
+  }, [response, loginWithGoogleIdToken]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -30,6 +67,16 @@ export default function LoginScreen({ navigation }) {
       Alert.alert('Login Failed', error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setGoogleLoading(true);
+      await promptAsync({ useProxy: true });
+    } catch (error) {
+      setGoogleLoading(false);
+      Alert.alert('Google Login Failed', error.message);
     }
   };
 
@@ -77,6 +124,28 @@ export default function LoginScreen({ navigation }) {
               <ActivityIndicator color="#FFF" />
             ) : (
               <Text style={styles.buttonText}>Log In</Text>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.googleButton, (googleLoading || !request) && styles.buttonDisabled]}
+            onPress={handleGoogleLogin}
+            disabled={googleLoading || !request}
+            testID="google-login-button"
+          >
+            {googleLoading ? (
+              <ActivityIndicator color="#007AFF" />
+            ) : (
+              <>
+                <Ionicons name="logo-google" size={18} color="#000" />
+                <Text style={styles.googleButtonText}>Continue with Google</Text>
+              </>
             )}
           </TouchableOpacity>
 
@@ -128,6 +197,27 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 14,
+  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#E5E5EA' },
+  dividerText: { color: '#8E8E93', fontSize: 12, fontWeight: '600' },
+  googleButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+    marginBottom: 14,
+  },
+  googleButtonText: { color: '#000', fontSize: 15, fontWeight: '700' },
   link: { textAlign: 'center', color: '#8E8E93', fontSize: 14 },
   linkBold: { color: '#007AFF', fontWeight: '700' },
 });

@@ -51,9 +51,17 @@
 |---|---|---|
 | `@expo/metro-runtime` | ^6.1.2 | Metro bundler runtime for web |
 | `@expo/vector-icons` | ^14.0.2 | Icon library (Ionicons used) |
+| `expo-auth-session` | ~7.0.10 | OAuth flows (Google sign-in) |
 | `expo-font` | ^14.0.11 | Custom font loading |
 | `expo-linear-gradient` | ^14.0.2 | Gradient backgrounds |
 | `expo-status-bar` | ~3.0.9 | Status bar control |
+| `expo-web-browser` | ~15.0.10 | Auth session completion / in-app browser |
+
+### Auth (Google)
+
+| Package | Version | Purpose |
+|---|---|---|
+| `@react-native-google-signin/google-signin` | ^16.1.1 | Installed (currently unused); alternative native Google sign-in SDK |
 
 ### Dev Dependencies
 
@@ -69,11 +77,15 @@
 
 ```
 Ubiverse/
+├── .github/
+│   └── copilot-instructions.md    # LLM workflow + maintenance guide
+├── Makefile                       # One-liner push/merge commands (dev ↔ main)
 ├── .env                          # Firebase credentials (EXPO_PUBLIC_* vars)
 ├── .gitignore
 ├── App.js                        # Root component (AuthProvider + AppNavigator)
 ├── app.json                      # Expo config (icons, splash, bundle IDs)
 ├── babel.config.js               # Babel config (babel-preset-expo)
+├── theme-update.js                # One-off script used to mass-update theme values
 ├── index.js                      # registerRootComponent entry
 ├── LICENSE                       # MIT
 ├── package.json
@@ -136,6 +148,12 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID
 EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 EXPO_PUBLIC_FIREBASE_APP_ID
+
+# Google Sign-In (OAuth client IDs)
+EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID
+EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
+EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
 ```
 
 ---
@@ -145,6 +163,7 @@ EXPO_PUBLIC_FIREBASE_APP_ID
 ### Authentication (Firebase Auth)
 - [x] Email/password registration with display name
 - [x] Email/password login
+- [x] Google sign-in (OAuth via `expo-auth-session` + Firebase credential sign-in)
 - [x] Logout
 - [x] Auth state listener (`onAuthStateChanged`) in context
 - [x] Auth-gated navigation (unauthenticated → Login/Register, authenticated → MainTabs)
@@ -231,15 +250,19 @@ AppNavigator (NativeStackNavigator)
 
 | Token | Value | Usage |
 |---|---|---|
-| Primary | `#6B4EFF` | Buttons, active tab, gradients |
-| Secondary Gradient | `#A855F7` | Header gradients |
-| Habit Accent | `#FF6B6B` / `#FF8E53` | Habit cards, streak flame |
-| Notes Accent | `#00C9A7` / `#00B4D8` | Note cards, save button |
-| Background (Todos) | `#F8F7FF` | Light purple tint |
-| Background (Habits) | `#FFF8F7` | Light warm tint |
-| Background (Notes) | `#F7FFFD` | Light mint tint |
-| Dark Text | `#1A1A2E` | Headings and body |
-| Card Style | White, `borderRadius: 16-24`, subtle shadow | Consistent across screens |
+| Primary | `#007AFF` | Buttons, active tab tint |
+| Secondary Text | `#3C3C43` / `#8E8E93` | iOS-like secondary labels |
+| Background | `#F2F2F7` | iOS grouped background |
+| Surface | `#FFFFFF` | Card backgrounds |
+| Destructive | `#FF3B30` | Delete/trash actions |
+| Accent (Habits) | `#FF9500` | Streak flame / habit accent |
+| Accent (Notes) | `#34C759` | Notes accent |
+| Dark Text | `#000000` | Primary text |
+| Card Style | White, `borderRadius: 10-14`, subtle shadow | More iOS-like cards |
+
+Notes:
+- Theme changes were applied across the project; verify screens for any remaining legacy colors.
+- `StatusBar` is set to dark content for light theme.
 
 ---
 
@@ -289,16 +312,31 @@ AppNavigator (NativeStackNavigator)
 8. **No offline persistence** configured — relies on default Firestore behavior
 9. **No state management library** — React Context + local `useState` suffices at current scale
 10. **Test IDs (`testID`)** added to all interactive elements for automated testing
+11. **Google OAuth via Expo AuthSession** — uses ID token → Firebase `signInWithCredential`
 
 ---
 
-## 12. Known Gaps / Future Considerations
+## 12. Recent Changes (2026-02-21)
+
+- Added LLM workflow instructions in `.github/copilot-instructions.md`
+- Added `Makefile` targets for push-to-dev and merge-dev-to-main
+- Created and ran `theme-update.js` to switch UI toward iOS light mode
+- Updated UI theme tokens toward iOS light style (`#007AFF`, `#F2F2F7`, etc.)
+- Implemented Google sign-in on Login/Register via `expo-auth-session` + Firebase credential sign-in
+- Added `WebBrowser.maybeCompleteAuthSession()` in `App.js` for auth session completion
+- Documented Google OAuth env vars in README
+
+---
+
+## 13. Known Gaps / Future Considerations
 
 ### Bugs & Critical Tech Debt
 - [ ] **BUG**: `TODAY` constant in `HabitsScreen.js` is evaluated at module load. If the app is left open overnight, habits will be logged for the wrong day. Needs to be computed inside the render cycle or via a hook.
 - [ ] **Tech Debt**: Theme colors (e.g., `#6B4EFF`, `#FF6B6B`) are duplicated across multiple screen `StyleSheet`s. Needs a centralized `src/constants/theme.js`.
 - [ ] **Tech Debt**: Missing React Error Boundary in `App.js`. Unhandled render errors will crash the entire app to a white screen.
 - [ ] **Tooling**: Missing ESLint and Prettier configuration for consistent code formatting.
+- [ ] **DevEx**: `Makefile` recipes assume a POSIX shell. On Windows, run via Git Bash/WSL/MSYS `make`, or adjust the Makefile to be PowerShell-compatible.
+- [ ] **Deps**: `@react-native-google-signin/google-signin` is installed but not used (current implementation uses `expo-auth-session`). Consider removing if not needed.
 
 ### Feature Gaps
 - [ ] No unit or integration tests written yet (jest-expo configured but unused)

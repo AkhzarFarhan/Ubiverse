@@ -7,7 +7,6 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 
@@ -16,21 +15,21 @@ const tools = [
     icon: 'checkbox-outline',
     label: 'Todos',
     desc: 'Track your tasks',
-    color: ['#6B4EFF', '#A855F7'],
+    color: '#007AFF',
     tab: 'Todos',
   },
   {
     icon: 'flame-outline',
     label: 'Habits',
     desc: 'Build daily habits',
-    color: ['#FF6B6B', '#FF8E53'],
+    color: '#FF9500',
     tab: 'Habits',
   },
   {
     icon: 'document-text-outline',
     label: 'Notes',
     desc: 'Quick notes & ideas',
-    color: ['#00C9A7', '#00B4D8'],
+    color: '#34C759',
     tab: 'Notes',
   },
 ];
@@ -63,8 +62,9 @@ export default function DashboardScreen({ navigation }) {
               onPress={() => navigation.navigate(tool.tab)}
               testID={`tool-${tool.label.toLowerCase()}`}
             >
-              <LinearGradient colors={tool.color} style={styles.iconWrap}>
-                <Ionicons name={tool.icon} size={28} color="#000" />
+              <View style={[styles.iconWrap, { backgroundColor: tool.color }]}
+              >
+                <Ionicons name={tool.icon} size={28} color="#FFF" />
               </View>
               <Text style={styles.cardLabel}>{tool.label}</Text>
               <Text style={styles.cardDesc}>{tool.desc}</Text>
@@ -105,6 +105,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  cardLabel: { fontSize: 16, fontWeight: '700', color: '#1A1A2E', marginBottom: 4 },
+  cardLabel: { fontSize: 16, fontWeight: '700', color: '#000', marginBottom: 4 },
   cardDesc: { fontSize: 12, color: '#8E8E93' },
 });

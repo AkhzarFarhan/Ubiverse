@@ -9,6 +9,12 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+// Initialize Google Sign-In
+GoogleSignin.configure({
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+});
 
 export const AuthContext = createContext({});
 
@@ -35,12 +41,21 @@ export function AuthProvider({ children }) {
   const login = (email, password) =>
     signInWithEmailAndPassword(auth, email, password);
 
-  const loginWithGoogleIdToken = async (idToken) => {
-    if (!idToken) {
-      throw new Error('Missing Google ID token.');
+  const loginWithGoogleIdToken = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = userInfo.data?.idToken || userInfo.idToken;
+      
+      if (!idToken) {
+        throw new Error('Missing Google ID token.');
+      }
+      const credential = GoogleAuthProvider.credential(idToken);
+      return signInWithCredential(auth, credential);
+    } catch (error) {
+      console.error('Google Sign-In Error:', error);
+      throw error;
     }
-    const credential = GoogleAuthProvider.credential(idToken);
-    return signInWithCredential(auth, credential);
   };
 
   const logout = () => signOut(auth);

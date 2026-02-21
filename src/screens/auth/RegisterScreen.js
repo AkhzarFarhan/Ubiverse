@@ -12,7 +12,6 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Google from 'expo-auth-session/providers/google';
 import { useAuth } from '../../context/AuthContext';
 
 export default function RegisterScreen({ navigation }) {
@@ -23,40 +22,6 @@ export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { register, loginWithGoogleIdToken } = useAuth();
-
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    expoClientId: process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-    scopes: ['profile', 'email'],
-  });
-
-  useEffect(() => {
-    const completeGoogleLogin = async () => {
-      if (!response) return;
-
-      if (response.type === 'success') {
-        const idToken =
-          response.authentication?.idToken ||
-          response.params?.id_token ||
-          response.params?.idToken;
-
-        try {
-          setGoogleLoading(true);
-          await loginWithGoogleIdToken(idToken);
-        } catch (error) {
-          Alert.alert('Google Sign Up Failed', error.message);
-        } finally {
-          setGoogleLoading(false);
-        }
-      } else {
-        setGoogleLoading(false);
-      }
-    };
-
-    completeGoogleLogin();
-  }, [response, loginWithGoogleIdToken]);
 
   const handleRegister = async () => {
     if (!displayName || !email || !password || !confirmPassword) {
@@ -84,7 +49,7 @@ export default function RegisterScreen({ navigation }) {
   const handleGoogleSignup = async () => {
     try {
       setGoogleLoading(true);
-      await promptAsync({ useProxy: true });
+      await loginWithGoogleIdToken();
     } catch (error) {
       setGoogleLoading(false);
       Alert.alert('Google Sign Up Failed', error.message);

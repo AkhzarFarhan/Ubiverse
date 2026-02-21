@@ -65,7 +65,7 @@ export default function DashboardScreen({ navigation }) {
             >
               <LinearGradient colors={tool.color} style={styles.iconWrap}>
                 <Ionicons name={tool.icon} size={28} color="#000" />
-              </View>
+              </LinearGradient>
               <Text style={styles.cardLabel}>{tool.label}</Text>
               <Text style={styles.cardDesc}>{tool.desc}</Text>
             </TouchableOpacity>

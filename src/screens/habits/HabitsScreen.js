@@ -92,8 +92,9 @@ export default function HabitsScreen() {
 
   const streak = (completedDates = []) => {
     let count = 0;
-    let date = new Date();
-    while (true) {
+    const date = new Date();
+    const MAX_STREAK = 365;
+    while (count < MAX_STREAK) {
       const key = date.toISOString().split('T')[0];
       if (!completedDates.includes(key)) break;
       count++;
@@ -118,7 +119,7 @@ export default function HabitsScreen() {
           <Text style={styles.habitName}>{item.name}</Text>
           <View style={styles.streakRow}>
             <Ionicons name="flame" size={14} color="#FF8E53" />
-            <Text style={styles.streakText}>{currentStreak} day streak</Text>
+            <Text style={styles.streakText}>{currentStreak} {currentStreak === 1 ? 'day' : 'days'} streak</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => deleteHabit(item.id)} testID={`habit-delete-${item.id}`}>

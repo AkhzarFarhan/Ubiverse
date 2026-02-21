@@ -108,7 +108,7 @@ export default function TodoScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Text style={styles.title}>My Todos</Text>
-        <Text style={styles.count}>{todos.filter((t) => !t.completed).length} remaining</Text>
+        <Text style={styles.count}>{todos.filter((t) => !t.completed).length} {todos.filter((t) => !t.completed).length === 1 ? 'task' : 'tasks'} remaining</Text>
       </View>
 
       <KeyboardAvoidingView

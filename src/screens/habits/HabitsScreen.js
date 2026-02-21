@@ -118,12 +118,12 @@ export default function HabitsScreen() {
         <View style={styles.itemInfo}>
           <Text style={styles.habitName}>{item.name}</Text>
           <View style={styles.streakRow}>
-            <Ionicons name="flame" size={14} color="#FF8E53" />
+            <Ionicons name="flame" size={14} color="#FF9500" />
             <Text style={styles.streakText}>{currentStreak} {currentStreak === 1 ? 'day' : 'days'} streak</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => deleteHabit(item.id)} testID={`habit-delete-${item.id}`}>
-          <Ionicons name="trash-outline" size={20} color="#FF6B6B" />
+          <Ionicons name="trash-outline" size={20} color="#007AFF" />
         </TouchableOpacity>
       </View>
     );
@@ -148,7 +148,7 @@ export default function HabitsScreen() {
       </View>
 
       {loading ? (
-        <ActivityIndicator style={styles.loader} size="large" color="#FF6B6B" />
+        <ActivityIndicator style={styles.loader} size="large" color="#007AFF" />
       ) : (
         <FlatList
           data={habits}
@@ -157,7 +157,7 @@ export default function HabitsScreen() {
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="flame-outline" size={48} color="#FFD0C8" />
+              <Ionicons name="flame-outline" size={48} color="#C6C6C8" />
               <Text style={styles.emptyText}>No habits yet — start building!</Text>
             </View>
           }
@@ -172,7 +172,7 @@ export default function HabitsScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Habit name (e.g. Meditate)"
-                placeholderTextColor="#B0A8C8"
+                placeholderTextColor="#8E8E93"
                 value={habitName}
                 onChangeText={setHabitName}
                 testID="habit-name-input"
@@ -180,7 +180,7 @@ export default function HabitsScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Emoji (e.g. 🧘)"
-                placeholderTextColor="#B0A8C8"
+                placeholderTextColor="#8E8E93"
                 value={habitEmoji}
                 onChangeText={setHabitEmoji}
                 testID="habit-emoji-input"
@@ -205,7 +205,7 @@ export default function HabitsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FFF8F7' },
+  safe: { flex: 1, backgroundColor: '#F2F2F7' },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -213,11 +213,11 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 8,
   },
-  title: { fontSize: 28, fontWeight: '800', color: '#1A1A2E' },
-  subtitle: { fontSize: 14, color: '#888', marginTop: 4 },
+  title: { fontSize: 28, fontWeight: '800', color: '#000' },
+  subtitle: { fontSize: 14, color: '#8E8E93', marginTop: 4 },
   addButton: {
-    backgroundColor: '#FF6B6B',
-    borderRadius: 14,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
     padding: 12,
   },
   loader: { marginTop: 40 },
@@ -226,37 +226,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 16,
     marginBottom: 10,
-    shadowColor: '#FF6B6B',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: 4,
     elevation: 2,
   },
   emojiBtn: {
     width: 52,
     height: 52,
-    borderRadius: 16,
-    backgroundColor: '#FFF0EE',
+    borderRadius: 10,
+    backgroundColor: '#F2F2F7',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
     borderWidth: 2,
-    borderColor: '#FFD0C8',
+    borderColor: '#E5E5EA',
   },
   emojiBtnDone: {
-    backgroundColor: '#FFE8E6',
-    borderColor: '#FF6B6B',
+    backgroundColor: '#E5F1FF',
+    borderColor: '#007AFF',
   },
   emoji: { fontSize: 24 },
   itemInfo: { flex: 1 },
-  habitName: { fontSize: 16, fontWeight: '600', color: '#1A1A2E' },
+  habitName: { fontSize: 16, fontWeight: '600', color: '#000' },
   streakRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  streakText: { fontSize: 12, color: '#888' },
+  streakText: { fontSize: 12, color: '#8E8E93' },
   empty: { alignItems: 'center', marginTop: 80 },
-  emptyText: { fontSize: 15, color: '#FFAAA0', marginTop: 12 },
+  emptyText: { fontSize: 15, color: '#8E8E93', marginTop: 12 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -269,32 +269,32 @@ const styles = StyleSheet.create({
     padding: 28,
     paddingBottom: 40,
   },
-  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A2E', marginBottom: 20 },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#000', marginBottom: 20 },
   input: {
-    backgroundColor: '#FFF0EE',
-    borderRadius: 12,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
     padding: 14,
     fontSize: 15,
-    color: '#1A1A2E',
+    color: '#000',
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#FFD0C8',
+    borderColor: '#E5E5EA',
   },
   modalBtns: { flexDirection: 'row', gap: 12, marginTop: 8 },
   cancelBtn: {
     flex: 1,
     padding: 14,
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: '#E5E5EA',
     alignItems: 'center',
   },
-  cancelText: { color: '#888', fontWeight: '600' },
+  cancelText: { color: '#8E8E93', fontWeight: '600' },
   saveBtn: {
     flex: 1,
     padding: 14,
-    borderRadius: 12,
-    backgroundColor: '#FF6B6B',
+    borderRadius: 10,
+    backgroundColor: '#007AFF',
     alignItems: 'center',
   },
   saveText: { color: '#FFF', fontWeight: '700' },

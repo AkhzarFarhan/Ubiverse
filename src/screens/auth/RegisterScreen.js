@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../../context/AuthContext';
 
 export default function RegisterScreen({ navigation }) {
@@ -46,7 +45,7 @@ export default function RegisterScreen({ navigation }) {
   };
 
   return (
-    <LinearGradient colors={['#6B4EFF', '#A855F7']} style={styles.gradient}>
+    <View style={styles.gradient}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -67,7 +66,7 @@ export default function RegisterScreen({ navigation }) {
             <TextInput
               style={styles.input}
               placeholder="Full Name"
-              placeholderTextColor="#B0A8C8"
+              placeholderTextColor="#8E8E93"
               value={displayName}
               onChangeText={setDisplayName}
               testID="name-input"
@@ -75,7 +74,7 @@ export default function RegisterScreen({ navigation }) {
             <TextInput
               style={styles.input}
               placeholder="Email"
-              placeholderTextColor="#B0A8C8"
+              placeholderTextColor="#8E8E93"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -85,7 +84,7 @@ export default function RegisterScreen({ navigation }) {
             <TextInput
               style={styles.input}
               placeholder="Password"
-              placeholderTextColor="#B0A8C8"
+              placeholderTextColor="#8E8E93"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -94,7 +93,7 @@ export default function RegisterScreen({ navigation }) {
             <TextInput
               style={styles.input}
               placeholder="Confirm Password"
-              placeholderTextColor="#B0A8C8"
+              placeholderTextColor="#8E8E93"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
@@ -122,41 +121,41 @@ export default function RegisterScreen({ navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: { flex: 1 },
+  gradient: { flex: 1, backgroundColor: '#F2F2F7' },
   container: { flex: 1 },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   header: { alignItems: 'center', marginBottom: 32 },
-  logo: { fontSize: 36, fontWeight: '800', color: '#FFF', marginBottom: 8 },
-  tagline: { fontSize: 16, color: 'rgba(255,255,255,0.8)' },
+  logo: { fontSize: 36, fontWeight: '800', color: '#000', marginBottom: 8 },
+  tagline: { fontSize: 16, color: '#3C3C43' },
   card: {
     backgroundColor: '#FFF',
-    borderRadius: 24,
+    borderRadius: 14,
     padding: 28,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  title: { fontSize: 24, fontWeight: '700', color: '#1A1A2E', marginBottom: 24 },
+  title: { fontSize: 24, fontWeight: '700', color: '#000', marginBottom: 24 },
   input: {
-    backgroundColor: '#F5F3FF',
-    borderRadius: 12,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
     padding: 14,
     fontSize: 16,
-    color: '#1A1A2E',
+    color: '#000',
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#E8E4FF',
+    borderColor: '#E5E5EA',
   },
   button: {
-    backgroundColor: '#6B4EFF',
-    borderRadius: 12,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
@@ -164,6 +163,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
-  link: { textAlign: 'center', color: '#888', fontSize: 14 },
-  linkBold: { color: '#6B4EFF', fontWeight: '700' },
+  link: { textAlign: 'center', color: '#8E8E93', fontSize: 14 },
+  linkBold: { color: '#007AFF', fontWeight: '700' },
 });

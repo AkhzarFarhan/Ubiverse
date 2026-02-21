@@ -89,7 +89,7 @@ export default function TodoScreen() {
         <Ionicons
           name={item.completed ? 'checkmark-circle' : 'ellipse-outline'}
           size={24}
-          color={item.completed ? '#6B4EFF' : '#D0C8FF'}
+          color={item.completed ? '#007AFF' : '#C6C6C8'}
         />
       </TouchableOpacity>
       <Text style={[styles.itemText, item.completed && styles.itemDone]}>
@@ -99,7 +99,7 @@ export default function TodoScreen() {
         onPress={() => deleteTodo(item.id)}
         testID={`todo-delete-${item.id}`}
       >
-        <Ionicons name="trash-outline" size={20} color="#FF6B6B" />
+        <Ionicons name="trash-outline" size={20} color="#FF3B30" />
       </TouchableOpacity>
     </View>
   );
@@ -116,7 +116,7 @@ export default function TodoScreen() {
         style={styles.flex}
       >
         {loading ? (
-          <ActivityIndicator style={styles.loader} size="large" color="#6B4EFF" />
+          <ActivityIndicator style={styles.loader} size="large" color="#007AFF" />
         ) : (
           <FlatList
             data={todos}
@@ -125,7 +125,7 @@ export default function TodoScreen() {
             contentContainerStyle={styles.list}
             ListEmptyComponent={
               <View style={styles.empty}>
-                <Ionicons name="checkbox-outline" size={48} color="#D0C8FF" />
+                <Ionicons name="checkbox-outline" size={48} color="#C6C6C8" />
                 <Text style={styles.emptyText}>No tasks yet — add one below!</Text>
               </View>
             }
@@ -153,53 +153,53 @@ export default function TodoScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F8F7FF' },
+  safe: { flex: 1, backgroundColor: '#F2F2F7' },
   flex: { flex: 1 },
   header: { padding: 24, paddingBottom: 8 },
-  title: { fontSize: 28, fontWeight: '800', color: '#1A1A2E' },
-  count: { fontSize: 14, color: '#888', marginTop: 4 },
+  title: { fontSize: 28, fontWeight: '800', color: '#000' },
+  count: { fontSize: 14, color: '#8E8E93', marginTop: 4 },
   loader: { marginTop: 40 },
   list: { padding: 16, paddingBottom: 24 },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 16,
     marginBottom: 10,
-    shadowColor: '#6B4EFF',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowRadius: 4,
     elevation: 2,
   },
   checkBtn: { marginRight: 12 },
-  itemText: { flex: 1, fontSize: 15, color: '#1A1A2E' },
-  itemDone: { textDecorationLine: 'line-through', color: '#AAA' },
+  itemText: { flex: 1, fontSize: 15, color: '#000' },
+  itemDone: { textDecorationLine: 'line-through', color: '#8E8E93' },
   empty: { alignItems: 'center', marginTop: 80 },
-  emptyText: { fontSize: 15, color: '#B0A8C8', marginTop: 12 },
+  emptyText: { fontSize: 15, color: '#8E8E93', marginTop: 12 },
   inputRow: {
     flexDirection: 'row',
     padding: 16,
     paddingTop: 8,
     backgroundColor: '#FFF',
     borderTopWidth: 1,
-    borderTopColor: '#F0EEF8',
+    borderTopColor: '#E5E5EA',
     gap: 10,
   },
   input: {
     flex: 1,
-    backgroundColor: '#F5F3FF',
-    borderRadius: 12,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
     padding: 14,
     fontSize: 15,
-    color: '#1A1A2E',
+    color: '#000',
     borderWidth: 1,
-    borderColor: '#E8E4FF',
+    borderColor: '#E5E5EA',
   },
   addBtn: {
-    backgroundColor: '#6B4EFF',
-    borderRadius: 12,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
     width: 52,
     justifyContent: 'center',
     alignItems: 'center',

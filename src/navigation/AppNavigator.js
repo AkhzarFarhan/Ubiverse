@@ -16,8 +16,8 @@ import NotesScreen from '../screens/notes/NotesScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const ACTIVE_COLOR = '#6B4EFF';
-const INACTIVE_COLOR = '#A0A0A0';
+const ACTIVE_COLOR = '#007AFF';
+const INACTIVE_COLOR = '#8E8E93';
 
 function MainTabs() {
   return (
@@ -57,8 +57,8 @@ export default function AppNavigator() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8F7FF' }}>
-        <ActivityIndicator size="large" color="#6B4EFF" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }

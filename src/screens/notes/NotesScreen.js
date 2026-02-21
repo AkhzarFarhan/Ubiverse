@@ -124,7 +124,7 @@ export default function NotesScreen() {
           onPress={() => deleteNote(item.id)}
           testID={`note-delete-${item.id}`}
         >
-          <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
+          <Ionicons name="trash-outline" size={18} color="#FF3B30" />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -140,7 +140,7 @@ export default function NotesScreen() {
       </View>
 
       {loading ? (
-        <ActivityIndicator style={styles.loader} size="large" color="#00C9A7" />
+        <ActivityIndicator style={styles.loader} size="large" color="#007AFF" />
       ) : (
         <FlatList
           data={notes}
@@ -151,7 +151,7 @@ export default function NotesScreen() {
           columnWrapperStyle={styles.columnWrapper}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="document-text-outline" size={48} color="#B0E8E0" />
+              <Ionicons name="document-text-outline" size={48} color="#C6C6C8" />
               <Text style={styles.emptyText}>No notes yet — create one!</Text>
             </View>
           }
@@ -170,13 +170,13 @@ export default function NotesScreen() {
                   {editingNote ? 'Edit Note' : 'New Note'}
                 </Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <Ionicons name="close" size={24} color="#888" />
+                  <Ionicons name="close" size={24} color="#8E8E93" />
                 </TouchableOpacity>
               </View>
               <TextInput
                 style={styles.titleInput}
                 placeholder="Title"
-                placeholderTextColor="#B0A8C8"
+                placeholderTextColor="#8E8E93"
                 value={title}
                 onChangeText={setTitle}
                 testID="note-title-input"
@@ -184,7 +184,7 @@ export default function NotesScreen() {
               <TextInput
                 style={styles.bodyInput}
                 placeholder="Write your note…"
-                placeholderTextColor="#B0A8C8"
+                placeholderTextColor="#8E8E93"
                 value={body}
                 onChangeText={setBody}
                 multiline
@@ -207,7 +207,7 @@ export default function NotesScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F7FFFD' },
+  safe: { flex: 1, backgroundColor: '#F2F2F7' },
   flex: { flex: 1 },
   headerRow: {
     flexDirection: 'row',
@@ -216,10 +216,10 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 8,
   },
-  title: { fontSize: 28, fontWeight: '800', color: '#1A1A2E' },
+  title: { fontSize: 28, fontWeight: '800', color: '#000' },
   addButton: {
-    backgroundColor: '#00C9A7',
-    borderRadius: 14,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
     padding: 12,
   },
   loader: { marginTop: 40 },
@@ -228,27 +228,27 @@ const styles = StyleSheet.create({
   noteCard: {
     flex: 1,
     backgroundColor: '#FFF',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#00C9A7',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: 4,
     elevation: 2,
     minHeight: 100,
   },
-  noteTitle: { fontSize: 15, fontWeight: '700', color: '#1A1A2E', marginBottom: 6 },
-  noteBody: { fontSize: 13, color: '#666', flex: 1 },
+  noteTitle: { fontSize: 15, fontWeight: '700', color: '#000', marginBottom: 6 },
+  noteBody: { fontSize: 13, color: '#3C3C43', flex: 1 },
   noteFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 12,
   },
-  noteDate: { fontSize: 11, color: '#AAA' },
+  noteDate: { fontSize: 11, color: '#8E8E93' },
   empty: { alignItems: 'center', marginTop: 80 },
-  emptyText: { fontSize: 15, color: '#A0D8D0', marginTop: 12 },
+  emptyText: { fontSize: 15, color: '#8E8E93', marginTop: 12 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -268,32 +268,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  modalTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A2E' },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#000' },
   titleInput: {
-    backgroundColor: '#F0FDF9',
-    borderRadius: 12,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
     padding: 14,
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1A2E',
+    color: '#000',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#C0EDE6',
+    borderColor: '#E5E5EA',
   },
   bodyInput: {
-    backgroundColor: '#F0FDF9',
-    borderRadius: 12,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
     padding: 14,
     fontSize: 15,
-    color: '#1A1A2E',
+    color: '#000',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#C0EDE6',
+    borderColor: '#E5E5EA',
     minHeight: 160,
   },
   saveBtn: {
-    backgroundColor: '#00C9A7',
-    borderRadius: 12,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
     padding: 16,
     alignItems: 'center',
   },

@@ -150,12 +150,14 @@ window.TasbihModule = (function () {
     if (!countEl) return;
 
     const pct         = Math.min(100, (_count / _target) * 100);
-    const remaining   = Math.max(0, _target - (_count % _target || (_count === 0 ? 0 : _target)));
+    const posInCycle  = _count % _target;
+    const cyclePos    = (posInCycle === 0 && _count > 0) ? _target : posInCycle;
+    const remaining   = Math.max(0, _target - cyclePos);
     const completions = Math.floor(_count / _target);
 
     countEl.textContent   = _count;
     barEl.style.width     = pct + '%';
-    labelEl.textContent   = (_count % _target || (_count === 0 ? 0 : _target)) + ' / ' + _target;
+    labelEl.textContent   = cyclePos + ' / ' + _target;
     statCount.textContent  = _count;
     statTarget.textContent = _target;
     statRem.textContent    = remaining;

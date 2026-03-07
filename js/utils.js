@@ -89,10 +89,18 @@ function showAlert(containerId, message, type) {
   const el = document.getElementById(containerId);
   if (!el) return;
   const icons = { success: '✅', error: '❌', warning: '⚠️' };
-  el.innerHTML = `<div class="alert alert-${type}" role="alert">
-    <span>${icons[type] || ''}</span>
-    <span>${message}</span>
-  </div>`;
+  // Build DOM nodes so message text is set via textContent (prevents XSS).
+  const wrapper = document.createElement('div');
+  wrapper.className = 'alert alert-' + type;
+  wrapper.setAttribute('role', 'alert');
+  const iconSpan = document.createElement('span');
+  iconSpan.textContent = icons[type] || '';
+  const msgSpan = document.createElement('span');
+  msgSpan.textContent = message;
+  wrapper.appendChild(iconSpan);
+  wrapper.appendChild(msgSpan);
+  el.innerHTML = '';
+  el.appendChild(wrapper);
 }
 
 /** Clear any alert in the container. */

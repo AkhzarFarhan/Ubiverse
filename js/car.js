@@ -266,6 +266,8 @@ window.CarModule = (function () {
       showAlert('car-alert', `Odometer (${odometer}) cannot be less than last entry (${lastOdo}).`, 'error');
       return;
     }
+    // Safe: fuelVol and fuelCost are derived from parseFloat() on <input type="number">
+    // so they are exact 0 or a user-entered value — strict equality is intentional here.
     if ((fuelVol > 0 && fuelCost === 0) || (fuelVol === 0 && fuelCost > 0)) {
       showAlert('car-alert', 'If entering fuel, both volume and cost are required.', 'error');
       return;

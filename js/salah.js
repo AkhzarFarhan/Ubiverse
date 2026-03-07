@@ -266,7 +266,10 @@ window.SalahModule = (function () {
     return PRAYERS.map(function (_, i) {
       const delta = Math.abs(lastRow[i] - firstRow[i]);
       if (delta === 0) return lastRow[i] === 0 ? 0 : '∞';
-      return Math.ceil(Math.abs(DIV(timeTaken, delta) * Math.abs(lastRow[i])));
+      // Rate of improvement per day × remaining rakah debt
+      const ratePerDay     = DIV(timeTaken, delta);
+      const remainingDebt  = Math.abs(lastRow[i]);
+      return Math.ceil(ratePerDay * remainingDebt);
     });
   }
 

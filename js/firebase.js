@@ -27,6 +27,8 @@ function firebasePost(path, data) {
   }
   const lastKey = keys[keys.length - 1];
   if (!obj[lastKey]) obj[lastKey] = {};
+  // NOTE: Math.random() is sufficient for this mock implementation.
+  // Replace with Firebase's built-in push() ID generation when wiring up the real SDK.
   const newKey = 'entry_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
   obj[lastKey][newKey] = data;
   return Promise.resolve({ name: newKey });

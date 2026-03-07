@@ -4,14 +4,8 @@
 window.GymModule = (function () {
   'use strict';
 
-  const STORAGE_KEY = () => 'gym_' + window.AppState.username;
-
-  const SAMPLE_DATA = [
-    { message: 'Chest & triceps: bench press 4×10, incline DB 3×12, tricep pushdown 3×15.', timestamp: '01-06-2025 06:30:00 AM' },
-    { message: 'Leg day: squats 4×8, leg press 3×12, leg curl 3×15, calf raises 4×20.', timestamp: '03-06-2025 06:45:22 AM' },
-    { message: 'Pull day: deadlifts 3×5, barbell rows 4×10, lat pulldown 3×12, face pulls 3×15.', timestamp: '05-06-2025 07:00:10 AM' },
-    { message: 'Cardio: 30 min treadmill + 15 min cycle. Felt energetic.', timestamp: '07-06-2025 06:20:00 AM' },
-  ];
+  const STORAGE_KEY   = () => 'gym_' + window.AppState.username;
+  const FIREBASE_PATH = () => 'gym/' + window.AppState.username;
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -34,7 +28,7 @@ window.GymModule = (function () {
 
         <div class="card">
           <div class="card-title">🗂️ Workout History</div>
-          <div id="gym-list"></div>
+          <div id="gym-list"><p class="text-muted text-sm text-center">Loading…</p></div>
         </div>
       </div>
     `;
@@ -48,7 +42,7 @@ window.GymModule = (function () {
   }
 
   /* ── Submit ───────────────────────────────────────────────── */
-  function submit() {
+  async function submit() {
     const message = document.getElementById('gym-message').value.trim();
 
     if (!message) {
@@ -63,13 +57,14 @@ window.GymModule = (function () {
       timestamp: getKolkataTimestamp(),
     };
 
-    const arr = getEntries();
+    try {
+      await firebasePost(FIREBASE_PATH(), entry);
+    } catch (e) {
+      console.warn('Firebase write failed:', e);
+    }
+    const arr = JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
     arr.unshift(entry);
-    saveEntries(arr);
-
-    // TODO: Firebase — POST to gym/{username}.json
-    firebasePost('gym/' + window.AppState.username, entry)
-      .then(function () { /* stub */ });
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
     document.getElementById('gym-message').value = '';
     showAlert('gym-alert', 'Workout logged successfully! 💪', 'success');
@@ -77,12 +72,8 @@ window.GymModule = (function () {
   }
 
   /* ── Load ─────────────────────────────────────────────────── */
-  function loadData() {
-    let arr = getEntries();
-    if (arr.length === 0) {
-      arr = SAMPLE_DATA.slice();
-      saveEntries(arr);
-    }
+  async function loadData() {
+    const arr = await getEntries();
     renderList(arr);
   }
 
@@ -113,14 +104,18 @@ window.GymModule = (function () {
   }
 
   /* ── Storage helpers ──────────────────────────────────────── */
-  function getEntries() {
+  async function getEntries() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
-    } catch (_) { return []; }
-  }
-
-  function saveEntries(arr) {
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      const data = await firebaseGet(FIREBASE_PATH());
+      const arr  = data ? objectToArray(data) : [];
+      localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      return arr;
+    } catch (e) {
+      console.warn('Firebase read failed, using localStorage:', e);
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
+      } catch (_) { return []; }
+    }
   }
 
   function escapeHtml(str) {
@@ -133,3 +128,4 @@ window.GymModule = (function () {
 
   return { render, submit, loadData };
 }());
+

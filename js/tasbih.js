@@ -4,7 +4,8 @@
 window.TasbihModule = (function () {
   'use strict';
 
-  const STORAGE_KEY = () => 'tasbih_' + window.AppState.username;
+  const STORAGE_KEY   = () => 'tasbih_' + window.AppState.username;
+  const FIREBASE_PATH = () => 'tasbih/' + window.AppState.username;
 
   let _count  = 0;
   let _target = 33;
@@ -130,11 +131,10 @@ window.TasbihModule = (function () {
     // Vibrate if supported
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
 
-    // TODO: Firebase — save tasbih count
-    firebasePut(
-      'tasbih/' + window.AppState.username + '/last',
-      { count: _count, target: _target, timestamp: getKolkataTimestamp() }
-    ).then(function () { /* stub */ });
+    const record = { count: _count, target: _target, timestamp: getKolkataTimestamp() };
+    firebasePut(FIREBASE_PATH() + '/last', record)
+      .catch(function (e) { console.warn('Firebase write failed:', e); });
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify({ count: _count, target: _target }));
   }
 
   /* ── Update UI ────────────────────────────────────────────── */
@@ -183,3 +183,4 @@ window.TasbihModule = (function () {
 
   return { render };
 }());
+

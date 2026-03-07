@@ -22,10 +22,8 @@
 
   function restoreSession() {
     const u = localStorage.getItem('ubiverse_username');
-    const p = localStorage.getItem('ubiverse_password');
-    if (u && p) {
+    if (u) {
       window.AppState.username = u;
-      window.AppState.password = p;
       return true;
     }
     return false;
@@ -56,9 +54,9 @@
     }
 
     window.AppState.username = username;
-    window.AppState.password = password;
+    window.AppState.password = password; // held in memory only; not persisted
     localStorage.setItem('ubiverse_username', username);
-    localStorage.setItem('ubiverse_password', password);
+    // Passwords are never written to localStorage (mock auth only).
 
     clearAlert('login-alert');
     showApp();

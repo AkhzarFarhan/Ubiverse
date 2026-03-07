@@ -1,0 +1,5 @@
+js/env.js
+.env
+.env.local
+.env.*.local
+.DS_Store

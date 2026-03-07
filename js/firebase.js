@@ -1,14 +1,17 @@
 // js/firebase.js
 // Firebase Realtime Database + Auth integration.
+// Credentials are loaded from js/env.js (see js/env.js.example).
+
+const env = window.__ENV__ || {};
 
 const firebaseConfig = {
-  apiKey: "REDACTED_API_KEY",
-  authDomain: "REDACTED_AUTH_DOMAIN",
-  databaseURL: "REDACTED_DATABASE_URL",
-  projectId: "my-own-ubiverse",
-  storageBucket: "REDACTED_STORAGE_BUCKET",
-  messagingSenderId: "REDACTED_SENDER_ID",
-  appId: "1:REDACTED_SENDER_ID:web:ef90332c1e681173268dd3"
+  apiKey:            env.FIREBASE_API_KEY,
+  authDomain:        env.FIREBASE_AUTH_DOMAIN,
+  databaseURL:       env.FIREBASE_DATABASE_URL,
+  projectId:         env.FIREBASE_PROJECT_ID,
+  storageBucket:     env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID,
+  appId:             env.FIREBASE_APP_ID
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -62,8 +65,8 @@ function onAuthStateChanged(callback) {
 
 /* ── Telegram notifications ────────────────────────────────── */
 
-const TG_BOT_TOKEN     = 'REDACTED_TG_BOT_TOKEN';
-const TG_LEDGER_CHAT_ID = 'REDACTED_TG_CHAT_ID';
+const TG_BOT_TOKEN      = env.TG_BOT_TOKEN     || '';
+const TG_LEDGER_CHAT_ID = env.TG_LEDGER_CHAT_ID || '';
 
 async function sendTelegramForLedger(entry, username) {
   if (username !== 'akhzarfarhan') return;

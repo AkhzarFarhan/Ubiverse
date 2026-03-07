@@ -4,14 +4,8 @@
 window.TexterModule = (function () {
   'use strict';
 
-  const STORAGE_KEY = () => 'texter_' + window.AppState.username;
-
-  const SAMPLE_DATA = [
-    { note: 'Remember to call the bank on Monday about the new account.', timestamp: '01-06-2025 10:15:00 AM' },
-    { note: 'Buy groceries: milk, eggs, bread, onions, tomatoes.', timestamp: '02-06-2025 11:30:45 AM' },
-    { note: 'Project deadline extended to June 20. Update the team.', timestamp: '03-06-2025 02:00:00 PM' },
-    { note: 'Book dentist appointment for next week.', timestamp: '04-06-2025 09:00:00 AM' },
-  ];
+  const STORAGE_KEY   = () => 'texter_' + window.AppState.username;
+  const FIREBASE_PATH = () => 'texter_v2/' + window.AppState.username;
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -34,7 +28,7 @@ window.TexterModule = (function () {
 
         <div class="card">
           <div class="card-title">📋 All Notes</div>
-          <div id="texter-list"></div>
+          <div id="texter-list"><p class="text-muted text-sm text-center">Loading…</p></div>
         </div>
       </div>
     `;
@@ -48,7 +42,7 @@ window.TexterModule = (function () {
   }
 
   /* ── Submit ───────────────────────────────────────────────── */
-  function submit() {
+  async function submit() {
     const note = document.getElementById('texter-note').value.trim();
 
     clearAlert('texter-alert');
@@ -58,13 +52,14 @@ window.TexterModule = (function () {
       timestamp: getKolkataTimestamp(),
     };
 
-    const arr = getEntries();
+    try {
+      await firebasePost(FIREBASE_PATH(), entry);
+    } catch (e) {
+      console.warn('Firebase write failed:', e);
+    }
+    const arr = JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
     arr.unshift(entry);
-    saveEntries(arr);
-
-    // TODO: Firebase — POST to texter_v2/{username}.json
-    firebasePost('texter_v2/' + window.AppState.username, entry)
-      .then(function () { /* stub */ });
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
     document.getElementById('texter-note').value = '';
     showAlert('texter-alert', 'Note saved!', 'success');
@@ -72,12 +67,8 @@ window.TexterModule = (function () {
   }
 
   /* ── Load ─────────────────────────────────────────────────── */
-  function loadData() {
-    let arr = getEntries();
-    if (arr.length === 0) {
-      arr = SAMPLE_DATA.slice();
-      saveEntries(arr);
-    }
+  async function loadData() {
+    const arr = await getEntries();
     renderList(arr);
   }
 
@@ -108,14 +99,18 @@ window.TexterModule = (function () {
   }
 
   /* ── Storage helpers ──────────────────────────────────────── */
-  function getEntries() {
+  async function getEntries() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
-    } catch (_) { return []; }
-  }
-
-  function saveEntries(arr) {
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      const data = await firebaseGet(FIREBASE_PATH());
+      const arr  = data ? objectToArray(data) : [];
+      localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      return arr;
+    } catch (e) {
+      console.warn('Firebase read failed, using localStorage:', e);
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
+      } catch (_) { return []; }
+    }
   }
 
   function escapeHtml(str) {
@@ -128,3 +123,4 @@ window.TexterModule = (function () {
 
   return { render, submit, loadData };
 }());
+

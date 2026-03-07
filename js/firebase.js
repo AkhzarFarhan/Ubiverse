@@ -1,72 +1,101 @@
 // js/firebase.js
-// TODO: Firebase — implement real database call
-// This module provides Firebase stub functions for development.
-// Replace with real Firebase SDK calls when ready.
+// Firebase Realtime Database + Auth integration.
 
-window.FirebaseDB = {}; // In-memory mock database
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "texter-for-me.firebaseapp.com",
+  databaseURL: "https://texter-for-me-default-rtdb.firebaseio.com",
+  projectId: "texter-for-me",
+  storageBucket: "texter-for-me.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
-function firebaseGet(path) {
-  // TODO: Firebase — implement real database call
-  // Real: GET https://texter-for-me.firebaseio.com/{path}.json?auth={FB_AUTH}
-  const keys = path.split('/').filter(Boolean);
-  let obj = window.FirebaseDB;
-  for (const k of keys) {
-    if (obj == null) return Promise.resolve(null);
-    obj = obj[k];
-  }
-  return Promise.resolve(obj !== undefined ? obj : null);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.database();
+
+/* ── CRUD helpers ──────────────────────────────────────────── */
+
+async function firebaseGet(path) {
+  const snapshot = await db.ref(path).once('value');
+  return snapshot.val();
 }
 
-function firebasePost(path, data) {
-  // TODO: Firebase — implement real database call
-  const keys = path.split('/').filter(Boolean);
-  let obj = window.FirebaseDB;
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (!obj[keys[i]]) obj[keys[i]] = {};
-    obj = obj[keys[i]];
-  }
-  const lastKey = keys[keys.length - 1];
-  if (!obj[lastKey]) obj[lastKey] = {};
-  // NOTE: Math.random() is sufficient for this mock implementation.
-  // Replace with Firebase's built-in push() ID generation when wiring up the real SDK.
-  const newKey = 'entry_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-  obj[lastKey][newKey] = data;
-  return Promise.resolve({ name: newKey });
+async function firebasePost(path, data) {
+  const ref = await db.ref(path).push(data);
+  return { name: ref.key };
 }
 
-function firebasePut(path, data) {
-  // TODO: Firebase — implement real database call
-  const keys = path.split('/').filter(Boolean);
-  let obj = window.FirebaseDB;
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (!obj[keys[i]]) obj[keys[i]] = {};
-    obj = obj[keys[i]];
-  }
-  obj[keys[keys.length - 1]] = data;
-  return Promise.resolve(true);
+async function firebasePut(path, data) {
+  await db.ref(path).set(data);
+  return true;
 }
 
-function firebasePatch(path, data) {
-  // TODO: Firebase — implement real database call
-  const keys = path.split('/').filter(Boolean);
-  let obj = window.FirebaseDB;
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (!obj[keys[i]]) obj[keys[i]] = {};
-    obj = obj[keys[i]];
-  }
-  const lastKey = keys[keys.length - 1];
-  obj[lastKey] = Object.assign({}, obj[lastKey] || {}, data);
-  return Promise.resolve(true);
+async function firebasePatch(path, data) {
+  await db.ref(path).update(data);
+  return true;
 }
 
-function firebaseDelete(path) {
-  // TODO: Firebase — implement real database call
-  const keys = path.split('/').filter(Boolean);
-  let obj = window.FirebaseDB;
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (!obj[keys[i]]) return Promise.resolve(true);
-    obj = obj[keys[i]];
-  }
-  delete obj[keys[keys.length - 1]];
-  return Promise.resolve(true);
+async function firebaseDelete(path) {
+  await db.ref(path).remove();
+  return true;
 }
+
+/* ── Auth helpers ──────────────────────────────────────────── */
+
+async function firebaseSignIn(email, password) {
+  return auth.signInWithEmailAndPassword(email, password);
+}
+
+async function firebaseSignUp(email, password) {
+  return auth.createUserWithEmailAndPassword(email, password);
+}
+
+function firebaseSignOut() {
+  return auth.signOut();
+}
+
+function onAuthStateChanged(callback) {
+  return auth.onAuthStateChanged(callback);
+}
+
+/* ── Telegram notifications ────────────────────────────────── */
+
+const TG_BOT_TOKEN     = '934430337:AAHuy53OeyE__KKel3jsfZwGmciyrLSLScg';
+const TG_LEDGER_CHAT_ID = '-376211740';
+
+async function sendTelegramForLedger(entry, username) {
+  if (username !== 'akhzarfarhan') return;
+
+  const separator = '=========================';
+  const type   = entry.credit > 0 ? 'CREDIT' : 'DEBIT';
+  const amount = entry.credit > 0 ? getINR(entry.credit) : getINR(entry.debit);
+
+  let text = separator + '\n';
+  text += '                     *' + type + '*\n';
+  text += separator + '\n';
+  text += 'ID:  *' + entry.transaction_id + '*\n';
+  text += (entry.credit > 0 ? 'Credit' : 'Debit') + ':  *' + amount + '*\n';
+  text += 'Details:  *' + entry.details + '*\n';
+  text += 'Mode:  *' + entry.mode + '*\n';
+  text += 'Cash Balance:  *' + getINR(entry.cash) + '*\n';
+  text += 'Bank Balance:  *' + getINR(entry.bank) + '*\n\n';
+  text += 'Total Balance:  *' + getINR(entry.total) + '*';
+
+  const url = 'https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage';
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TG_LEDGER_CHAT_ID,
+        text: text,
+        parse_mode: 'Markdown'
+      })
+    });
+  } catch (e) {
+    console.warn('Telegram notification failed:', e);
+  }
+}
+

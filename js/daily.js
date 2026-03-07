@@ -4,13 +4,8 @@
 window.DailyModule = (function () {
   'use strict';
 
-  const STORAGE_KEY = () => 'daily_' + window.AppState.username;
-
-  const SAMPLE_DATA = [
-    { message: 'Had a productive morning, finished the main feature.', rating: 8, timestamp: '01-06-2025 08:45:12 AM' },
-    { message: 'Feeling a bit tired but pushed through the workout.', rating: 6, timestamp: '02-06-2025 09:10:30 AM' },
-    { message: 'Great day overall! Met all targets and slept well.', rating: 9, timestamp: '03-06-2025 08:55:00 AM' },
-  ];
+  const STORAGE_KEY   = () => 'daily_' + window.AppState.username;
+  const FIREBASE_PATH = () => 'daily/' + window.AppState.username;
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -37,7 +32,7 @@ window.DailyModule = (function () {
 
         <div class="card">
           <div class="card-title">📋 Past Entries</div>
-          <div id="daily-list"></div>
+          <div id="daily-list"><p class="text-muted text-sm text-center">Loading…</p></div>
         </div>
       </div>
     `;
@@ -51,7 +46,7 @@ window.DailyModule = (function () {
   }
 
   /* ── Submit ───────────────────────────────────────────────── */
-  function submit() {
+  async function submit() {
     const message = document.getElementById('daily-message').value.trim();
     const ratingRaw = document.getElementById('daily-rating').value.trim();
     const rating  = parseInt(ratingRaw, 10);
@@ -73,28 +68,27 @@ window.DailyModule = (function () {
       timestamp: getKolkataTimestamp(),
     };
 
-    const arr = getEntries();
-    arr.unshift(entry);
-    saveEntries(arr);
-
-    // TODO: Firebase — POST to daily/{username}.json
-    firebasePost('daily/' + window.AppState.username, entry)
-      .then(function () { /* stub */ });
+    // Write to Firebase
+    try {
+      await firebasePost(FIREBASE_PATH(), entry);
+    } catch (e) {
+      console.warn('Firebase write failed:', e);
+    }
+    // Prepend to localStorage cache (synced from Firebase on page load)
+    const cached = JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
+    cached.unshift(entry);
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(cached));
 
     document.getElementById('daily-message').value = '';
     document.getElementById('daily-rating').value  = '';
 
     showAlert('daily-alert', 'Entry added successfully!', 'success');
-    renderList(arr);
+    renderList(cached);
   }
 
   /* ── Load ─────────────────────────────────────────────────── */
-  function loadData() {
-    let arr = getEntries();
-    if (arr.length === 0) {
-      arr = SAMPLE_DATA.slice();
-      saveEntries(arr);
-    }
+  async function loadData() {
+    const arr = await getEntries();
     renderList(arr);
   }
 
@@ -131,14 +125,18 @@ window.DailyModule = (function () {
   }
 
   /* ── Storage helpers ──────────────────────────────────────── */
-  function getEntries() {
+  async function getEntries() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
-    } catch (_) { return []; }
-  }
-
-  function saveEntries(arr) {
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      const data = await firebaseGet(FIREBASE_PATH());
+      const arr  = data ? objectToArray(data) : [];
+      localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      return arr;
+    } catch (e) {
+      console.warn('Firebase read failed, using localStorage:', e);
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
+      } catch (_) { return []; }
+    }
   }
 
   function escapeHtml(str) {
@@ -151,3 +149,4 @@ window.DailyModule = (function () {
 
   return { render, submit, loadData };
 }());
+

@@ -4,6 +4,13 @@
 
 const env = window.__ENV__ || {};
 
+if (!env.FIREBASE_API_KEY) {
+  throw new Error(
+    'Missing environment config. ' +
+    'Copy js/env.js.example to js/env.js and fill in your credentials.'
+  );
+}
+
 const firebaseConfig = {
   apiKey:            env.FIREBASE_API_KEY,
   authDomain:        env.FIREBASE_AUTH_DOMAIN,

@@ -2,13 +2,13 @@
 // Firebase Realtime Database + Auth integration.
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "texter-for-me.firebaseapp.com",
-  databaseURL: "https://texter-for-me-default-rtdb.firebaseio.com",
-  projectId: "texter-for-me",
-  storageBucket: "texter-for-me.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "REDACTED_API_KEY",
+  authDomain: "REDACTED_AUTH_DOMAIN",
+  databaseURL: "REDACTED_DATABASE_URL",
+  projectId: "my-own-ubiverse",
+  storageBucket: "REDACTED_STORAGE_BUCKET",
+  messagingSenderId: "REDACTED_SENDER_ID",
+  appId: "1:REDACTED_SENDER_ID:web:ef90332c1e681173268dd3"
 };
 
 firebase.initializeApp(firebaseConfig);

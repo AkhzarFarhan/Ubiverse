@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ubiverse — your personal all-in-one dashboard" />
+  <title>Ubiverse</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ── Login Screen ─────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <h2>🌐 Ubiverse</h2>
+    <div id="login-alert"></div>
+    <form id="login-form" autocomplete="off" novalidate>
+      <div class="form-group">
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username" placeholder="Enter username" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="Enter password" autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- ── App Shell ─────────────────────────────────────────────── -->
+<div id="layout" class="hidden">
+
+  <header id="header">
+    <button id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <h1>🌐 Ubiverse</h1>
+    <span id="header-user"></span>
+  </header>
+
+  <div id="sidebar-overlay"></div>
+
+  <aside id="sidebar" role="navigation" aria-label="Main navigation">
+    <nav>
+      <a href="#daily"  class="nav-link" data-page="daily">
+        <span class="nav-icon">📅</span> Daily
+      </a>
+      <a href="#gym"    class="nav-link" data-page="gym">
+        <span class="nav-icon">🏋️</span> Gym
+      </a>
+      <a href="#texter" class="nav-link" data-page="texter">
+        <span class="nav-icon">✏️</span> Texter
+      </a>
+      <a href="#tasbih" class="nav-link" data-page="tasbih">
+        <span class="nav-icon">📿</span> Tasbih
+      </a>
+      <a href="#salah"  class="nav-link" data-page="salah">
+        <span class="nav-icon">🕌</span> Salah
+      </a>
+      <a href="#ledger" class="nav-link" data-page="ledger">
+        <span class="nav-icon">💰</span> Ledger
+      </a>
+      <a href="#car"    class="nav-link" data-page="car">
+        <span class="nav-icon">🚗</span> Car
+      </a>
+    </nav>
+  </aside>
+
+  <main id="main">
+    <div id="app"></div>
+  </main>
+
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- App scripts — order matters -->
+<script src="js/firebase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/daily.js"></script>
+<script src="js/gym.js"></script>
+<script src="js/texter.js"></script>
+<script src="js/tasbih.js"></script>
+<script src="js/salah.js"></script>
+<script src="js/ledger.js"></script>
+<script src="js/car.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

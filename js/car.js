@@ -4,52 +4,8 @@
 window.CarModule = (function () {
   'use strict';
 
-  const STORAGE_KEY = () => 'car_' + window.AppState.username;
-
-  const SAMPLE_DATA = [
-    {
-      entry_id: 1, date: '2025-04-01', odometer: 12000, distanceTraveled: 0,
-      fuelVolume: 0, totalCost: 0, pricePerUnit: 0, fullTank: false, station: '',
-      serviceCost: 0, serviceDetails: '',
-      drivingMode: '', notes: 'Initial odometer reading',
-      mileage: null, entryType: 'odometer', timestamp: '01-04-2025 09:00:00 AM',
-    },
-    {
-      entry_id: 2, date: '2025-04-10', odometer: 12320, distanceTraveled: 320,
-      fuelVolume: 22, totalCost: 2376, pricePerUnit: 108, fullTank: true, station: 'HP Majestic',
-      serviceCost: 0, serviceDetails: '',
-      drivingMode: 'City', notes: '',
-      mileage: null, entryType: 'fuel', timestamp: '10-04-2025 07:15:00 AM',
-    },
-    {
-      entry_id: 3, date: '2025-04-22', odometer: 12700, distanceTraveled: 380,
-      fuelVolume: 28, totalCost: 3024, pricePerUnit: 108, fullTank: true, station: 'Indian Oil',
-      serviceCost: 0, serviceDetails: '',
-      drivingMode: 'Mixed', notes: '',
-      mileage: 17.27, entryType: 'fuel', timestamp: '22-04-2025 08:00:00 AM',
-    },
-    {
-      entry_id: 4, date: '2025-05-05', odometer: 13050, distanceTraveled: 350,
-      fuelVolume: 0, totalCost: 0, pricePerUnit: 0, fullTank: false, station: '',
-      serviceCost: 2500, serviceDetails: 'Oil change + air filter',
-      drivingMode: '', notes: 'Routine service',
-      mileage: null, entryType: 'service', timestamp: '05-05-2025 10:30:00 AM',
-    },
-    {
-      entry_id: 5, date: '2025-05-20', odometer: 13420, distanceTraveled: 370,
-      fuelVolume: 25, totalCost: 2700, pricePerUnit: 108, fullTank: true, station: 'HP Majestic',
-      serviceCost: 0, serviceDetails: '',
-      drivingMode: 'Highway', notes: 'Weekend trip',
-      mileage: null, entryType: 'fuel', timestamp: '20-05-2025 06:45:00 AM',
-    },
-    {
-      entry_id: 6, date: '2025-06-02', odometer: 13800, distanceTraveled: 380,
-      fuelVolume: 26, totalCost: 2808, pricePerUnit: 108, fullTank: true, station: 'BPCL',
-      serviceCost: 0, serviceDetails: '',
-      drivingMode: 'City', notes: '',
-      mileage: 14.62, entryType: 'fuel', timestamp: '02-06-2025 07:10:00 AM',
-    },
-  ];
+  const STORAGE_KEY   = () => 'car_' + window.AppState.username;
+  const FIREBASE_PATH = () => 'car/' + window.AppState.username;
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -190,7 +146,7 @@ window.CarModule = (function () {
                   <th>Notes</th>
                 </tr>
               </thead>
-              <tbody id="car-tbody"></tbody>
+              <tbody id="car-tbody"><tr><td colspan="15" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -236,7 +192,7 @@ window.CarModule = (function () {
   }
 
   /* ── Submit ───────────────────────────────────────────────── */
-  function submit() {
+  async function submit() {
     const date      = document.getElementById('car-date').value;
     const odometer  = parseFloat(document.getElementById('car-odometer').value) || 0;
     const fuelVol   = parseFloat(document.getElementById('car-fuel-vol').value)   || 0;
@@ -259,7 +215,7 @@ window.CarModule = (function () {
       return;
     }
 
-    const arr = getEntries();
+    const arr = await getEntries();
     const lastOdo = arr.length > 0 ? arr[arr.length - 1].odometer : 0;
 
     if (odometer < lastOdo) {
@@ -281,11 +237,14 @@ window.CarModule = (function () {
     });
 
     arr.push(entry);
-    saveEntries(arr);
 
-    // TODO: Firebase — POST to car/{username}.json
-    firebasePost('car/' + window.AppState.username, entry)
-      .then(function () { /* stub */ });
+    // Write to Firebase and update local cache
+    try {
+      await firebasePost(FIREBASE_PATH(), entry);
+    } catch (e) {
+      console.warn('Firebase write failed:', e);
+    }
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
     showAlert('car-alert', 'Entry saved! 🚗', 'success');
 
@@ -300,7 +259,8 @@ window.CarModule = (function () {
     document.getElementById('car-mode').value       = '';
     document.getElementById('car-notes').value      = '';
 
-    loadData();
+    renderSummary(arr);
+    renderTable(arr);
   }
 
   /* ── Process car entry ────────────────────────────────────── */
@@ -344,14 +304,21 @@ window.CarModule = (function () {
   }
 
   /* ── Load ─────────────────────────────────────────────────── */
-  function loadData() {
-    let arr = getEntries();
+  async function loadData() {
+    const arr = await getEntries();
+
     if (arr.length === 0) {
-      arr = SAMPLE_DATA.slice();
-      saveEntries(arr);
+      const tbody = document.getElementById('car-tbody');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="15" class="text-muted text-sm text-center">No entries yet.</td></tr>';
+      return;
     }
 
-    // Summary
+    renderSummary(arr);
+    renderTable(arr);
+  }
+
+  /* ── Summary ──────────────────────────────────────────────── */
+  function renderSummary(arr) {
     let totalDist = 0, totalFuelVol = 0, totalFuelCost = 0, totalSvcCost = 0;
     const mileages = [];
 
@@ -372,8 +339,6 @@ window.CarModule = (function () {
     document.getElementById('cs-fcost').textContent   = getINR(totalFuelCost);
     document.getElementById('cs-scost').textContent   = getINR(totalSvcCost);
     document.getElementById('cs-mileage').textContent = avgMileage ? avgMileage + ' km/L' : '— km/L';
-
-    renderTable(arr);
   }
 
   /* ── Table ────────────────────────────────────────────────── */
@@ -408,14 +373,18 @@ window.CarModule = (function () {
   }
 
   /* ── Storage helpers ──────────────────────────────────────── */
-  function getEntries() {
+  async function getEntries() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
-    } catch (_) { return []; }
-  }
-
-  function saveEntries(arr) {
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      const data = await firebaseGet(FIREBASE_PATH());
+      const arr  = data ? objectToArray(data) : [];
+      localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      return arr;
+    } catch (e) {
+      console.warn('Firebase read failed, using localStorage:', e);
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
+      } catch (_) { return []; }
+    }
   }
 
   function escapeHtml(str) {

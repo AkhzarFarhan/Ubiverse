@@ -6,19 +6,10 @@ window.SalahModule = (function () {
 
   const PRAYERS    = ['Fajr', 'Zohar', 'Asr', 'Maghrib', 'Isha'];
   const FARZ_RAKA  = [2, 4, 4, 3, 4];
-  const STORAGE_KEY = () => 'salah_' + window.AppState.username;
+  const STORAGE_KEY   = () => 'salah_' + window.AppState.username;
+  const FIREBASE_PATH = () => 'salah/' + window.AppState.username;
 
   let _chartInstance = null;
-
-  // Sample mock data: each entry is { prayers:[f,z,a,m,i], note, timestamp, date }
-  // Values represent cumulative "debt" (negative = behind, positive = ahead)
-  const SAMPLE_DATA = [
-    { prayers: [-8, -16, -12, -6, -12], note: 'Starting tracking', timestamp: '01-01-2025 09:00:00 AM', date: '2025-01-01' },
-    { prayers: [-7, -14, -10, -5, -10], note: 'Making up prayers', timestamp: '08-01-2025 09:00:00 AM', date: '2025-01-08' },
-    { prayers: [-5, -10, -7,  -3, -7 ], note: 'Good progress',     timestamp: '15-01-2025 09:00:00 AM', date: '2025-01-15' },
-    { prayers: [-3, -6,  -4,  -2, -4 ], note: 'Consistent',        timestamp: '22-01-2025 09:00:00 AM', date: '2025-01-22' },
-    { prayers: [-1, -2,  -1,  -1, -1 ], note: 'Almost there',      timestamp: '29-01-2025 09:00:00 AM', date: '2025-01-29' },
-  ];
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -74,7 +65,7 @@ window.SalahModule = (function () {
                   ${PRAYERS.map(function (p) { return '<th>' + p + '</th>'; }).join('')}
                 </tr>
               </thead>
-              <tbody id="salah-tbody"></tbody>
+              <tbody id="salah-tbody"><tr><td colspan="${PRAYERS.length + 2}" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -90,13 +81,13 @@ window.SalahModule = (function () {
   }
 
   /* ── Submit ───────────────────────────────────────────────── */
-  function submit() {
+  async function submit() {
     const newValues = PRAYERS.map(function (_, i) {
       return parseInt(document.getElementById('salah-input-' + i).value, 10) || 0;
     });
     const note = document.getElementById('salah-note').value.trim();
 
-    const arr = getEntries();
+    const arr = await getEntries();
     const last = arr.length > 0 ? arr[arr.length - 1].prayers : Array(PRAYERS.length).fill(0);
 
     // For each prayer: if new_value != 0 → updated = existing + new - farz; else keep
@@ -115,12 +106,13 @@ window.SalahModule = (function () {
       date:      today,
     };
 
+    try {
+      await firebasePost(FIREBASE_PATH(), entry);
+    } catch (e) {
+      console.warn('Firebase write failed:', e);
+    }
     arr.push(entry);
-    saveEntries(arr);
-
-    // TODO: Firebase — POST to salah/{username}.json
-    firebasePost('salah/' + window.AppState.username, entry)
-      .then(function () { /* stub */ });
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
     PRAYERS.forEach(function (_, i) {
       document.getElementById('salah-input-' + i).value = 0;
@@ -128,15 +120,19 @@ window.SalahModule = (function () {
     document.getElementById('salah-note').value = '';
 
     showAlert('salah-alert', 'Progress saved! 🕌', 'success');
-    loadData();
+    renderStats(arr);
+    renderChart(arr);
+    renderTable(arr);
   }
 
   /* ── Load ─────────────────────────────────────────────────── */
-  function loadData() {
-    let arr = getEntries();
+  async function loadData() {
+    const arr = await getEntries();
+
     if (arr.length === 0) {
-      arr = SAMPLE_DATA.slice();
-      saveEntries(arr);
+      const tbody = document.getElementById('salah-tbody');
+      if (tbody) tbody.innerHTML = `<tr><td colspan="${PRAYERS.length + 2}" class="text-muted text-sm text-center">No entries yet.</td></tr>`;
+      return;
     }
 
     renderStats(arr);
@@ -280,14 +276,18 @@ window.SalahModule = (function () {
   }
 
   /* ── Storage helpers ──────────────────────────────────────── */
-  function getEntries() {
+  async function getEntries() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
-    } catch (_) { return []; }
-  }
-
-  function saveEntries(arr) {
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      const data = await firebaseGet(FIREBASE_PATH());
+      const arr  = data ? objectToArray(data) : [];
+      localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      return arr;
+    } catch (e) {
+      console.warn('Firebase read failed, using localStorage:', e);
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
+      } catch (_) { return []; }
+    }
   }
 
   function escapeHtml(str) {
@@ -300,3 +300,4 @@ window.SalahModule = (function () {
 
   return { render, submit, loadData };
 }());
+

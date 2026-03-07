@@ -4,27 +4,14 @@
 window.LedgerModule = (function () {
   'use strict';
 
-  const STORAGE_KEY = () => 'ledger_' + window.AppState.username;
+  const STORAGE_KEY   = () => 'ledger_' + window.AppState.username;
+  const FIREBASE_PATH = () => 'LedgerV2/' + window.AppState.username;
 
   const MODES = ['Cash', 'PhonePe', 'PayTM', 'Other UPI', 'Card', 'Net Banking', 'CashToBank', 'BankToCash'];
   const MODE_SHORT = {
     'Cash': 'CA', 'PhonePe': 'PP', 'PayTM': 'UPI', 'Other UPI': 'UPI',
     'Card': 'CRD', 'Net Banking': 'NB', 'CashToBank': 'CTB', 'BankToCash': 'BTC',
   };
-
-  const SAMPLE_DATA = [
-    { transaction_id: 1, credit: 50000, debit: 0, mode: 'Cash', details: 'Opening cash balance',
-      cash: 50000, bank: 0, total: 50000, timestamp: '01-05-2025 10:00:00 AM' },
-    { transaction_id: 2, credit: 100000, debit: 0, mode: 'Net Banking', details: 'Salary credited',
-      cash: 50000, bank: 100000, total: 150000, timestamp: '01-05-2025 11:00:00 AM' },
-    { transaction_id: 3, credit: 0, debit: 1200, mode: 'PhonePe', details: 'Grocery shopping',
-      cash: 50000, bank: 98800, total: 148800, timestamp: '03-05-2025 06:30:00 PM' },
-    { transaction_id: 4, credit: 0, debit: 500, mode: 'Cash', details: 'Auto fare',
-      cash: 49500, bank: 98800, total: 148300, timestamp: '05-05-2025 09:15:00 AM' },
-    { transaction_id: 5, credit: 0, debit: 0, mode: 'CashToBank', details: 'Deposit to bank',
-      cash: 44500, bank: 103800, total: 148300, timestamp: '10-05-2025 02:00:00 PM',
-      _transfer_amount: 5000 },
-  ];
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -93,7 +80,7 @@ window.LedgerModule = (function () {
                   <th class="td-num">Total Balance</th>
                 </tr>
               </thead>
-              <tbody id="ledger-tbody"></tbody>
+              <tbody id="ledger-tbody"><tr><td colspan="7" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -126,7 +113,7 @@ window.LedgerModule = (function () {
   }
 
   /* ── Submit ───────────────────────────────────────────────── */
-  function submit() {
+  async function submit() {
     const credit  = parseFloat(document.getElementById('ledger-credit').value)  || 0;
     const debit   = parseFloat(document.getElementById('ledger-debit').value)   || 0;
     const mode    = document.getElementById('ledger-mode').value;
@@ -146,7 +133,7 @@ window.LedgerModule = (function () {
       return;
     }
 
-    const arr = getEntries();
+    const arr = await getEntries();
 
     // Duplicate check against last transaction
     if (arr.length > 0) {
@@ -160,13 +147,17 @@ window.LedgerModule = (function () {
 
     const entry = processLedgerData(arr, credit, debit, mode, details);
     arr.push(entry);
-    saveEntries(arr);
 
-    // TODO: Firebase — POST to ledger/{username}.json
-    firebasePost('ledger/' + window.AppState.username, entry)
-      .then(function () { /* stub */ });
+    // Write to Firebase and update local cache
+    try {
+      await firebasePost(FIREBASE_PATH(), entry);
+    } catch (e) {
+      console.warn('Firebase write failed:', e);
+    }
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
-    // TODO: Telegram — send ledger notification
+    // Send Telegram notification
+    sendTelegramForLedger(entry, window.AppState.username);
 
     document.getElementById('ledger-credit').value  = 0;
     document.getElementById('ledger-debit').value   = 0;
@@ -174,7 +165,9 @@ window.LedgerModule = (function () {
 
     clearAlert('ledger-alert');
     showAlert('ledger-alert', 'Transaction added!', 'success');
-    loadData();
+    updateBalances(arr);
+    renderTable(arr);
+    renderMonthly(arr);
   }
 
   /* ── Process ledger entry ─────────────────────────────────── */
@@ -215,21 +208,27 @@ window.LedgerModule = (function () {
   }
 
   /* ── Load ─────────────────────────────────────────────────── */
-  function loadData() {
-    let arr = getEntries();
+  async function loadData() {
+    const arr = await getEntries();
+
     if (arr.length === 0) {
-      arr = SAMPLE_DATA.slice();
-      saveEntries(arr);
+      const tbody = document.getElementById('ledger-tbody');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-muted text-sm text-center">No transactions yet.</td></tr>';
+      return;
     }
 
-    // Update balance cards
+    updateBalances(arr);
+    renderTable(arr);
+    renderMonthly(arr);
+  }
+
+  /* ── Update balance cards ─────────────────────────────────── */
+  function updateBalances(arr) {
+    if (arr.length === 0) return;
     const last = arr[arr.length - 1];
     document.getElementById('bal-cash').textContent  = getINR(last.cash);
     document.getElementById('bal-bank').textContent  = getINR(last.bank);
     document.getElementById('bal-total').textContent = getINR(last.total);
-
-    renderTable(arr);
-    renderMonthly(arr);
   }
 
   /* ── Transaction table ────────────────────────────────────── */
@@ -281,14 +280,18 @@ window.LedgerModule = (function () {
   }
 
   /* ── Storage helpers ──────────────────────────────────────── */
-  function getEntries() {
+  async function getEntries() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
-    } catch (_) { return []; }
-  }
-
-  function saveEntries(arr) {
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      const data = await firebaseGet(FIREBASE_PATH());
+      const arr  = data ? objectToArray(data) : [];
+      localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+      return arr;
+    } catch (e) {
+      console.warn('Firebase read failed, using localStorage:', e);
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
+      } catch (_) { return []; }
+    }
   }
 
   function escapeHtml(str) {
@@ -301,3 +304,4 @@ window.LedgerModule = (function () {
 
   return { render, submit, loadData };
 }());
+

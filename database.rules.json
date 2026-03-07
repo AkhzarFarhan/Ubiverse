@@ -1,0 +1,52 @@
+{
+  "rules": {
+    "daily": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "gym": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "texter_v2": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "salah": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "tasbih": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "LedgerV2": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "car": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "user_db": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    ".read": false,
+    ".write": false
+  }
+}

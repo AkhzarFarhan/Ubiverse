@@ -1,5 +1,6 @@
 // js/tasbih.js
 // Digital tasbih (dhikr counter) module.
+// Modes: "standard" (SubhanAllah → Alhamdulillah → Allahu Akbar) and "custom".
 
 window.TasbihModule = (function () {
   'use strict';
@@ -7,8 +8,35 @@ window.TasbihModule = (function () {
   const STORAGE_KEY   = () => 'tasbih_' + window.AppState.username;
   const FIREBASE_PATH = () => 'tasbih/' + window.AppState.username;
 
-  let _count  = 0;
-  let _target = 33;
+  /* ── Standard dhikr phases ────────────────────────────────── */
+  const PHASES = [
+    { arabic: 'سُبْحَانَ ٱللَّٰهِ',    label: 'SubhanAllah',   count: 33 },
+    { arabic: 'ٱلْحَمْدُ لِلَّٰهِ',     label: 'Alhamdulillah', count: 33 },
+    { arabic: 'ٱللَّٰهُ أَكْبَرُ',       label: 'Allahu Akbar',  count: 34 },
+  ];
+  const TOTAL_STANDARD = PHASES.reduce((s, p) => s + p.count, 0); // 100
+
+  let _mode       = 'standard'; // 'standard' | 'custom'
+  let _count       = 0;
+  let _phase       = 0;         // index into PHASES (standard mode)
+  let _customTarget = 100;      // editable target for custom mode
+
+  /* ── Helpers ──────────────────────────────────────────────── */
+  function currentPhase() { return PHASES[_phase]; }
+
+  /** Return { phaseIndex, offsetInPhase } from global _count */
+  function phaseInfo() {
+    let remaining = _count;
+    for (let i = 0; i < PHASES.length; i++) {
+      if (remaining < PHASES[i].count) return { idx: i, offset: remaining };
+      remaining -= PHASES[i].count;
+    }
+    return { idx: PHASES.length - 1, offset: PHASES[PHASES.length - 1].count };
+  }
+
+  function vibrate(pattern) {
+    if (navigator.vibrate) navigator.vibrate(pattern);
+  }
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -19,8 +47,17 @@ window.TasbihModule = (function () {
           <p>Digital dhikr counter</p>
         </div>
 
+        <!-- Mode tabs -->
+        <div class="tasbih-mode-tabs">
+          <button class="tasbih-mode-tab active" data-mode="standard">Standard (33-33-34)</button>
+          <button class="tasbih-mode-tab" data-mode="custom">Custom Counter</button>
+        </div>
+
         <div class="card">
           <div class="tasbih-wrap">
+            <!-- Phase label (standard mode) -->
+            <div class="tasbih-phase" id="tasbih-phase"></div>
+
             <div class="tasbih-count" id="tasbih-count">0</div>
 
             <div class="tasbih-progress">
@@ -29,21 +66,21 @@ window.TasbihModule = (function () {
 
             <div class="text-muted text-sm" id="tasbih-progress-label">0 / 33</div>
 
-            <button class="tasbih-btn" id="tasbih-tap" aria-label="Tap to count">
-              ﷽
-            </button>
+            <button class="tasbih-btn" id="tasbih-tap" aria-label="Tap to count"></button>
 
             <div class="completion-msg" id="tasbih-complete">
-              🎉 SubhanAllah! Target reached!
+              🎉 Tasbih complete!
             </div>
 
-            <div class="tasbih-target-row">
-              <label for="tasbih-target" style="margin-bottom:0">Target:</label>
-              <input type="number" id="tasbih-target" value="33" min="1" max="10000"
-                style="width:80px;" />
-              <button class="btn btn-secondary btn-sm" id="tasbih-set-target">Set</button>
-              <button class="btn btn-danger btn-sm" id="tasbih-reset">Reset</button>
+            <!-- Custom mode: target input -->
+            <div class="tasbih-target-row hidden" id="tasbih-custom-row">
+              <label for="tasbih-custom-target" style="margin-bottom:0">Target:</label>
+              <input type="number" id="tasbih-custom-target" value="100" min="1" max="99999"
+                style="width:90px;" />
+              <button class="btn btn-secondary btn-sm" id="tasbih-set-custom">Set</button>
             </div>
+
+            <button class="btn btn-danger btn-sm" id="tasbih-reset">Reset</button>
           </div>
         </div>
 
@@ -56,46 +93,91 @@ window.TasbihModule = (function () {
             </div>
             <div class="stat-card">
               <div class="stat-label">Target</div>
-              <div class="stat-value" id="tasbih-stat-target">33</div>
+              <div class="stat-value" id="tasbih-stat-target">100</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Remaining</div>
-              <div class="stat-value" id="tasbih-stat-remaining">33</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-label">Completions</div>
-              <div class="stat-value" id="tasbih-stat-completions">0</div>
+              <div class="stat-value" id="tasbih-stat-remaining">100</div>
             </div>
           </div>
         </div>
       </div>
     `;
 
-    // Restore saved state
     loadState();
+    applyModeUI();
     updateUI();
 
     document.getElementById('tasbih-tap').addEventListener('click', tap);
     document.getElementById('tasbih-reset').addEventListener('click', reset);
-    document.getElementById('tasbih-set-target').addEventListener('click', setTarget);
+    document.getElementById('tasbih-set-custom').addEventListener('click', setCustomTarget);
 
-    // Allow keyboard spacebar / Enter as tap
+    document.querySelectorAll('.tasbih-mode-tab').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        switchMode(btn.dataset.mode);
+      });
+    });
+
     document.addEventListener('keydown', handleKey);
+  }
+
+  /* ── Mode switching ───────────────────────────────────────── */
+  function switchMode(mode) {
+    _mode  = mode;
+    _count = 0;
+    _phase = 0;
+    saveState();
+
+    document.querySelectorAll('.tasbih-mode-tab').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+
+    applyModeUI();
+    updateUI();
+    document.getElementById('tasbih-complete').classList.remove('show');
+  }
+
+  function applyModeUI() {
+    const customRow = document.getElementById('tasbih-custom-row');
+    const phaseEl   = document.getElementById('tasbih-phase');
+
+    document.querySelectorAll('.tasbih-mode-tab').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.mode === _mode);
+    });
+
+    if (_mode === 'custom') {
+      customRow.classList.remove('hidden');
+      phaseEl.classList.add('hidden');
+      document.getElementById('tasbih-custom-target').value = _customTarget;
+    } else {
+      customRow.classList.add('hidden');
+      phaseEl.classList.remove('hidden');
+    }
   }
 
   /* ── Tap ──────────────────────────────────────────────────── */
   function tap() {
+    const total = _mode === 'standard' ? TOTAL_STANDARD : _customTarget;
+    if (_count >= total) return; // already done
+
     _count++;
+
+    // Standard mode: detect phase transitions
+    if (_mode === 'standard') {
+      const info = phaseInfo();
+      if (info.idx !== _phase) {
+        _phase = info.idx;
+        vibrate([100, 50, 100, 50, 100]); // triple-pulse for phase change
+      }
+    }
+
     saveState();
     updateUI();
 
-    if (_count === _target) {
-      onComplete();
-    }
+    if (_count >= total) onComplete();
   }
 
   function handleKey(e) {
-    // Only active when tasbih page is visible
     if (!document.getElementById('tasbih-tap')) {
       document.removeEventListener('keydown', handleKey);
       return;
@@ -109,17 +191,18 @@ window.TasbihModule = (function () {
   /* ── Reset ────────────────────────────────────────────────── */
   function reset() {
     _count = 0;
+    _phase = 0;
     saveState();
     updateUI();
     document.getElementById('tasbih-complete').classList.remove('show');
   }
 
-  /* ── Set target ───────────────────────────────────────────── */
-  function setTarget() {
-    const val = parseInt(document.getElementById('tasbih-target').value, 10);
+  /* ── Set custom target ────────────────────────────────────── */
+  function setCustomTarget() {
+    const val = parseInt(document.getElementById('tasbih-custom-target').value, 10);
     if (!val || val < 1) return;
-    _target = val;
-    _count  = 0;
+    _customTarget = val;
+    _count = 0;
     saveState();
     updateUI();
     document.getElementById('tasbih-complete').classList.remove('show');
@@ -128,57 +211,78 @@ window.TasbihModule = (function () {
   /* ── Completion ───────────────────────────────────────────── */
   function onComplete() {
     document.getElementById('tasbih-complete').classList.add('show');
-    // Vibrate if supported
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    vibrate([200, 100, 200, 100, 300]);
 
-    const record = { count: _count, target: _target, timestamp: getKolkataTimestamp() };
+    const total = _mode === 'standard' ? TOTAL_STANDARD : _customTarget;
+    const record = { count: _count, target: total, mode: _mode, timestamp: getKolkataTimestamp() };
     firebasePut(FIREBASE_PATH() + '/last', record)
       .catch(function (e) { console.warn('Firebase write failed:', e); });
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify({ count: _count, target: _target }));
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(getStateObj()));
   }
 
   /* ── Update UI ────────────────────────────────────────────── */
   function updateUI() {
-    const countEl    = document.getElementById('tasbih-count');
-    const barEl      = document.getElementById('tasbih-bar');
-    const labelEl    = document.getElementById('tasbih-progress-label');
-    const statCount  = document.getElementById('tasbih-stat-count');
+    const countEl   = document.getElementById('tasbih-count');
+    const barEl     = document.getElementById('tasbih-bar');
+    const labelEl   = document.getElementById('tasbih-progress-label');
+    const phaseEl   = document.getElementById('tasbih-phase');
+    const tapBtn    = document.getElementById('tasbih-tap');
+    const statCount = document.getElementById('tasbih-stat-count');
     const statTarget = document.getElementById('tasbih-stat-target');
-    const statRem    = document.getElementById('tasbih-stat-remaining');
-    const statComp   = document.getElementById('tasbih-stat-completions');
+    const statRem   = document.getElementById('tasbih-stat-remaining');
 
     if (!countEl) return;
 
-    const pct         = Math.min(100, (_count / _target) * 100);
-    const posInCycle  = _count % _target;
-    const cyclePos    = (posInCycle === 0 && _count > 0) ? _target : posInCycle;
-    const remaining   = Math.max(0, _target - cyclePos);
-    const completions = Math.floor(_count / _target);
+    if (_mode === 'standard') {
+      const info      = phaseInfo();
+      const phase     = PHASES[info.idx];
+      const pct       = Math.min(100, (_count / TOTAL_STANDARD) * 100);
+      const remaining = TOTAL_STANDARD - _count;
 
-    countEl.textContent   = _count;
-    barEl.style.width     = pct + '%';
-    labelEl.textContent   = cyclePos + ' / ' + _target;
-    statCount.textContent  = _count;
-    statTarget.textContent = _target;
-    statRem.textContent    = remaining;
-    statComp.textContent   = completions;
+      countEl.textContent    = info.offset;
+      barEl.style.width      = pct + '%';
+      labelEl.textContent    = info.offset + ' / ' + phase.count;
+      phaseEl.innerHTML      = '<span class="tasbih-phase-arabic">' + phase.arabic + '</span>'
+                             + '<span class="tasbih-phase-label">' + phase.label + '</span>';
+      phaseEl.classList.remove('hidden');
+      tapBtn.textContent     = phase.arabic;
+      statCount.textContent  = _count;
+      statTarget.textContent = TOTAL_STANDARD;
+      statRem.textContent    = remaining;
+    } else {
+      const pct       = Math.min(100, (_count / _customTarget) * 100);
+      const remaining = Math.max(0, _customTarget - _count);
 
-    document.getElementById('tasbih-target').value = _target;
+      countEl.textContent    = _count;
+      barEl.style.width      = pct + '%';
+      labelEl.textContent    = _count + ' / ' + _customTarget;
+      phaseEl.classList.add('hidden');
+      tapBtn.textContent     = _count;
+      statCount.textContent  = _count;
+      statTarget.textContent = _customTarget;
+      statRem.textContent    = remaining;
+    }
   }
 
   /* ── Storage ──────────────────────────────────────────────── */
+  function getStateObj() {
+    return { mode: _mode, count: _count, phase: _phase, customTarget: _customTarget };
+  }
+
   function loadState() {
     try {
       const s = JSON.parse(localStorage.getItem(STORAGE_KEY()));
       if (s) {
-        _count  = s.count  || 0;
-        _target = s.target || 33;
+        _mode         = s.mode         || 'standard';
+        _count        = s.count        || 0;
+        _phase        = s.phase        || 0;
+        _customTarget = s.customTarget || 100;
       }
     } catch (_) { /* ignore */ }
   }
 
   function saveState() {
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify({ count: _count, target: _target }));
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(getStateObj()));
   }
 
   return { render };

@@ -30,7 +30,14 @@
     document.getElementById('app').innerHTML = `
       <div class="fade-in">
         <div class="page-header">
-          <h2>🌐 Ubiverse</h2>
+          <h2>
+            <svg viewBox="0 0 24 24" width="28" height="28" stroke="var(--color-primary)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:bottom; margin-right:4px;">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            Ubiverse
+          </h2>
           <p class="home-tagline">An Endless Possibility</p>
         </div>
         <div class="home-grid">

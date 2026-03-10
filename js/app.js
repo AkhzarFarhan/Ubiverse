@@ -4,7 +4,18 @@
 (function () {
   'use strict';
 
+  const MODULES = [
+    { key: 'daily',  icon: '📅', label: 'Daily' },
+    { key: 'gym',    icon: '🏋️', label: 'Gym' },
+    { key: 'texter', icon: '✏️',  label: 'Texter' },
+    { key: 'tasbih', icon: '📿', label: 'Tasbih' },
+    { key: 'salah',  icon: '🕌', label: 'Salah' },
+    { key: 'ledger', icon: '💰', label: 'Ledger' },
+    { key: 'car',    icon: '🚗', label: 'Car' },
+  ];
+
   const ROUTES = {
+    home:   () => renderHome(),
     daily:  () => window.DailyModule.render(),
     gym:    () => window.GymModule.render(),
     texter: () => window.TexterModule.render(),
@@ -13,6 +24,29 @@
     ledger: () => window.LedgerModule.render(),
     car:    () => window.CarModule.render(),
   };
+
+  /* ── Home (icon grid) ─────────────────────────────────────── */
+  function renderHome() {
+    document.getElementById('app').innerHTML = `
+      <div class="fade-in">
+        <div class="page-header">
+          <h2>🌐 Ubiverse</h2>
+          <p class="home-tagline">An Endless Possibility</p>
+        </div>
+        <div class="home-grid">
+          ${MODULES.map(function (m) {
+            return '<a href="#' + m.key + '" class="home-tile">'
+              + '<span class="home-tile-icon">' + m.icon + '</span>'
+              + '<span class="home-tile-label">' + m.label + '</span>'
+              + '</a>';
+          }).join('')}
+        </div>
+        <footer class="home-footer">
+          Developed and Maintained by <a href="https://github.com/AkhzarFarhan" target="_blank" rel="noopener">Akhzar Farhan</a>
+        </footer>
+      </div>
+    `;
+  }
 
   /* ── Auth ─────────────────────────────────────────────────── */
 
@@ -69,11 +103,11 @@
   /* ── Router ───────────────────────────────────────────────── */
 
   function navigate() {
-    const hash = window.location.hash.replace('#', '') || 'daily';
-    const page = ROUTES[hash] ? hash : 'daily';
+    const hash = window.location.hash.replace('#', '') || 'home';
+    const page = ROUTES[hash] ? hash : 'home';
 
     if (!ROUTES[hash]) {
-      window.location.hash = 'daily';
+      window.location.hash = 'home';
       return;
     }
 

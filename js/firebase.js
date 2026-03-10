@@ -54,12 +54,10 @@ async function firebaseDelete(path) {
 
 /* ── Auth helpers ──────────────────────────────────────────── */
 
-async function firebaseSignIn(email, password) {
-  return auth.signInWithEmailAndPassword(email, password);
-}
+const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-async function firebaseSignUp(email, password) {
-  return auth.createUserWithEmailAndPassword(email, password);
+async function firebaseSignInWithGoogle() {
+  return auth.signInWithPopup(googleProvider);
 }
 
 function firebaseSignOut() {

@@ -216,6 +216,22 @@ ul, ol { list-style: none; }
   text-align: center;
 }
 
+.btn-google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  font-weight: 500;
+  font-size: .95rem;
+  transition: background .2s, box-shadow .2s;
+}
+.btn-google:hover {
+  background: #f7f8f8;
+  box-shadow: 0 1px 3px rgba(60,64,67,.3);
+}
+
 /* ── Cards ─────────────────────────────────────────────────── */
 .card {
   background: var(--surface);

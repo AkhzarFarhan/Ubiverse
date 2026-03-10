@@ -30,38 +30,14 @@
     document.getElementById('signout-btn').classList.add('hidden');
   }
 
-  /* ── Login form ───────────────────────────────────────────── */
+  /* ── Google Sign-In ───────────────────────────────────────── */
 
-  document.getElementById('login-form').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value.trim();
-
-    if (!username || !password) {
-      showAlert('login-alert', 'Please enter both username and password.', 'error');
-      return;
-    }
-
-    if (!sanitizeUsername(username)) {
-      showAlert('login-alert', 'Username may only contain letters and numbers.', 'error');
-      return;
-    }
-
-    const email = username + '@ubiverse.app';
-
+  document.getElementById('google-signin-btn').addEventListener('click', async function () {
     try {
-      await firebaseSignIn(email, password);
+      await firebaseSignInWithGoogle();
       // onAuthStateChanged will handle the rest
     } catch (err) {
-      if (err.code === 'auth/user-not-found') {
-        // Auto-create account (matches old backend behaviour)
-        try {
-          const cred = await firebaseSignUp(email, password);
-          await cred.user.updateProfile({ displayName: username });
-        } catch (signUpErr) {
-          showAlert('login-alert', 'Account creation failed: ' + signUpErr.message, 'error');
-        }
-      } else {
+      if (err.code !== 'auth/popup-closed-by-user') {
         showAlert('login-alert', 'Sign-in failed: ' + err.message, 'error');
       }
     }
@@ -78,8 +54,8 @@
 
   onAuthStateChanged(function (user) {
     if (user) {
-      // Derive username from displayName or email prefix
-      const username = user.displayName || user.email.split('@')[0];
+      // Derive username from Google displayName or email prefix
+      const username = (user.displayName || user.email.split('@')[0]).replace(/\s+/g, '').toLowerCase();
       window.AppState.username = username;
       localStorage.setItem('ubiverse_username', username);
       showApp();

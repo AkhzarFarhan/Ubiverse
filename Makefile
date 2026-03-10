@@ -2,6 +2,7 @@
 # Usage:
 #   make push          – add, commit & push (dev branch only)
 #   make merge         – merge dev → main, push main, switch back to dev
+#   make pushm         – runs push, then immediately merges to main
 
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
@@ -30,3 +31,8 @@ merge:
 	git push origin main
 	git checkout dev
 	@echo "✅ Merged dev → main and switched back to dev."
+
+# ── Push then Merge ───────────────────────────────────────────
+.PHONY: pushm
+pushm: push merge
+	@echo "✅ Push and merge complete."

@@ -254,10 +254,11 @@ window.LedgerModule = (function () {
     if (!tbody) return;
 
     tbody.innerHTML = arr.slice().reverse().map(function (e) {
+      const dateOnly = (e.timestamp || '').split(' ')[0] || e.timestamp;
       return `<tr>
         <td>${e.transaction_id}</td>
-        <td style="white-space:nowrap;font-size:.8rem">${e.timestamp}</td>
-        <td>${escapeHtml(e.details || '')}</td>
+        <td style="white-space:nowrap;font-size:.75rem">${dateOnly}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(e.details || '')}">${escapeHtml(e.details || '')}</td>
         <td><span class="badge badge-neutral">${MODE_SHORT[e.mode] || e.mode}</span></td>
         <td class="td-num td-positive">${e.credit > 0 ? getINR(e.credit) : '—'}</td>
         <td class="td-num td-negative">${e.debit  > 0 ? getINR(e.debit)  : '—'}</td>

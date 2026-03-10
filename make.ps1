@@ -2,15 +2,16 @@
 # Usage:
 #   .\make.ps1 push    – add, commit & push (dev branch only)
 #   .\make.ps1 merge   – merge dev → main, push main, switch back to dev
+#   .\make.ps1 pushm   – runs push, then immediately merges to main
 
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("push", "merge")]
+    [ValidateSet("push", "merge", "pushm")]
     [string]$Command
 )
 
 if (-not $Command) {
-    Write-Host "Usage: .\make.ps1 <push|merge>" -ForegroundColor Yellow
+    Write-Host "Usage: .\make.ps1 <push|merge|pushm>" -ForegroundColor Yellow
     exit 1
 }
 
@@ -47,4 +48,11 @@ function Merge-ToMain {
 switch ($Command) {
     "push"  { Push-Dev }
     "merge" { Merge-ToMain }
+    "pushm" { 
+        Push-Dev
+        if ($LASTEXITCODE -eq 0) {
+            Merge-ToMain
+            Write-Host "Push and merge complete." -ForegroundColor Green
+        }
+    }
 }

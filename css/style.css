@@ -510,8 +510,8 @@ input[type="checkbox"] {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: .85rem;
-  min-width: 400px;
+  font-size: .8rem;
+  min-width: 300px;
 }
 
 thead tr {
@@ -520,18 +520,18 @@ thead tr {
 
 th {
   text-align: left;
-  padding: .6rem .85rem;
+  padding: .5rem .4rem;
   font-weight: 600;
-  font-size: .78rem;
+  font-size: .75rem;
   text-transform: uppercase;
-  letter-spacing: .4px;
+  letter-spacing: .2px;
   color: var(--text-muted);
   white-space: nowrap;
   border-bottom: 1px solid var(--border);
 }
 
 td {
-  padding: .55rem .85rem;
+  padding: .45rem .4rem;
   border-bottom: 1px solid var(--border);
   color: var(--text);
   vertical-align: middle;

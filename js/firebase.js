@@ -72,9 +72,10 @@ function onAuthStateChanged(callback) {
 
 const TG_BOT_TOKEN      = env.TG_BOT_TOKEN     || '';
 const TG_LEDGER_CHAT_ID = env.TG_LEDGER_CHAT_ID || '';
+const TG_USERNAME       = env.TG_USERNAME       || '';
 
 async function sendTelegramForLedger(entry, username) {
-  if (username !== 'akhzarfarhan') return;
+  if (username !== TG_USERNAME) return;
 
   const separator = '=========================';
   const type   = entry.credit > 0 ? 'CREDIT' : 'DEBIT';

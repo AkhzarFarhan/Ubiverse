@@ -40,29 +40,35 @@ window.LedgerModule = (function () {
         <form class="form-card" id="ledger-form" novalidate>
           <div class="card-title">New Transaction</div>
           <div id="ledger-alert"></div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="ledger-credit">Credit (₹)</label>
-              <input type="number" id="ledger-credit" value="0" min="0" step="0.01" />
-            </div>
-            <div class="form-group">
-              <label for="ledger-debit">Debit (₹)</label>
-              <input type="number" id="ledger-debit" value="0" min="0" step="0.01" />
+
+          <!-- Type toggle -->
+          <div class="ledger-type-row">
+            <button type="button" class="ledger-type-btn active" data-type="debit">− Debit</button>
+            <button type="button" class="ledger-type-btn" data-type="credit">+ Credit</button>
+          </div>
+
+          <!-- Amount -->
+          <div class="form-group">
+            <label for="ledger-amount">Amount (₹)</label>
+            <input type="number" id="ledger-amount" placeholder="0.00" min="0" step="0.01" inputmode="decimal" />
+          </div>
+
+          <!-- Mode pills -->
+          <div class="form-group">
+            <label>Mode</label>
+            <div class="ledger-mode-pills" id="ledger-mode-pills">
+              ${MODES.map(function (m, i) {
+                return '<button type="button" class="mode-pill' + (i === 0 ? ' active' : '') + '" data-mode="' + m + '">' + m + '</button>';
+              }).join('')}
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="ledger-mode">Mode</label>
-              <select id="ledger-mode">
-                ${MODES.map(function (m) { return `<option value="${m}">${m}</option>`; }).join('')}
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="ledger-details">Details</label>
-              <input type="text" id="ledger-details" placeholder="e.g. Grocery shopping" maxlength="200" />
-            </div>
+
+          <!-- Details -->
+          <div class="form-group">
+            <input type="text" id="ledger-details" placeholder="Details (e.g. Grocery shopping)" maxlength="200" />
           </div>
-          <button type="submit" class="btn btn-primary">Add Transaction</button>
+
+          <button type="submit" class="btn btn-primary btn-full">Add Transaction</button>
         </form>
 
         <div class="card">
@@ -104,6 +110,22 @@ window.LedgerModule = (function () {
       </div>
     `;
 
+    // Type toggle (credit / debit)
+    document.querySelectorAll('.ledger-type-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.ledger-type-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+
+    // Mode pills
+    document.querySelectorAll('.mode-pill').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.mode-pill').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+
     document.getElementById('ledger-form').addEventListener('submit', function (e) {
       e.preventDefault();
       submit();
@@ -114,22 +136,18 @@ window.LedgerModule = (function () {
 
   /* ── Submit ───────────────────────────────────────────────── */
   async function submit() {
-    const credit  = parseFloat(document.getElementById('ledger-credit').value)  || 0;
-    const debit   = parseFloat(document.getElementById('ledger-debit').value)   || 0;
-    const mode    = document.getElementById('ledger-mode').value;
+    const amount  = parseFloat(document.getElementById('ledger-amount').value) || 0;
+    const type    = document.querySelector('.ledger-type-btn.active').dataset.type;
+    const modeBtn = document.querySelector('.mode-pill.active');
+    const mode    = modeBtn ? modeBtn.dataset.mode : MODES[0];
     const details = document.getElementById('ledger-details').value.trim();
 
+    const credit = type === 'credit' ? amount : 0;
+    const debit  = type === 'debit'  ? amount : 0;
+
     // Validation
-    if (credit === 0 && debit === 0) {
-      showAlert('ledger-alert', 'Enter either a credit or debit amount.', 'error');
-      return;
-    }
-    if (credit !== 0 && debit !== 0) {
-      showAlert('ledger-alert', 'Only one of credit or debit can be non-zero.', 'error');
-      return;
-    }
-    if (credit < 0 || debit < 0) {
-      showAlert('ledger-alert', 'Amounts cannot be negative.', 'error');
+    if (amount <= 0) {
+      showAlert('ledger-alert', 'Enter a valid amount.', 'error');
       return;
     }
 
@@ -159,8 +177,7 @@ window.LedgerModule = (function () {
     // Send Telegram notification
     sendTelegramForLedger(entry, window.AppState.username);
 
-    document.getElementById('ledger-credit').value  = 0;
-    document.getElementById('ledger-debit').value   = 0;
+    document.getElementById('ledger-amount').value  = '';
     document.getElementById('ledger-details').value = '';
 
     clearAlert('ledger-alert');

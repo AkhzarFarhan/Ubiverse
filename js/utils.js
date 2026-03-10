@@ -1,7 +1,7 @@
 // js/utils.js
 // Shared utility helpers used across all modules.
 
-window.AppState = { username: '', password: '' };
+window.AppState = { username: '', displayName: '', password: '' };
 
 /* ── Math ──────────────────────────────────────────────────── */
 

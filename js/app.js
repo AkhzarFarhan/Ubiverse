@@ -60,7 +60,7 @@
   function showApp() {
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('layout').classList.remove('hidden');
-    document.getElementById('header-user').textContent = '👤 ' + window.AppState.username;
+    document.getElementById('header-user').textContent = '👤 ' + window.AppState.displayName;
     document.getElementById('signout-btn').classList.remove('hidden');
     navigate();
   }
@@ -95,13 +95,17 @@
 
   onAuthStateChanged(function (user) {
     if (user) {
-      // Derive username from Google displayName or email prefix
-      const username = (user.displayName || user.email.split('@')[0]).replace(/\s+/g, '').toLowerCase();
+      // Username from email prefix (unique per Google account)
+      const username = user.email.split('@')[0].toLowerCase();
+      // Display name: first name from Google profile, fallback to email prefix
+      const firstName = user.displayName ? user.displayName.split(' ')[0] : username;
       window.AppState.username = username;
+      window.AppState.displayName = firstName;
       localStorage.setItem('ubiverse_username', username);
       showApp();
     } else {
       window.AppState.username = '';
+      window.AppState.displayName = '';
       localStorage.removeItem('ubiverse_username');
       showLogin();
     }

@@ -36,7 +36,9 @@ jobs:
             FIREBASE_MESSAGING_SENDER_ID:  '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}',
             FIREBASE_APP_ID:               '${{ secrets.FIREBASE_APP_ID }}',
             TG_BOT_TOKEN:                  '${{ secrets.TG_BOT_TOKEN }}',
-            TG_LEDGER_CHAT_ID:             '${{ secrets.TG_LEDGER_CHAT_ID }}'
+            TG_LEDGER_CHAT_ID:             '${{ secrets.TG_LEDGER_CHAT_ID }}',
+            TG_USERNAME:                   '${{ secrets.TG_USERNAME }}'
+
           };
           ENVEOF
 

@@ -1024,6 +1024,24 @@ tbody tr:hover { background: #fafbff; }
 /* ── Vibex (Chat) ──────────────────────────────────────────── */
 
 /* Contact list */
+.vibex-new-chat-card { margin-bottom: .75rem; }
+.vibex-new-chat-form {
+  display: flex;
+  gap: .5rem;
+  padding: 0 1rem .5rem;
+}
+.vibex-username-input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .5rem .75rem;
+  font-size: .9rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--transition);
+}
+.vibex-username-input:focus { border-color: var(--color-primary); }
+
 .vibex-contacts-card { padding: 0; overflow: hidden; }
 .vibex-contacts-card .card-title { padding: 1rem 1rem .5rem; }
 

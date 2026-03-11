@@ -64,7 +64,7 @@ window.CarModule = (function () {
           <div class="collapsible-body" id="fuel-section">
             <div class="form-row">
               <div class="form-group">
-                <label for="car-fuel-rate">Fuel Rate (₹/L) <span class="text-xs text-muted">saved</span></label>
+                <label for="car-fuel-rate">Fuel Rate (₹/L) <span class="text-xs text-muted">auto-saved</span></label>
                 <input type="number" id="car-fuel-rate" placeholder="e.g. 103.50" min="0" step="0.01" />
               </div>
               <div class="form-group">

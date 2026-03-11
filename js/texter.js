@@ -137,10 +137,10 @@ window.TexterModule = (function () {
     text = escapeHtml(text);
 
     // Bold **text**
-    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
 
     // Italic *text*
-    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    text = text.replace(/\*([\s\S]+?)\*/g, '<em>$1</em>');
 
     // Convert newlines to <br>
     text = text.replace(/\n/g, '<br>');

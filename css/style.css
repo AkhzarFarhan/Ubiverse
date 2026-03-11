@@ -736,32 +736,41 @@ tbody tr:hover { background: #fafbff; }
 }
 
 /* ── Daily: rating buttons ─────────────────────────────────── */
-.daily-rating-row {
-  display: flex;
-  gap: .5rem;
+.daily-rating-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: .4rem;
 }
 .daily-rating-btn {
-  flex: 1;
-  padding: .6rem 1rem;
-  border-radius: var(--radius);
+  padding: .5rem .25rem;
+  border-radius: var(--radius-sm);
   border: 1.5px solid var(--border);
   background: var(--surface);
   color: var(--text-muted);
-  font-weight: 600;
-  font-size: .9rem;
+  font-weight: 700;
+  font-size: .95rem;
   cursor: pointer;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform .1s;
+  text-align: center;
+  min-width: 0;
 }
-.daily-rating-good.active {
-  background: #f0fdf4;
-  color: #16a34a;
-  border-color: #86efac;
-}
-.daily-rating-bad.active {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #fca5a5;
-}
+.daily-rating-btn:active { transform: scale(.93); }
+/* 1–3 red (worst) */
+.daily-rating-low        { border-color: #fecaca; color: #b91c1c; }
+.daily-rating-low:hover  { background: #fef2f2; }
+.daily-rating-low.active { background: #ef4444; color: #fff; border-color: #ef4444; }
+/* 4–5 amber */
+.daily-rating-mid        { border-color: #fed7aa; color: #c2410c; }
+.daily-rating-mid:hover  { background: #fff7ed; }
+.daily-rating-mid.active { background: #f97316; color: #fff; border-color: #f97316; }
+/* 6–7 blue-green */
+.daily-rating-ok         { border-color: #bae6fd; color: #0369a1; }
+.daily-rating-ok:hover   { background: #f0f9ff; }
+.daily-rating-ok.active  { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
+/* 8–10 green (best) */
+.daily-rating-high        { border-color: #bbf7d0; color: #15803d; }
+.daily-rating-high:hover  { background: #f0fdf4; }
+.daily-rating-high.active { background: #22c55e; color: #fff; border-color: #22c55e; }
 
 /* ── Gym: muscle group pills ───────────────────────────────── */
 .gym-muscle-pills {

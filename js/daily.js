@@ -24,11 +24,17 @@ window.DailyModule = (function () {
             <input type="text" id="daily-message" placeholder="How was your day?" maxlength="300" />
           </div>
           <div class="form-group">
-            <label>Rating</label>
+            <label>Rating (1 = worst, 10 = best)</label>
             <input type="hidden" id="daily-rating" value="" />
-            <div class="daily-rating-row">
-              <button type="button" class="daily-rating-btn daily-rating-good" data-rating="good">👍 Good</button>
-              <button type="button" class="daily-rating-btn daily-rating-bad" data-rating="bad">👎 Bad</button>
+            <div class="daily-rating-grid">
+              ${[1,2,3,4,5,6,7,8,9,10].map(function (n) {
+                var cls;
+                if (n <= 3)      cls = 'daily-rating-low';
+                else if (n <= 5) cls = 'daily-rating-mid';
+                else if (n <= 7) cls = 'daily-rating-ok';
+                else             cls = 'daily-rating-high';
+                return '<button type="button" class="daily-rating-btn ' + cls + '" data-rating="' + n + '">' + n + '</button>';
+              }).join('')}
             </div>
           </div>
           <button type="submit" class="btn btn-primary">Add Entry</button>
@@ -68,7 +74,7 @@ window.DailyModule = (function () {
       return;
     }
     if (!rating) {
-      showAlert('daily-alert', 'Please select a rating (Good or Bad).', 'error');
+      showAlert('daily-alert', 'Please select a rating (1–10).', 'error');
       return;
     }
 
@@ -76,7 +82,7 @@ window.DailyModule = (function () {
 
     const entry = {
       message,
-      rating,
+      rating: parseInt(rating, 10),
       timestamp: getKolkataTimestamp(),
     };
 
@@ -119,12 +125,13 @@ window.DailyModule = (function () {
     }
 
     function ratingBadge(r) {
+      // Legacy good/bad string ratings
       if (r === 'good') return '<span class="badge badge-success">👍 Good</span>';
       if (r === 'bad')  return '<span class="badge badge-danger">👎 Bad</span>';
-      // Legacy numeric ratings
+      // Numeric ratings (1–10)
       var num = parseInt(r, 10);
       if (isNaN(num)) return '';
-      var cls = num >= 8 ? 'badge-success' : num >= 5 ? 'badge-primary' : 'badge-danger';
+      var cls = num >= 8 ? 'badge-success' : num >= 6 ? 'badge-primary' : num >= 4 ? 'badge-warning' : 'badge-danger';
       return '<span class="badge ' + cls + '">' + num + '/10</span>';
     }
 

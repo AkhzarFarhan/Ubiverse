@@ -6,6 +6,7 @@ window.CarModule = (function () {
 
   const STORAGE_KEY   = () => 'car_' + window.AppState.username;
   const FIREBASE_PATH = () => 'car/' + window.AppState.username;
+  const FUEL_RATE_KEY = () => 'car_fuel_rate_' + window.AppState.username;
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -63,22 +64,23 @@ window.CarModule = (function () {
           <div class="collapsible-body" id="fuel-section">
             <div class="form-row">
               <div class="form-group">
-                <label for="car-fuel-vol">Fuel Volume (L)</label>
-                <input type="number" id="car-fuel-vol" value="0" min="0" step="0.01" />
-              </div>
-              <div class="form-group">
-                <label for="car-fuel-cost">Total Cost (₹)</label>
-                <input type="number" id="car-fuel-cost" value="0" min="0" step="0.01" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="car-price-per-unit">₹ / Litre</label>
-                <input type="number" id="car-price-per-unit" value="0" min="0" step="0.01" />
+                <label for="car-fuel-rate">Fuel Rate (₹/L) <span class="text-xs text-muted">auto-saved</span></label>
+                <input type="number" id="car-fuel-rate" placeholder="e.g. 103.50" min="0" step="0.01" />
               </div>
               <div class="form-group">
                 <label for="car-station">Station</label>
                 <input type="text" id="car-station" placeholder="e.g. HP Majestic" />
+              </div>
+            </div>
+            <p class="text-xs text-muted mb-sm">Enter <strong>either</strong> fuel volume or total cost. The other is calculated from the rate.</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="car-fuel-vol">Fuel Volume (L)</label>
+                <input type="number" id="car-fuel-vol" placeholder="0" min="0" step="0.01" />
+              </div>
+              <div class="form-group">
+                <label for="car-fuel-cost">Total Cost (₹)</label>
+                <input type="number" id="car-fuel-cost" placeholder="0" min="0" step="0.01" />
               </div>
             </div>
             <div class="toggle-row">
@@ -98,7 +100,7 @@ window.CarModule = (function () {
             <div class="form-row">
               <div class="form-group">
                 <label for="car-svc-cost">Service Cost (₹)</label>
-                <input type="number" id="car-svc-cost" value="0" min="0" step="0.01" />
+                <input type="number" id="car-svc-cost" placeholder="0" min="0" step="0.01" />
               </div>
               <div class="form-group">
                 <label for="car-svc-details">Service Details</label>
@@ -157,6 +159,12 @@ window.CarModule = (function () {
     const today = new Date().toISOString().slice(0, 10);
     document.getElementById('car-date').value = today;
 
+    // Load saved fuel rate
+    const savedRate = localStorage.getItem(FUEL_RATE_KEY());
+    if (savedRate) {
+      document.getElementById('car-fuel-rate').value = savedRate;
+    }
+
     // Collapsible toggles
     setupToggle('fuel-toggle', 'fuel-section', 'fuel-toggle-icon');
     setupToggle('service-toggle', 'service-section', 'service-toggle-icon');
@@ -166,9 +174,14 @@ window.CarModule = (function () {
       submit();
     });
 
-    // Auto-calculate ₹/L
-    ['car-fuel-vol', 'car-fuel-cost'].forEach(function (id) {
-      document.getElementById(id).addEventListener('input', autoPricePerUnit);
+    // Auto-calculate: when volume changes, compute cost from rate
+    document.getElementById('car-fuel-vol').addEventListener('input', function () {
+      autoCalcFromVolume();
+    });
+
+    // Auto-calculate: when cost changes, compute volume from rate
+    document.getElementById('car-fuel-cost').addEventListener('input', function () {
+      autoCalcFromCost();
     });
 
     loadData();
@@ -183,11 +196,19 @@ window.CarModule = (function () {
     });
   }
 
-  function autoPricePerUnit() {
+  function autoCalcFromVolume() {
     const vol  = parseFloat(document.getElementById('car-fuel-vol').value)  || 0;
+    const rate = parseFloat(document.getElementById('car-fuel-rate').value) || 0;
+    if (vol > 0 && rate > 0) {
+      document.getElementById('car-fuel-cost').value = (vol * rate).toFixed(2);
+    }
+  }
+
+  function autoCalcFromCost() {
     const cost = parseFloat(document.getElementById('car-fuel-cost').value) || 0;
-    if (vol > 0 && cost > 0) {
-      document.getElementById('car-price-per-unit').value = (cost / vol).toFixed(2);
+    const rate = parseFloat(document.getElementById('car-fuel-rate').value) || 0;
+    if (cost > 0 && rate > 0) {
+      document.getElementById('car-fuel-vol').value = (cost / rate).toFixed(2);
     }
   }
 
@@ -195,9 +216,9 @@ window.CarModule = (function () {
   async function submit() {
     const date      = document.getElementById('car-date').value;
     const odometer  = parseFloat(document.getElementById('car-odometer').value) || 0;
-    const fuelVol   = parseFloat(document.getElementById('car-fuel-vol').value)   || 0;
-    const fuelCost  = parseFloat(document.getElementById('car-fuel-cost').value)  || 0;
-    const ppu       = parseFloat(document.getElementById('car-price-per-unit').value) || 0;
+    const fuelRate  = parseFloat(document.getElementById('car-fuel-rate').value) || 0;
+    let   fuelVol   = parseFloat(document.getElementById('car-fuel-vol').value)   || 0;
+    let   fuelCost  = parseFloat(document.getElementById('car-fuel-cost').value)  || 0;
     const fullTank  = document.getElementById('car-full-tank').checked;
     const station   = document.getElementById('car-station').value.trim();
     const svcCost   = parseFloat(document.getElementById('car-svc-cost').value)    || 0;
@@ -222,12 +243,25 @@ window.CarModule = (function () {
       showAlert('car-alert', `Odometer (${odometer}) cannot be less than last entry (${lastOdo}).`, 'error');
       return;
     }
-    // Safe: fuelVol and fuelCost are derived from parseFloat() on <input type="number">
-    // so they are exact 0 or a user-entered value — strict equality is intentional here.
-    if ((fuelVol > 0 && fuelCost === 0) || (fuelVol === 0 && fuelCost > 0)) {
-      showAlert('car-alert', 'If entering fuel, both volume and cost are required.', 'error');
+
+    // If either volume or cost is provided, compute the other from rate
+    if ((fuelVol > 0 || fuelCost > 0) && fuelRate <= 0) {
+      showAlert('car-alert', 'Fuel rate is required when entering fuel data.', 'error');
       return;
     }
+
+    if (fuelVol > 0 && fuelCost === 0 && fuelRate > 0) {
+      fuelCost = parseFloat((fuelVol * fuelRate).toFixed(2));
+    } else if (fuelCost > 0 && fuelVol === 0 && fuelRate > 0) {
+      fuelVol = parseFloat((fuelCost / fuelRate).toFixed(2));
+    }
+
+    // Save the fuel rate for reuse
+    if (fuelRate > 0) {
+      localStorage.setItem(FUEL_RATE_KEY(), String(fuelRate));
+    }
+
+    const ppu = fuelRate > 0 ? fuelRate : (fuelVol > 0 ? parseFloat(DIV(fuelCost, fuelVol).toFixed(2)) : 0);
 
     clearAlert('car-alert');
 
@@ -248,13 +282,12 @@ window.CarModule = (function () {
 
     showAlert('car-alert', 'Entry saved! 🚗', 'success');
 
-    // Reset optional fields
-    document.getElementById('car-fuel-vol').value   = 0;
-    document.getElementById('car-fuel-cost').value  = 0;
-    document.getElementById('car-price-per-unit').value = 0;
+    // Reset optional fields (keep fuel rate)
+    document.getElementById('car-fuel-vol').value   = '';
+    document.getElementById('car-fuel-cost').value  = '';
     document.getElementById('car-full-tank').checked    = false;
     document.getElementById('car-station').value    = '';
-    document.getElementById('car-svc-cost').value   = 0;
+    document.getElementById('car-svc-cost').value   = '';
     document.getElementById('car-svc-details').value = '';
     document.getElementById('car-mode').value       = '';
     document.getElementById('car-notes').value      = '';

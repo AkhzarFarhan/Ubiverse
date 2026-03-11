@@ -30,13 +30,13 @@ window.SalahModule = (function () {
           <div id="salah-alert"></div>
           <p class="text-sm text-muted mb-sm">
             Enter the number of <strong>rakah you prayed today</strong> per prayer.
-            Leave 0 if unchanged.
+            Leave blank if unchanged.
           </p>
           <div class="form-row">
             ${PRAYERS.map(function (p, i) {
               return `<div class="form-group">
                 <label for="salah-input-${i}">${p} (Farz: ${FARZ_RAKA[i]})</label>
-                <input type="number" id="salah-input-${i}" value="0" min="0" />
+                <input type="number" id="salah-input-${i}" placeholder="0" min="0" />
               </div>`;
             }).join('')}
           </div>
@@ -115,7 +115,7 @@ window.SalahModule = (function () {
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
     PRAYERS.forEach(function (_, i) {
-      document.getElementById('salah-input-' + i).value = 0;
+      document.getElementById('salah-input-' + i).value = '';
     });
     document.getElementById('salah-note').value = '';
 

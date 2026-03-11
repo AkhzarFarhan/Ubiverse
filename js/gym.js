@@ -7,6 +7,8 @@ window.GymModule = (function () {
   const STORAGE_KEY   = () => 'gym_' + window.AppState.username;
   const FIREBASE_PATH = () => 'gym/' + window.AppState.username;
 
+  const MUSCLE_GROUPS = ['Abs', 'Chest', 'Back', 'Biceps', 'Triceps', 'Shoulder', 'Leg'];
+
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
     document.getElementById('app').innerHTML = `
@@ -20,8 +22,12 @@ window.GymModule = (function () {
           <div class="card-title">Log Workout</div>
           <div id="gym-alert"></div>
           <div class="form-group">
-            <label for="gym-message">Workout Details</label>
-            <textarea id="gym-message" placeholder="e.g. Chest day: bench press 4×10, incline 3×12…" rows="3"></textarea>
+            <label>Muscle Groups</label>
+            <div class="gym-muscle-pills">
+              ${MUSCLE_GROUPS.map(function (g) {
+                return '<button type="button" class="muscle-pill" data-muscle="' + g + '">' + g + '</button>';
+              }).join('')}
+            </div>
           </div>
           <button type="submit" class="btn btn-primary">Save Workout</button>
         </form>
@@ -33,6 +39,13 @@ window.GymModule = (function () {
       </div>
     `;
 
+    // Muscle pill toggles
+    document.querySelectorAll('.muscle-pill').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        btn.classList.toggle('active');
+      });
+    });
+
     document.getElementById('gym-form').addEventListener('submit', function (e) {
       e.preventDefault();
       submit();
@@ -43,17 +56,20 @@ window.GymModule = (function () {
 
   /* ── Submit ───────────────────────────────────────────────── */
   async function submit() {
-    const message = document.getElementById('gym-message').value.trim();
+    const selected = [];
+    document.querySelectorAll('.muscle-pill.active').forEach(function (btn) {
+      selected.push(btn.getAttribute('data-muscle'));
+    });
 
-    if (!message) {
-      showAlert('gym-alert', 'Workout details cannot be empty.', 'error');
+    if (selected.length === 0) {
+      showAlert('gym-alert', 'Select at least one muscle group.', 'error');
       return;
     }
 
     clearAlert('gym-alert');
 
     const entry = {
-      message,
+      message: selected.join(', '),
       timestamp: getKolkataTimestamp(),
     };
 
@@ -66,7 +82,7 @@ window.GymModule = (function () {
     arr.unshift(entry);
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
-    document.getElementById('gym-message').value = '';
+    document.querySelectorAll('.muscle-pill').forEach(function (b) { b.classList.remove('active'); });
     showAlert('gym-alert', 'Workout logged successfully! 💪', 'success');
     renderList(arr);
   }

@@ -735,6 +735,94 @@ tbody tr:hover { background: #fafbff; }
   color: #fff;
 }
 
+/* ── Daily: rating buttons ─────────────────────────────────── */
+.daily-rating-row {
+  display: flex;
+  gap: .5rem;
+}
+.daily-rating-btn {
+  flex: 1;
+  padding: .6rem 1rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+.daily-rating-good.active {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #86efac;
+}
+.daily-rating-bad.active {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+/* ── Gym: muscle group pills ───────────────────────────────── */
+.gym-muscle-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.muscle-pill {
+  padding: .4rem .75rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: .8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.muscle-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.muscle-pill.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* ── Texter: markdown rendering ────────────────────────────── */
+.texter-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.texter-code-block {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .75rem;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: .83rem;
+  line-height: 1.5;
+  margin: .5rem 0;
+  white-space: pre;
+}
+.texter-code-block code {
+  background: none;
+  padding: 0;
+  border: none;
+  font-size: inherit;
+}
+.texter-inline-code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: .1rem .35rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: .85em;
+}
+
 /* ── Tasbih ────────────────────────────────────────────────── */
 .tasbih-wrap {
   display: flex;

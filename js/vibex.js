@@ -134,6 +134,14 @@ window.VibexModule = (function () {
           '<h2>\uD83D\uDCAC Vibex</h2>' +
           '<p>Chat with other Ubiverse users</p>' +
         '</div>' +
+        '<div class="card vibex-new-chat-card">' +
+          '<div class="card-title">\u2709\uFE0F Start New Chat</div>' +
+          '<div class="vibex-new-chat-form">' +
+            '<input type="text" id="vibex-username-input" class="vibex-username-input" placeholder="Enter username\u2026" autocomplete="off" autocapitalize="none" />' +
+            '<button class="btn btn-primary" id="vibex-start-chat-btn">Chat</button>' +
+          '</div>' +
+          '<div id="vibex-new-chat-alert"></div>' +
+        '</div>' +
         '<div class="card vibex-contacts-card">' +
           '<div class="card-title">\uD83D\uDC65 Conversations</div>' +
           '<div id="vibex-contacts">' +
@@ -142,7 +150,36 @@ window.VibexModule = (function () {
         '</div>' +
       '</div>';
 
+    document.getElementById('vibex-start-chat-btn').addEventListener('click', startNewChat);
+    document.getElementById('vibex-username-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); startNewChat(); }
+    });
+
     loadContacts();
+  }
+
+  function startNewChat() {
+    var input = document.getElementById('vibex-username-input');
+    if (!input) return;
+    var target = input.value.trim().toLowerCase();
+
+    clearAlert('vibex-new-chat-alert');
+
+    if (!target) {
+      showAlert('vibex-new-chat-alert', 'Please enter a username.', 'warning');
+      return;
+    }
+    if (!sanitizeUsername(target)) {
+      showAlert('vibex-new-chat-alert', 'Username must be alphanumeric only.', 'error');
+      return;
+    }
+    if (target === window.AppState.username) {
+      showAlert('vibex-new-chat-alert', 'You cannot chat with yourself.', 'warning');
+      return;
+    }
+
+    input.value = '';
+    openChat(target);
   }
 
   function loadContacts() {
@@ -167,7 +204,7 @@ window.VibexModule = (function () {
       container.innerHTML =
         '<div class="empty-state">' +
           '<div class="empty-icon">\uD83D\uDC65</div>' +
-          '<p>No other users yet. Share Ubiverse with friends to start chatting!</p>' +
+          '<p>No conversations yet. Enter a username above to start chatting!</p>' +
         '</div>';
       return;
     }

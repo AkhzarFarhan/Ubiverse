@@ -12,6 +12,7 @@
 | `salah` | [js/salah.js](js/salah.js) | `salah_<username>` | `salah/<username>` | Prayer debt tracking + Chart.js visuals |
 | `ledger` | [js/ledger.js](js/ledger.js) | `ledger_<username>` | `LedgerV2/<username>` | Fast transaction entry, balances, monthly summary |
 | `car` | [js/car.js](js/car.js) | `car_<username>` | `car/<username>` | Fuel/service records and calculations |
+| `vibex` | [js/vibex.js](js/vibex.js) | none | `vibex/users/<username>`, `vibex/chats/<chatId>/messages` | Real-time chat between users |
 
 ## Shared module expectations
 - Each module renders into `#app`.
@@ -51,6 +52,16 @@
 ### Texter
 - Firebase path is `texter_v2/<username>` rather than `texter/<username>`
 - Preserve this path unless explicitly migrating stored data
+
+### Vibex
+- Real-time chat module using Firebase listeners (`on()`) rather than one-shot `once()`
+- User presence tracked via `vibex/users/<username>` with `online` flag and `lastSeen` timestamp
+- Uses Firebase `.info/connected` and `onDisconnect()` for automatic offline detection
+- Chat ID between two users is their sorted usernames joined by underscore (e.g. `alice_bob`)
+- Messages stored at `vibex/chats/<chatId>/messages/<pushId>`
+- Each message has `delivered` and `read` boolean flags for receipt tracking
+- Supports markdown text (bold, italic, inline code, fenced code blocks)
+- No localStorage caching — all data is real-time from Firebase
 
 ## When adding a new module
 1. Create `js/<module>.js` with a `window.<Name>Module` IIFE.

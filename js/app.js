@@ -12,6 +12,7 @@
     { key: 'salah',  icon: '🕌', label: 'Salah' },
     { key: 'ledger', icon: '💰', label: 'Ledger' },
     { key: 'car',    icon: '🚗', label: 'Car' },
+    { key: 'vibex',  icon: '💬', label: 'Vibex' },
   ];
 
   const ROUTES = {
@@ -23,6 +24,7 @@
     salah:  () => window.SalahModule.render(),
     ledger: () => window.LedgerModule.render(),
     car:    () => window.CarModule.render(),
+    vibex:  () => window.VibexModule.render(),
   };
 
   /* ── Home (icon grid) ─────────────────────────────────────── */

@@ -75,7 +75,10 @@ window.VibexModule = (function () {
     if (diff < 60000)    return 'just now';
     if (diff < 3600000)  return Math.floor(diff / 60000) + 'm ago';
     if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
-    return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    var d = new Date(ts);
+    var opts = { day: '2-digit', month: 'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
+    return d.toLocaleDateString('en-IN', opts);
   }
 
   /* ── Presence ─────────────────────────────────────────────── */
@@ -109,7 +112,7 @@ window.VibexModule = (function () {
   function cleanup() {
     if (messageListener)  { messageListener.off();  messageListener  = null; }
     if (usersListener)    { usersListener.off();    usersListener    = null; }
-    if (presenceListener) { presenceListener.off('value'); presenceListener = null; }
+    if (presenceListener) { presenceListener.off(); presenceListener = null; }
     currentChatUser = null;
   }
 
@@ -349,7 +352,7 @@ window.VibexModule = (function () {
       }
 
       var time = date.toLocaleTimeString('en-IN', {
-        hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata'
+        hour: '2-digit', minute: '2-digit', hour12: true
       });
 
       var ticks = '';
@@ -385,7 +388,7 @@ window.VibexModule = (function () {
       }
     });
     if (Object.keys(updates).length) {
-      try { await db.ref().update(updates); } catch (e) { /* silent */ }
+      try { await db.ref().update(updates); } catch (e) { console.warn('Vibex: mark delivered failed', e); }
     }
   }
 
@@ -410,7 +413,7 @@ window.VibexModule = (function () {
       if (Object.keys(updates).length) {
         await db.ref().update(updates);
       }
-    } catch (e) { /* silent */ }
+    } catch (e) { console.warn('Vibex: mark read failed', e); }
   }
 
   /* ── User status listener (chat header) ────────────────────── */

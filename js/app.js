@@ -171,9 +171,18 @@
   overlay.addEventListener('click', closeSidebar);
 
   /* ── Boot ─────────────────────────────────────────────────── */
-  // Auth state is restored by onAuthStateChanged — no need for manual session check.
-  // Show login until Firebase resolves the auth state.
-  showLogin();
+  // If a previous session is cached in localStorage, show the app shell
+  // immediately to avoid the login-screen flash while Firebase resolves
+  // the auth state. We only toggle visibility here (not calling showApp())
+  // because AppState is not yet populated — navigate() and the header
+  // username are set by onAuthStateChanged once it confirms the session.
+  // If the session has expired, onAuthStateChanged will call showLogin().
+  if (localStorage.getItem('ubiverse_username')) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('layout').classList.remove('hidden');
+  } else {
+    showLogin();
+  }
 
 }());
 

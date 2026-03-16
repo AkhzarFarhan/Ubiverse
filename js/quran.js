@@ -127,6 +127,8 @@ window.QuranModule = (function () {
   ];
 
   /* ── State ───────────────────────────────────────────────────── */
+  var SURAH_AL_FATIHAH = 1;   // Bismillah is the first ayah itself
+  var SURAH_AT_TAWBAH  = 9;   // No bismillah at the start
   let _xmlDoc     = null;   // parsed XML document
   let _progress   = {};     // { surahIndex: { lastAyah, completed, timestamp } }
   let _view       = 'index'; // 'index' | 'reader'
@@ -134,8 +136,8 @@ window.QuranModule = (function () {
 
   /* ── Arabic numeral converter ────────────────────────────────── */
   function toArabicNum(n) {
-    var digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return String(n).replace(/[0-9]/g, function (d) { return digits[+d]; });
+    var arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return String(n).replace(/[0-9]/g, function (d) { return arabicDigits[+d]; });
   }
 
   /* ── XML loading ─────────────────────────────────────────────── */
@@ -149,9 +151,9 @@ window.QuranModule = (function () {
   }
 
   function getSurahAyahs(doc, surahIndex) {
-    var sura = doc.querySelector('sura[index="' + surahIndex + '"]');
-    if (!sura) return [];
-    var ayaNodes = sura.querySelectorAll('aya');
+    var surahEl = doc.querySelector('sura[index="' + surahIndex + '"]');
+    if (!surahEl) return [];
+    var ayaNodes = surahEl.querySelectorAll('aya');
     var ayahs = [];
     for (var i = 0; i < ayaNodes.length; i++) {
       ayahs.push({
@@ -341,7 +343,7 @@ window.QuranModule = (function () {
     // Surah 1 (Al-Fatihah): bismillah is the first ayah itself
     // Surah 9 (At-Tawbah): no bismillah
     // All others: show bismillah from the first ayah's bismillah attribute
-    if (surahIndex !== 1 && surahIndex !== 9 && ayahs[0] && ayahs[0].bismillah) {
+    if (surahIndex !== SURAH_AL_FATIHAH && surahIndex !== SURAH_AT_TAWBAH && ayahs[0] && ayahs[0].bismillah) {
       html += '<div class="quran-bismillah">' + ayahs[0].bismillah + '</div>';
     }
 

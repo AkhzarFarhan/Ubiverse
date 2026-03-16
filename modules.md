@@ -67,7 +67,7 @@
 ### Al-Qur'an
 - Loads Tanzil Simple Plain XML (`assets/quran-simple-plain.xml`) via fetch + DOMParser
 - Displays surah index with Arabic names, English names, ayah counts, and reading progress
-- Reader view uses Amiri Quran font (Google Fonts) with warm sepia reading surface
+- Reader view prioritizes Al-Qalam Majeed, PDMS Saleem Quran Font, Noorehuda, and Mehr Naskh with Amiri Quran fallback on unsupported devices
 - Preserves all Quranic marks (waqf/stop signs, diacritics) as present in source XML
 - Tap any ayah to bookmark progress; "Mark Surah as Read" for full completion
 - Progress stored per surah: `{ lastAyah, completed, timestamp }` at `quran/<username>`

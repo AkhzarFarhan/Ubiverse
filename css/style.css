@@ -33,6 +33,7 @@
 
   --transition:           0.18s ease;
   --font:                 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-quran:           'Al-Qalam Majeed', 'PDMS Saleem Quran Font', 'Noorehuda', 'Mehr Naskh', 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
 }
 
 /* ── Reset & Base ──────────────────────────────────────────── */
@@ -1308,7 +1309,7 @@ tbody tr:hover { background: #fafbff; }
   padding: 2rem 1rem 1.2rem;
 }
 .quran-title {
-  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-family: var(--font-quran);
   font-size: 2.4rem;
   color: #1a5e3a;
   margin: 0 0 .2rem;
@@ -1399,7 +1400,7 @@ tbody tr:hover { background: #fafbff; }
   font-weight: 700;
   border-radius: 8px;
   transform: rotate(0deg);
-  font-family: 'Amiri Quran', 'Amiri', serif;
+  font-family: var(--font-quran);
 }
 
 /* Surah info */
@@ -1410,7 +1411,7 @@ tbody tr:hover { background: #fafbff; }
   min-width: 0;
 }
 .quran-surah-name-ar {
-  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-family: var(--font-quran);
   font-size: 1.25rem;
   color: var(--text);
   line-height: 1.5;
@@ -1482,7 +1483,7 @@ tbody tr:hover { background: #fafbff; }
   line-height: 1.3;
 }
 .quran-reader-surah-name {
-  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-family: var(--font-quran);
   font-size: 1.2rem;
   display: block;
 }
@@ -1498,7 +1499,7 @@ tbody tr:hover { background: #fafbff; }
 /* ── Bismillah ─────────────────────────────────────────────── */
 .quran-bismillah {
   text-align: center;
-  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-family: var(--font-quran);
   font-size: 1.6rem;
   color: #1a5e3a;
   padding: 1.4rem 1rem .8rem;
@@ -1509,7 +1510,7 @@ tbody tr:hover { background: #fafbff; }
 .quran-ayah-body {
   direction: rtl;
   text-align: justify;
-  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-family: var(--font-quran);
   font-size: 1.65rem;
   line-height: 2.8;
   color: #1e293b;
@@ -1550,7 +1551,7 @@ tbody tr:hover { background: #fafbff; }
   border-radius: 50%;
   margin: 0 .15rem;
   vertical-align: middle;
-  font-family: 'Amiri Quran', 'Amiri', serif;
+  font-family: var(--font-quran);
   line-height: 1;
 }
 
@@ -1613,7 +1614,7 @@ tbody tr:hover { background: #fafbff; }
   color: var(--text);
   cursor: pointer;
   transition: border-color .15s, background .15s;
-  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-family: var(--font-quran);
   line-height: 1.5;
   text-align: center;
 }

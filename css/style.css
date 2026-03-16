@@ -1290,3 +1290,364 @@ tbody tr:hover { background: #fafbff; }
   font-family: 'Consolas', 'Monaco', monospace;
   font-size: .82rem;
 }
+
+/* ============================================================
+   Al-Qur'an Module — beautiful reading experience
+   ============================================================ */
+
+/* ── Container ─────────────────────────────────────────────── */
+.quran-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+/* ── Header / Title ────────────────────────────────────────── */
+.quran-header {
+  text-align: center;
+  padding: 2rem 1rem 1.2rem;
+}
+.quran-title {
+  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-size: 2.4rem;
+  color: #1a5e3a;
+  margin: 0 0 .2rem;
+  line-height: 1.6;
+}
+.quran-subtitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d6a4f;
+  margin: 0 0 .4rem;
+  letter-spacing: .5px;
+}
+.quran-progress-summary {
+  font-size: .85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Search bar ────────────────────────────────────────────── */
+.quran-search-bar {
+  padding: 0 1rem .8rem;
+}
+.quran-search-input {
+  width: 100%;
+  padding: .65rem 1rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: var(--radius);
+  font-size: .95rem;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+  box-sizing: border-box;
+}
+.quran-search-input:focus {
+  border-color: #2d6a4f;
+  box-shadow: 0 0 0 3px rgba(45,106,79,.12);
+}
+
+/* ── Surah list cards ──────────────────────────────────────── */
+.quran-surah-list {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  padding: 0 1rem;
+}
+.quran-surah-card {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .75rem .9rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+  border-left: 3px solid transparent;
+}
+.quran-surah-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.quran-surah-card:active {
+  transform: scale(.99);
+}
+.quran-surah-card.completed {
+  border-left-color: #2d6a4f;
+  background: linear-gradient(135deg, #f0fdf4 0%, var(--surface) 100%);
+}
+.quran-surah-card.in-progress {
+  border-left-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, var(--surface) 100%);
+}
+
+/* Surah number diamond */
+.quran-surah-num {
+  flex-shrink: 0;
+}
+.quran-surah-diamond {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 700;
+  border-radius: 8px;
+  transform: rotate(0deg);
+  font-family: 'Amiri Quran', 'Amiri', serif;
+}
+
+/* Surah info */
+.quran-surah-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.quran-surah-name-ar {
+  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-size: 1.25rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+.quran-surah-name-en {
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* Meta (ayahs count + status) */
+.quran-surah-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.quran-surah-ayahs {
+  font-size: .72rem;
+  color: var(--text-light);
+}
+.quran-surah-status {
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.quran-done {
+  color: #fff;
+  background: #2d6a4f;
+}
+.quran-partial {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+/* ── Reader navigation bar ─────────────────────────────────── */
+.quran-reader-nav {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .6rem .8rem;
+  background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+  border-radius: var(--radius);
+  margin: .5rem .5rem 0;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.quran-nav-btn {
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: .4rem .7rem;
+  font-size: .82rem;
+  cursor: pointer;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.quran-nav-btn:hover {
+  background: rgba(255,255,255,.3);
+}
+.quran-reader-nav-title {
+  flex: 1;
+  text-align: center;
+  line-height: 1.3;
+}
+.quran-reader-surah-name {
+  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-size: 1.2rem;
+  display: block;
+}
+.quran-reader-surah-ename {
+  font-size: .7rem;
+  opacity: .85;
+}
+.quran-nav-arrows {
+  display: flex;
+  gap: .3rem;
+}
+
+/* ── Bismillah ─────────────────────────────────────────────── */
+.quran-bismillah {
+  text-align: center;
+  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-size: 1.6rem;
+  color: #1a5e3a;
+  padding: 1.4rem 1rem .8rem;
+  line-height: 2;
+}
+
+/* ── Ayah body — warm, eye-friendly reading surface ────────── */
+.quran-ayah-body {
+  direction: rtl;
+  text-align: justify;
+  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  font-size: 1.65rem;
+  line-height: 2.8;
+  color: #1e293b;
+  background: linear-gradient(180deg, #fefcf3 0%, #fdf8ee 50%, #fefcf3 100%);
+  padding: 1.2rem 1.4rem 1.6rem;
+  border-radius: var(--radius-lg);
+  margin: 0 .5rem;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,.04);
+  word-spacing: 4px;
+  letter-spacing: 0;
+}
+
+/* Individual ayah — tap to bookmark */
+.quran-ayah {
+  cursor: pointer;
+  padding: 2px 1px;
+  border-radius: 4px;
+  transition: background .2s;
+}
+.quran-ayah:hover {
+  background: rgba(45,106,79,.07);
+}
+.quran-ayah-read {
+  background: rgba(45,106,79,.08);
+}
+
+/* Ayah number ornament */
+.quran-ayah-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  font-size: .85rem;
+  color: #2d6a4f;
+  background: rgba(45,106,79,.08);
+  border: 1.5px solid rgba(45,106,79,.2);
+  border-radius: 50%;
+  margin: 0 .15rem;
+  vertical-align: middle;
+  font-family: 'Amiri Quran', 'Amiri', serif;
+  line-height: 1;
+}
+
+/* ── Reader controls / bookmark bar ────────────────────────── */
+.quran-reader-controls {
+  padding: 1rem .8rem;
+}
+.quran-bookmark-bar {
+  text-align: center;
+  margin-bottom: .8rem;
+}
+.quran-bookmark-info {
+  font-size: .82rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  padding: .35rem .8rem;
+  border-radius: var(--radius-sm);
+}
+.quran-bookmark-done {
+  color: #fff;
+  background: #2d6a4f;
+}
+.quran-reader-actions {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.quran-action-btn {
+  border: none;
+  border-radius: var(--radius);
+  padding: .6rem 1.6rem;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.quran-mark-btn {
+  background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+  color: #fff;
+}
+.quran-mark-btn:hover {
+  background: linear-gradient(135deg, #1a5e3a 0%, #2d6a4f 100%);
+}
+.quran-mark-btn:active {
+  transform: scale(.97);
+}
+
+/* ── Pager (prev/next at bottom) ───────────────────────────── */
+.quran-reader-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+}
+.quran-pager-btn {
+  flex: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: .55rem .6rem;
+  font-size: .78rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  font-family: 'Amiri Quran', 'Amiri', 'Traditional Arabic', serif;
+  line-height: 1.5;
+  text-align: center;
+}
+.quran-pager-btn:hover {
+  border-color: #2d6a4f;
+  background: #f0fdf4;
+}
+
+/* ── Loading state ─────────────────────────────────────────── */
+.quran-reader-loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+/* ── Responsive tweaks ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .quran-ayah-body {
+    font-size: 1.4rem;
+    line-height: 2.5;
+    padding: 1rem;
+    margin: 0 .3rem;
+  }
+  .quran-bismillah {
+    font-size: 1.35rem;
+  }
+  .quran-title {
+    font-size: 2rem;
+  }
+  .quran-reader-nav {
+    margin: .3rem;
+    padding: .5rem .6rem;
+  }
+  .quran-reader-surah-name {
+    font-size: 1rem;
+  }
+}

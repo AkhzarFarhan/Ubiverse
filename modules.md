@@ -13,6 +13,7 @@
 | `ledger` | [js/ledger.js](js/ledger.js) | `ledger_<username>` | `LedgerV2/<username>` | Fast transaction entry, balances, monthly summary |
 | `car` | [js/car.js](js/car.js) | `car_<username>` | `car/<username>` | Fuel/service records and calculations |
 | `vibex` | [js/vibex.js](js/vibex.js) | none | `vibex/users/<username>`, `vibex/chats/<chatId>/messages` | Real-time chat between users |
+| `quran` | [js/quran.js](js/quran.js) | `quran_<username>` | `quran/<username>` | Qur'an reader with per-surah reading progress |
 
 ## Shared module expectations
 - Each module renders into `#app`.
@@ -62,6 +63,15 @@
 - Each message has `delivered` and `read` boolean flags for receipt tracking
 - Supports markdown text (bold, italic, inline code, fenced code blocks)
 - No localStorage caching — all data is real-time from Firebase
+
+### Al-Qur'an
+- Loads Tanzil Simple Plain XML (`assets/quran-simple-plain.xml`) via fetch + DOMParser
+- Displays surah index with Arabic names, English names, ayah counts, and reading progress
+- Reader view uses Amiri Quran font (Google Fonts) with warm sepia reading surface
+- Preserves all Quranic marks (waqf/stop signs, diacritics) as present in source XML
+- Tap any ayah to bookmark progress; "Mark Surah as Read" for full completion
+- Progress stored per surah: `{ lastAyah, completed, timestamp }` at `quran/<username>`
+- Surah search by Arabic name, English name, or number
 
 ## When adding a new module
 1. Create `js/<module>.js` with a `window.<Name>Module` IIFE.

@@ -23,7 +23,10 @@ window.TexterModule = (function () {
             <label for="texter-note">Note</label>
             <textarea id="texter-note" placeholder="Type your note here…" rows="4"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">Save Note</button>
+          <div class="texter-actions">
+            <button type="submit" class="btn btn-primary">Save Note</button>
+            <button type="button" id="texter-share-btn" class="btn btn-secondary">Share</button>
+          </div>
         </form>
 
         <div class="card">
@@ -37,6 +40,7 @@ window.TexterModule = (function () {
       e.preventDefault();
       submit();
     });
+    document.getElementById('texter-share-btn').addEventListener('click', shareNote);
 
     loadData();
   }
@@ -63,6 +67,58 @@ window.TexterModule = (function () {
 
     document.getElementById('texter-note').value = '';
     showAlert('texter-alert', 'Note saved!', 'success');
+    renderList(arr);
+  }
+
+  async function shareNote() {
+    clearAlert('texter-alert');
+    const noteInput = document.getElementById('texter-note');
+    const note = noteInput.value.trim();
+    if (!note) {
+      showAlert('texter-alert', 'Please enter text before sharing.', 'warning');
+      return;
+    }
+
+    const targetUsernameRaw = window.prompt('Enter username (without @gmail.com) to share with:');
+    const targetUsername = (targetUsernameRaw || '').trim().toLowerCase();
+    if (!targetUsername) {
+      showAlert('texter-alert', 'Share cancelled. Username is required.', 'warning');
+      return;
+    }
+    if (targetUsername.includes('@')) {
+      showAlert('texter-alert', 'Please enter only the username part, without @gmail.com.', 'warning');
+      return;
+    }
+    // Username is derived from Google email prefix in app.js.
+    if (!/^[a-z0-9._-]+$/.test(targetUsername)) {
+      showAlert('texter-alert', 'Username can only contain letters, numbers, dots, underscores, and hyphens.', 'warning');
+      return;
+    }
+    if (targetUsername === window.AppState.username) {
+      showAlert('texter-alert', 'Enter another username to share this note.', 'warning');
+      return;
+    }
+
+    const timestamp = getKolkataTimestamp();
+    const sharedEntry = { note, timestamp, sharedBy: window.AppState.username };
+    const ownerEntry = sharedEntry;
+
+    try {
+      await Promise.all([
+        firebasePost(FIREBASE_PATH(), ownerEntry),
+        firebasePost('texter_v2/' + targetUsername, sharedEntry)
+      ]);
+    } catch (e) {
+      console.warn('Share failed:', e);
+      showAlert('texter-alert', 'Could not share note right now. Please try again.', 'error');
+      return;
+    }
+
+    const arr = JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
+    arr.unshift(ownerEntry);
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
+    noteInput.value = '';
+    showAlert('texter-alert', `Note shared with @${targetUsername} and saved.`, 'success');
     renderList(arr);
   }
 

@@ -802,6 +802,11 @@ tbody tr:hover { background: #fafbff; }
 }
 
 /* ── Texter: markdown rendering ────────────────────────────── */
+.texter-actions {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
 .texter-content {
   white-space: pre-wrap;
   word-wrap: break-word;

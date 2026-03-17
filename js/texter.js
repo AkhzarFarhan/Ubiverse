@@ -255,6 +255,8 @@ window.TexterModule = (function () {
     textArea.value = text;
     textArea.style.position = 'fixed';
     textArea.style.opacity = '0';
+    textArea.style.pointerEvents = 'none';
+    textArea.setAttribute('readonly', 'true');
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();

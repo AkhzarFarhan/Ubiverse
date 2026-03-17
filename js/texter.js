@@ -178,7 +178,7 @@ window.TexterModule = (function () {
             <span class="entry-time">🕐 ${e.timestamp || ''}</span>
             <button type="button" class="btn btn-secondary btn-sm texter-copy-btn texter-copy-note-btn" data-index="${i}">Copy</button>
           </div>
-          <div class="entry-message texter-content">${renderMarkdown(e.note)}</div>
+          <div class="entry-message texter-content">${renderNoteText(e.note)}</div>
         </div>`;
       }).join('') +
     `</div>`;
@@ -200,7 +200,7 @@ window.TexterModule = (function () {
   }
 
   /* ── Note text renderer (plain text only) ───────────────── */
-  function renderMarkdown(str) {
+  function renderNoteText(str) {
     return escapeHtml(str);
   }
 

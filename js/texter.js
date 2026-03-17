@@ -31,7 +31,7 @@ window.TexterModule = (function () {
         </form>
 
         <div class="card">
-          <div class="card-title">📋 All Notes <button type="button" id="texter-copy-thread-btn" class="btn btn-secondary btn-sm texter-copy-btn">Copy Thread</button></div>
+          <div class="card-title">📋 All Notes</div>
           <div id="texter-list"><p class="text-muted text-sm text-center">Loading…</p></div>
         </div>
       </div>
@@ -42,7 +42,11 @@ window.TexterModule = (function () {
       submit();
     });
     document.getElementById('texter-share-btn').addEventListener('click', shareNote);
-    document.getElementById('texter-copy-thread-btn').addEventListener('click', copyThread);
+    document.getElementById('texter-list').addEventListener('click', function (event) {
+      const btn = event.target.closest('.texter-copy-note-btn');
+      if (!btn) return;
+      copyNoteByIndex(btn.dataset.index);
+    });
 
     loadData();
   }
@@ -130,25 +134,25 @@ window.TexterModule = (function () {
     renderList(arr);
   }
 
-  async function copyThread() {
+  async function copyNoteByIndex(index) {
     clearAlert('texter-alert');
+    const noteIndex = Number(index);
     if (!currentEntries.length) {
       showAlert('texter-alert', 'No notes to copy yet.', 'warning');
       return;
     }
-
-    const threadText = currentEntries.map(function (entry, index) {
-      const note = entry.note || '(empty note)';
-      const timestamp = entry.timestamp || '';
-      return '#' + (currentEntries.length - index) + ' [' + timestamp + ']\n' + note;
-    }).join('\n\n---\n\n');
+    if (!Number.isInteger(noteIndex) || noteIndex < 0 || noteIndex >= currentEntries.length) {
+      showAlert('texter-alert', 'Invalid note selection.', 'warning');
+      return;
+    }
+    const noteText = currentEntries[noteIndex].note || '(empty note)';
 
     try {
-      await copyTextToClipboard(threadText);
-      showAlert('texter-alert', 'Thread copied to clipboard!', 'success');
+      await copyTextToClipboard(noteText);
+      showAlert('texter-alert', 'Note copied to clipboard!', 'success');
     } catch (e) {
       console.warn('Copy failed:', e);
-      showAlert('texter-alert', 'Could not copy thread. Please try again.', 'error');
+      showAlert('texter-alert', 'Could not copy note. Please try again.', 'error');
     }
   }
 
@@ -172,6 +176,7 @@ window.TexterModule = (function () {
           <div class="entry-meta">
             <span class="badge badge-neutral">#${currentEntries.length - i}</span>
             <span class="entry-time">🕐 ${e.timestamp || ''}</span>
+            <button type="button" class="btn btn-secondary btn-sm texter-copy-btn texter-copy-note-btn" data-index="${i}">Copy</button>
           </div>
           <div class="entry-message texter-content">${renderMarkdown(e.note)}</div>
         </div>`;
@@ -218,10 +223,10 @@ window.TexterModule = (function () {
     text = escapeHtml(text);
 
     // Bold **text**
-    text = text.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/(^|[^\w*])\*\*([^*]+?)\*\*(?=[^\w*]|$)/g, '$1<strong>$2</strong>');
 
     // Italic *text*
-    text = text.replace(/\*([\s\S]+?)\*/g, '<em>$1</em>');
+    text = text.replace(/(^|[^\w*])\*([^*\n]+?)\*(?=[^\w*]|$)/g, '$1<em>$2</em>');
 
     // Convert newlines to <br>
     text = text.replace(/\n/g, '<br>');

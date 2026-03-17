@@ -6,6 +6,7 @@ window.TexterModule = (function () {
 
   const STORAGE_KEY   = () => 'texter_' + window.AppState.username;
   const FIREBASE_PATH = () => 'texter_v2/' + window.AppState.username;
+  let currentEntries = [];
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -30,7 +31,7 @@ window.TexterModule = (function () {
         </form>
 
         <div class="card">
-          <div class="card-title">📋 All Notes</div>
+          <div class="card-title">📋 All Notes <button type="button" id="texter-copy-thread-btn" class="btn btn-secondary btn-sm texter-copy-btn">Copy Thread</button></div>
           <div id="texter-list"><p class="text-muted text-sm text-center">Loading…</p></div>
         </div>
       </div>
@@ -41,6 +42,7 @@ window.TexterModule = (function () {
       submit();
     });
     document.getElementById('texter-share-btn').addEventListener('click', shareNote);
+    document.getElementById('texter-copy-thread-btn').addEventListener('click', copyThread);
 
     loadData();
   }
@@ -128,12 +130,35 @@ window.TexterModule = (function () {
     renderList(arr);
   }
 
+  async function copyThread() {
+    clearAlert('texter-alert');
+    if (!currentEntries.length) {
+      showAlert('texter-alert', 'No notes to copy yet.', 'warning');
+      return;
+    }
+
+    const threadText = currentEntries.map(function (entry, index) {
+      const note = entry.note || '(empty note)';
+      const timestamp = entry.timestamp || '';
+      return '#' + (currentEntries.length - index) + ' [' + timestamp + ']\n' + note;
+    }).join('\n\n---\n\n');
+
+    try {
+      await copyTextToClipboard(threadText);
+      showAlert('texter-alert', 'Thread copied to clipboard!', 'success');
+    } catch (e) {
+      console.warn('Copy failed:', e);
+      showAlert('texter-alert', 'Could not copy thread. Please try again.', 'error');
+    }
+  }
+
   /* ── Render list ──────────────────────────────────────────── */
   function renderList(arr) {
     const container = document.getElementById('texter-list');
     if (!container) return;
+    currentEntries = Array.isArray(arr) ? arr : [];
 
-    if (arr.length === 0) {
+    if (currentEntries.length === 0) {
       container.innerHTML = `<div class="empty-state">
         <div class="empty-icon">📝</div>
         <p>No notes yet. Write your first one above!</p>
@@ -142,10 +167,10 @@ window.TexterModule = (function () {
     }
 
     container.innerHTML = `<div class="entry-list">` +
-      arr.map(function (e, i) {
+      currentEntries.map(function (e, i) {
         return `<div class="entry-card">
           <div class="entry-meta">
-            <span class="badge badge-neutral">#${arr.length - i}</span>
+            <span class="badge badge-neutral">#${currentEntries.length - i}</span>
             <span class="entry-time">🕐 ${e.timestamp || ''}</span>
           </div>
           <div class="entry-message texter-content">${renderMarkdown(e.note)}</div>
@@ -218,6 +243,26 @@ window.TexterModule = (function () {
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    textArea.style.pointerEvents = 'none';
+    textArea.setAttribute('readonly', 'true');
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const copied = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    if (!copied) throw new Error('execCommand copy failed');
   }
 
   return { render, submit, loadData };

@@ -53,12 +53,12 @@ window.TexterModule = (function () {
 
   /* ── Submit ───────────────────────────────────────────────── */
   async function submit() {
-    const note = document.getElementById('texter-note').value.trim();
+    const note = document.getElementById('texter-note').value;
 
     clearAlert('texter-alert');
 
     const entry = {
-      note: note || '(empty note)',
+      note: note === '' ? '(empty note)' : note,
       timestamp: getKolkataTimestamp(),
     };
 
@@ -79,8 +79,8 @@ window.TexterModule = (function () {
   async function shareNote() {
     clearAlert('texter-alert');
     const noteInput = document.getElementById('texter-note');
-    const note = noteInput.value.trim();
-    if (!note) {
+    const note = noteInput.value;
+    if (!note.trim()) {
       showAlert('texter-alert', 'Please enter text before sharing.', 'warning');
       return;
     }
@@ -199,47 +199,9 @@ window.TexterModule = (function () {
     }
   }
 
-  /* ── Simple markdown renderer ────────────────────────────── */
+  /* ── Note text renderer (plain text only) ───────────────── */
   function renderMarkdown(str) {
-    var text = String(str);
-
-    // Extract fenced code blocks first (```...```)
-    var codeBlocks = [];
-    text = text.replace(/```([\s\S]*?)```/g, function (_, code) {
-      var idx = codeBlocks.length;
-      codeBlocks.push('<pre class="texter-code-block"><code>' + escapeHtml(code.replace(/^\n/, '')) + '</code></pre>');
-      return '\x00CODE' + idx + '\x00';
-    });
-
-    // Extract inline code (`...`)
-    var inlineCodes = [];
-    text = text.replace(/`([^`\n]+)`/g, function (_, code) {
-      var idx = inlineCodes.length;
-      inlineCodes.push('<code class="texter-inline-code">' + escapeHtml(code) + '</code>');
-      return '\x00INLINE' + idx + '\x00';
-    });
-
-    // Escape remaining HTML
-    text = escapeHtml(text);
-
-    // Bold **text**
-    text = text.replace(/(^|[^\w*])\*\*([^*]+?)\*\*(?=[^\w*]|$)/g, '$1<strong>$2</strong>');
-
-    // Italic *text*
-    text = text.replace(/(^|[^\w*])\*([^*\n]+?)\*(?=[^\w*]|$)/g, '$1<em>$2</em>');
-
-    // Convert newlines to <br>
-    text = text.replace(/\n/g, '<br>');
-
-    // Restore code blocks and inline codes
-    text = text.replace(/\x00CODE(\d+)\x00/g, function (_, idx) {
-      return codeBlocks[parseInt(idx, 10)];
-    });
-    text = text.replace(/\x00INLINE(\d+)\x00/g, function (_, idx) {
-      return inlineCodes[parseInt(idx, 10)];
-    });
-
-    return text;
+    return escapeHtml(str);
   }
 
   function escapeHtml(str) {

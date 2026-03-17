@@ -137,8 +137,12 @@ window.TexterModule = (function () {
   async function copyNoteByIndex(index) {
     clearAlert('texter-alert');
     const noteIndex = Number(index);
-    if (!Number.isInteger(noteIndex) || noteIndex < 0 || noteIndex >= currentEntries.length) {
+    if (!currentEntries.length) {
       showAlert('texter-alert', 'No notes to copy yet.', 'warning');
+      return;
+    }
+    if (!Number.isInteger(noteIndex) || noteIndex < 0 || noteIndex >= currentEntries.length) {
+      showAlert('texter-alert', 'Invalid note selection.', 'warning');
       return;
     }
     const noteText = currentEntries[noteIndex].note || '(empty note)';

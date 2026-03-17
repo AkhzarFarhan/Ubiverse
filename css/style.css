@@ -807,6 +807,9 @@ tbody tr:hover { background: #fafbff; }
   gap: .5rem;
   flex-wrap: wrap;
 }
+.texter-copy-btn {
+  margin-left: auto;
+}
 .texter-content {
   white-space: pre-wrap;
   word-wrap: break-word;

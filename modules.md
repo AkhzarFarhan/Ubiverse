@@ -52,6 +52,7 @@
 
 ### Texter
 - Firebase path is `texter_v2/<username>` rather than `texter/<username>`
+- Supports sharing entered text to another Ubiverse username (Google email prefix only)
 - Preserve this path unless explicitly migrating stored data
 
 ### Vibex

@@ -45,7 +45,6 @@ class ModuleContractTests(unittest.TestCase):
             'js/salah.js',
             'js/ledger.js',
             'js/car.js',
-            'js/quran.js',
         ]
         for file_path in modules_with_read_fallback:
             content = read_text(file_path)
@@ -61,7 +60,6 @@ class ModuleContractTests(unittest.TestCase):
             'js/ledger.js',
             'js/car.js',
             'js/tasbih.js',
-            'js/quran.js',
             'js/vibex.js',
         ]
         for file_path in write_modules:

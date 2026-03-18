@@ -526,6 +526,8 @@ window.LedgerModule = (function () {
       });
 
       chartInstances.push(chart);
+    });
+  }
 
   /* ── Storage helpers ──────────────────────────────────────── */
   async function getEntries() {

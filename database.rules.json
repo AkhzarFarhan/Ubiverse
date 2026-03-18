@@ -42,6 +42,10 @@
         ".write": "auth != null"
       }
     },
+    "vibex": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
     "user_db": {
       ".read": "auth != null",
       ".write": "auth != null"

@@ -63,9 +63,9 @@ window.SalahModule = (function () {
             <table id="salah-table">
               <thead>
                 <tr>
-                  <th>Day</th>
+                  <th>Date</th>
                   <th>Note</th>
-                  ${PRAYERS.map(function (p) { return '<th>' + p + '</th>'; }).join('')}
+                  ${PRAYERS.map(function (p) { return '<th style="text-align: right;">' + p + '</th>'; }).join('')}
                 </tr>
               </thead>
               <tbody id="salah-tbody"><tr><td colspan="${PRAYERS.length + 2}" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
@@ -247,7 +247,8 @@ window.SalahModule = (function () {
     datasets.forEach(function (d, i) { d.borderColor = COLORS[i]; d.backgroundColor = COLORS[i]; });
 
     for (let idx = 1; idx < arr.length; idx++) {
-      labels.push('Entry ' + (idx + 1));
+      const labelStr = arr[idx].date ? formatDate(arr[idx].date) : 'Entry ' + (idx + 1);
+      labels.push(labelStr);
       PRAYERS.forEach(function (_, i) {
         datasets[i].data.push(arr[idx].prayers[i] - arr[idx - 1].prayers[i]);
       });
@@ -285,7 +286,7 @@ window.SalahModule = (function () {
         <td>${escapeHtml(e.note || '')}</td>
         ${e.prayers.map(function (v) {
           const cls = v < 0 ? 'td-negative' : v > 0 ? 'td-positive' : '';
-          return `<td class="td-num ${cls}">${v}</td>`;
+          return `<td class="td-num ${cls}" style="text-align: right; font-variant-numeric: tabular-nums;">${v}</td>`;
         }).join('')}
       </tr>`;
     }).join('');

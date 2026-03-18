@@ -43,11 +43,7 @@ window.SalahModule = (function () {
               </div>`;
             }).join('')}
           </div>
-          <div class="form-group">
-            <label for="salah-note">Update Note</label>
-            <input type="text" id="salah-note" placeholder="e.g. Made up 2 Zohar prayers" maxlength="200" />
-          </div>
-          <button type="submit" class="btn btn-primary">Save Update</button>
+          <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Save Update</button>
         </form>
 
         <div class="stat-cards" id="salah-stats"></div>
@@ -64,11 +60,10 @@ window.SalahModule = (function () {
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Note</th>
                   ${PRAYERS.map(function (p) { return '<th style="text-align: right;">' + p + '</th>'; }).join('')}
                 </tr>
               </thead>
-              <tbody id="salah-tbody"><tr><td colspan="${PRAYERS.length + 2}" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
+              <tbody id="salah-tbody"><tr><td colspan="${PRAYERS.length + 1}" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -100,7 +95,6 @@ window.SalahModule = (function () {
     const jamaatValues = PRAYERS.map(function (_, i) {
       return document.getElementById('salah-jamaat-' + i).checked;
     });
-    const note = document.getElementById('salah-note').value.trim();
 
     const arr = await getEntries();
     const today = getKolkataDate();
@@ -129,7 +123,6 @@ window.SalahModule = (function () {
 
     const entry = {
       prayers:   updated,
-      note:      note || '',
       timestamp: getKolkataTimestamp(),
       date:      today,
     };
@@ -146,7 +139,6 @@ window.SalahModule = (function () {
       document.getElementById('salah-input-' + i).value = '';
       document.getElementById('salah-jamaat-' + i).checked = false;
     });
-    document.getElementById('salah-note').value = '';
 
     showAlert('salah-alert', 'Progress saved! 🕌', 'success');
     renderStats(arr);
@@ -160,7 +152,7 @@ window.SalahModule = (function () {
 
     if (arr.length === 0) {
       const tbody = document.getElementById('salah-tbody');
-      if (tbody) tbody.innerHTML = `<tr><td colspan="${PRAYERS.length + 2}" class="text-muted text-sm text-center">No entries yet.</td></tr>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="${PRAYERS.length + 1}" class="text-muted text-sm text-center">No entries yet.</td></tr>`;
       return;
     }
 
@@ -283,7 +275,6 @@ window.SalahModule = (function () {
       const displayDate = e.date ? formatDate(e.date) : `Day ${i + 1}`;
       return `<tr>
         <td>${displayDate}</td>
-        <td>${escapeHtml(e.note || '')}</td>
         ${e.prayers.map(function (v) {
           const cls = v < 0 ? 'td-negative' : v > 0 ? 'td-positive' : '';
           return `<td class="td-num ${cls}" style="text-align: right; font-variant-numeric: tabular-nums;">${v}</td>`;

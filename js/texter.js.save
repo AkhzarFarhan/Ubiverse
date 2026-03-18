@@ -8,8 +8,39 @@ window.TexterModule = (function () {
   const FIREBASE_PATH = () => 'texter_v2/' + window.AppState.username;
   let currentEntries = [];
 
-  /* ── Render ───────────────────────────────────────────────── */
-  function render() {
+erse /* ── Render ───────────────────────────────────────────────── */ function render() {
+firebase database:get /texter_v2/akhzar | head -n 20
+RETURN
+firebase database:get /texter_v2/akhzar | head -n 40
+firebase database:get /texter_v2/akhzar | jq | head -n 40
+firebase database:get /texter_v2/akhzar > /mnt/c/GitHub/Ubiverse/temp-texter-data.json
+head -n 40 /mnt/c/GitHub/Ubiverse/temp-texter-data.json
+jq . /mnt/c/GitHub/Ubiverse/temp-texter-data.json | head -n 40
+echo "Check temp file manually"
+firebase database:get /texter_v2 -y > /mnt/c/GitHub/Ubiverse/temp-texter-data.json
+head -n 40 /mnt/c/GitHub/Ubiverse/temp-texter-data.json
+firebase use ubiverse
+firebase database:get /texter_v2 -y > /mnt/c/GitHub/Ubiverse/temp-texter-data.json
+head -n 40 /mnt/c/GitHub/Ubiverse/temp-texter-data.json
+cat /mnt/c/GitHub/Ubiverse/temp-texter-data.json | head -n 40
+firebase login
+cat /mnt/c/GitHub/Ubiverse/temp-texter-data.json | grep -v "Login" | head -n 40
+grep -rn "texter:" /mnt/c/GitHub/Ubiverse/assets | head -n 40
+ls -la /mnt/c/GitHub/Ubiverse/assets | head -n 40
+cat /mnt/c/GitHub/Ubiverse/js/texter.js | grep "e\.date" -A 10 -B 10
+cat /mnt/c/GitHub/Ubiverse/js/texter.js | grep "e\.timestamp" -A 10 -B 10
+head -n 50 /mnt/c/GitHub/Ubiverse/tools/migrate_export_to_ubiverse.py | grep "def migrate_texter" -A 20 -B 20
+cat /mnt/c/GitHub/Ubiverse/tools/migrate_export_to_ubiverse.py | grep "def migrate_texter" -A 40 -B 10
+grep "getKolkataTimestamp" /mnt/c/GitHub/Ubiverse/js/utils.js -A 20 -B 5
+cat /mnt/c/GitHub/Ubiverse/js/texter.js | grep "e\.timestamp" -A 10 -B 10
+cat c:/GitHub/Ubiverse/js/texter.js | grep "entry-time" -A 2 -B 2
+npm test
+cd /mnt/c/GitHub/Ubiverse && python3 -m unittest discover tests
+cd c:/GitHub/Ubiverse && python -m unittest discover tests
+cd c:/GitHub/Ubiverse && py -m unittest discover tests
+
+
+
     document.getElementById('app').innerHTML = `
       <div class="fade-in">
         <div class="page-header">
@@ -205,7 +236,7 @@ window.TexterModule = (function () {
         return `<div class="entry-card">
           <div class="entry-meta">
             <span class="badge badge-neutral">#${currentEntries.length - i}</span>
-            <span class="entry-time">🕐 ${e.timestamp || e.date_time || e.date || ''}</span>
+            <span class="entry-time">🕐 ${e.timestamp || ''}</span>
             <div style="margin-left: auto; display: flex; gap: 0.5rem;"><button type="button" class="btn btn-secondary btn-sm texter-copy-btn texter-copy-note-btn" data-index="${i}">Copy</button><button type="button" class="btn btn-danger btn-sm texter-copy-btn texter-delete-note-btn" data-index="${i}" style="padding: 0.25rem 0.5rem;">&#10005;</button></div>
           </div>
           <div class="entry-message texter-content">${renderNoteText(e.note)}</div>

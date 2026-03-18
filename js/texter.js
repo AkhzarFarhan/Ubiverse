@@ -204,13 +204,13 @@ window.TexterModule = (function () {
       currentEntries.map(function (e, i) {
         return `<div class="entry-card">
           <div class="entry-meta">
-            <span class="badge badge-neutral">#${currentEntries.length - i}</span>
+            <span class="badge badge-neutral">#${i + 1}</span>
             <span class="entry-time">🕐 ${e.timestamp || e.date_time || e.date || ''}</span>
             <div style="margin-left: auto; display: flex; gap: 0.5rem;"><button type="button" class="btn btn-secondary btn-sm texter-copy-btn texter-copy-note-btn" data-index="${i}">Copy</button><button type="button" class="btn btn-danger btn-sm texter-copy-btn texter-delete-note-btn" data-index="${i}" style="padding: 0.25rem 0.5rem;">&#10005;</button></div>
           </div>
           <div class="entry-message texter-content">${renderNoteText(e.note)}</div>
         </div>`;
-      }).join('') +
+      }).reverse().join('') +
     `</div>`;
   }
 

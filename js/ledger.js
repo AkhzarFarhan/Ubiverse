@@ -115,9 +115,8 @@ window.LedgerModule = (function () {
 
         <div class="card" id="ledger-chart-card">
           <div class="card-title">📈 Financial Timeline</div>
-          <div style="position: relative; height: 300px; width: 100%; margin-top: 1rem;" id="ledger-chart-wrapper">
-            <div id="ledger-chart-loader" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.875rem;">Loading graph...</div>
-            <canvas id="ledger-chart" style="display:none;"></canvas>
+          <div style="width: 100%; margin-top: 1rem;" id="ledger-chart-wrapper">
+            <div id="ledger-chart-loader" style="min-height: 100px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.875rem;">Loading graph...</div>
           </div>
         </div>
 
@@ -371,7 +370,7 @@ window.LedgerModule = (function () {
   }
 
   /* ── Timeline Chart ───────────────────────────────────────── */
-  let chartInstance = null;
+  let chartInstances = [];
   let chartDataCache = null;
   let chartIntersectionObserver = null;
 
@@ -409,89 +408,124 @@ window.LedgerModule = (function () {
 
   function drawChart() {
     if (!window.Chart || !chartDataCache) return;
-    const canvas = document.getElementById('ledger-chart');
-    if (!canvas) return;
-    const loader = document.getElementById('ledger-chart-loader');
-    if (loader) loader.style.display = 'none';
-    canvas.style.display = 'block';
+    const wrapper = document.getElementById('ledger-chart-wrapper');
+    if (!wrapper) return;
 
-    const months = {};
+    chartInstances.forEach(function(c) { c.destroy(); });
+    chartInstances = [];
+    wrapper.innerHTML = ''; // Clear loader and previous canvases
+
+    const yearsData = {}; // { 'YYYY': { 'MM': { credit: 0, debit: 0 } } }
+    
     chartDataCache.forEach(function (e) {
       const parts = (e.timestamp || '').split(' ')[0].split('-');
-      const key   = parts.length === 3 ? parts[1] + '-' + parts[2] : 'Unknown';
-      if (key === 'Unknown') return;
-      if (!months[key]) months[key] = { credit: 0, debit: 0 };
-      months[key].credit += (e.credit || 0);
-      months[key].debit  += (e.debit  || 0);
+      if (parts.length < 3) return;
+      
+      const mm = parts[1];
+      const yyyy = parts[2];
+
+      if (!yearsData[yyyy]) {
+        yearsData[yyyy] = {};
+        for(let m = 1; m <= 12; m++) {
+          const mStr = m.toString().padStart(2, '0');
+          yearsData[yyyy][mStr] = { credit: 0, debit: 0 };
+        }
+      }
+      
+      yearsData[yyyy][mm].credit += (e.credit || 0);
+      yearsData[yyyy][mm].debit  += (e.debit  || 0);
     });
 
     const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    
-    // Sort chronologically
-    const sortedKeys = Object.keys(months).sort(function (a, b) {
-      const [am, ay] = a.split('-').map(function (x) { return parseInt(x, 10); });
-      const [bm, by] = b.split('-').map(function (x) { return parseInt(x, 10); });
-      if (ay !== by) return ay - by;
-      return am - bm;
+
+    // Sort years from recent to older (descending)
+    const sortedYears = Object.keys(yearsData).sort(function(a, b) {
+      return parseInt(b, 10) - parseInt(a, 10);
     });
 
-    const labels = sortedKeys.map(function(k) {
-      const [mm, yyyy] = k.split('-');
-      return monthNames[parseInt(mm, 10) - 1] + ' ' + (yyyy.substring(2));
-    });
-
-    const creditData = sortedKeys.map(function(k) { return months[k].credit; });
-    const debitData = sortedKeys.map(function(k) { return months[k].debit; });
-
-    if (chartInstance) {
-      chartInstance.destroy();
+    if (sortedYears.length === 0) {
+      wrapper.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:1rem;">No graphical data available.</div>';
+      return;
     }
 
-    const ctx = canvas.getContext('2d');
-    
-    // Check if body has a dark theme or light theme to adjust text colors
     const isDark = document.body.style.backgroundColor !== '#ffffff' && document.body.style.backgroundColor !== 'white' && !document.body.classList.contains('light-theme');
     const textColor = isDark ? '#9ca3af' : '#6b7280';
     const gridColor = isDark ? '#374151' : '#e5e7eb';
 
-    chartInstance = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Credit',
-            data: creditData,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            borderWidth: 2,
-            tension: 0.3,
-            fill: true
-          },
-          {
-            label: 'Debit',
-            data: debitData,
-            borderColor: '#ef4444',
-            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-            borderWidth: 2,
-            tension: 0.3,
-            fill: true
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: true, position: 'top', labels: { color: textColor } }
-        },
-        scales: {
-          x: { ticks: { color: textColor }, grid: { display: false } },
-          y: { ticks: { color: textColor }, grid: { color: gridColor } }
-        }
+    sortedYears.forEach(function(yearStr) {
+      // Create UI block for year
+      const yearBlock = document.createElement('div');
+      yearBlock.style.marginBottom = '2.5rem';
+      
+      const yearTitle = document.createElement('h3');
+      yearTitle.style.fontSize = '1.1rem';
+      yearTitle.style.marginBottom = '0.5rem';
+      yearTitle.style.fontWeight = '600';
+      yearTitle.innerText = 'Year ' + yearStr;
+      yearBlock.appendChild(yearTitle);
+
+      const canvasContainer = document.createElement('div');
+      canvasContainer.style.position = 'relative';
+      canvasContainer.style.height = '250px';
+      canvasContainer.style.width = '100%';
+      
+      const canvas = document.createElement('canvas');
+      canvasContainer.appendChild(canvas);
+      yearBlock.appendChild(canvasContainer);
+      wrapper.appendChild(yearBlock);
+
+      const yData = yearsData[yearStr];
+      const labels = [];
+      const creditData = [];
+      const debitData = [];
+
+      for(let m = 1; m <= 12; m++) {
+        const mStr = m.toString().padStart(2, '0');
+        labels.push(monthNames[m - 1]);
+        creditData.push(yData[mStr].credit);
+        debitData.push(yData[mStr].debit);
       }
-    });
-  }
+
+      const ctx = canvas.getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Credit',
+              data: creditData,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'Debit',
+              data: debitData,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: 'top', labels: { color: textColor } }
+          },
+          scales: {
+            x: { ticks: { color: textColor }, grid: { display: false } },
+            y: { ticks: { color: textColor }, grid: { color: gridColor } }
+          }
+        }
+      });
+
+      chartInstances.push(chart);
 
   /* ── Storage helpers ──────────────────────────────────────── */
   async function getEntries() {

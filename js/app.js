@@ -53,10 +53,30 @@
           }).join('')}
         </div>
         <footer class="home-footer">
-          Developed and Maintained by <a href="https://github.com/AkhzarFarhan" target="_blank" rel="noopener">Akhzar Farhan</a>
+          <div>Developed and Maintained by <a href="https://github.com/AkhzarFarhan" target="_blank" rel="noopener">Akhzar Farhan</a></div>
+          <div id="home-last-updated" style="margin-top: 0.5rem; opacity: 0.7;"></div>
         </footer>
       </div>
     `;
+
+    // Fetch last commit date from GitHub
+    fetch('https://api.github.com/repos/AkhzarFarhan/Ubiverse/commits?per_page=1')
+      .then(r => r.json())
+      .then(data => {
+        if (data && data[0] && data[0].commit && data[0].commit.author) {
+          const date = new Date(data[0].commit.author.date);
+          const formatted = date.toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: true
+          });
+          const el = document.getElementById('home-last-updated');
+          if (el) el.innerHTML = '<span style="font-size: 0.70rem;">Last Updated: ' + formatted + ' (IST)</span>';
+        }
+      })
+      .catch(e => {
+        console.warn('Could not fetch last update time', e);
+      });
   }
 
   /* ── Auth ─────────────────────────────────────────────────── */

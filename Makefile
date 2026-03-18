@@ -1,38 +1,19 @@
 # Ubiverse – Git workflow helpers
 # Usage:
-#   make push          – add, commit & push (dev branch only)
-#   make merge         – merge dev → main, push main, switch back to dev
-#   make pushm         – runs push, then immediately merges to main
+#   make push          – commit, fetch & rebase from main, then push
 
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
-# ── Push changes (dev only) ────────────────────────────────────
+# ── Push changes (main only) ────────────────────────────────────
 .PHONY: push
 push:
-	@if [ "$(BRANCH)" != "dev" ]; then \
-		echo "ERROR: You must be on the 'dev' branch (current: $(BRANCH))"; \
+	@if [ "$(BRANCH)" != "main" ]; then \
+		echo "ERROR: You must be on the 'main' branch (current: $(BRANCH))"; \
 		exit 1; \
 	fi
 	@read -p "Commit message: " msg; \
 	git add -A; \
 	git commit -m "$$msg"; \
-	git push origin dev
-	@echo "✅ Pushed to dev."
-
-# ── Merge dev → main ──────────────────────────────────────────
-.PHONY: merge
-merge:
-	@if [ "$(BRANCH)" != "dev" ]; then \
-		echo "ERROR: Run this from the 'dev' branch (current: $(BRANCH))"; \
-		exit 1; \
-	fi
-	git checkout main
-	git merge dev
+	git pull --rebase origin main; \
 	git push origin main
-	git checkout dev
-	@echo "✅ Merged dev → main and switched back to dev."
-
-# ── Push then Merge ───────────────────────────────────────────
-.PHONY: pushm
-pushm: push merge
-	@echo "✅ Push and merge complete."
+	@echo "✅ Pushed to main."

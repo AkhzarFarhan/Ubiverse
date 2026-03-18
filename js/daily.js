@@ -24,8 +24,18 @@ window.DailyModule = (function () {
             <input type="text" id="daily-message" placeholder="How was your day?" maxlength="300" />
           </div>
           <div class="form-group">
-            <label for="daily-rating">Rating (1–10)</label>
-            <input type="number" id="daily-rating" placeholder="7" min="1" max="10" />
+            <label>Rating (1 = worst, 10 = best)</label>
+            <input type="hidden" id="daily-rating" value="" />
+            <div class="daily-rating-grid">
+              ${[1,2,3,4,5,6,7,8,9,10].map(function (n) {
+                var cls;
+                if (n <= 3)      cls = 'daily-rating-low';
+                else if (n <= 5) cls = 'daily-rating-mid';
+                else if (n <= 7) cls = 'daily-rating-ok';
+                else             cls = 'daily-rating-high';
+                return '<button type="button" class="daily-rating-btn ' + cls + '" data-rating="' + n + '">' + n + '</button>';
+              }).join('')}
+            </div>
           </div>
           <button type="submit" class="btn btn-primary">Add Entry</button>
         </form>
@@ -42,21 +52,29 @@ window.DailyModule = (function () {
       submit();
     });
 
+    // Rating button listeners
+    document.querySelectorAll('.daily-rating-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.daily-rating-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('daily-rating').value = btn.getAttribute('data-rating');
+      });
+    });
+
     loadData();
   }
 
   /* ── Submit ───────────────────────────────────────────────── */
   async function submit() {
     const message = document.getElementById('daily-message').value.trim();
-    const ratingRaw = document.getElementById('daily-rating').value.trim();
-    const rating  = parseInt(ratingRaw, 10);
+    const rating  = document.getElementById('daily-rating').value;
 
     if (!message) {
       showAlert('daily-alert', 'Message cannot be empty.', 'error');
       return;
     }
-    if (!ratingRaw || isNaN(rating) || rating < 1 || rating > 10) {
-      showAlert('daily-alert', 'Rating must be a number between 1 and 10.', 'error');
+    if (!rating) {
+      showAlert('daily-alert', 'Please select a rating (1–10).', 'error');
       return;
     }
 
@@ -64,7 +82,7 @@ window.DailyModule = (function () {
 
     const entry = {
       message,
-      rating,
+      rating: parseInt(rating, 10),
       timestamp: getKolkataTimestamp(),
     };
 
@@ -81,6 +99,7 @@ window.DailyModule = (function () {
 
     document.getElementById('daily-message').value = '';
     document.getElementById('daily-rating').value  = '';
+    document.querySelectorAll('.daily-rating-btn').forEach(function (b) { b.classList.remove('active'); });
 
     showAlert('daily-alert', 'Entry added successfully!', 'success');
     renderList(cached);
@@ -105,18 +124,23 @@ window.DailyModule = (function () {
       return;
     }
 
-    const ratingColor = (r) => {
-      if (r >= 8) return 'badge-success';
-      if (r >= 5) return 'badge-primary';
-      return 'badge-danger';
-    };
+    function ratingBadge(r) {
+      // Legacy good/bad string ratings
+      if (r === 'good') return '<span class="badge badge-success">👍 Good</span>';
+      if (r === 'bad')  return '<span class="badge badge-danger">👎 Bad</span>';
+      // Numeric ratings (1–10)
+      var num = parseInt(r, 10);
+      if (isNaN(num)) return '';
+      var cls = num >= 8 ? 'badge-success' : num >= 6 ? 'badge-primary' : num >= 4 ? 'badge-warning' : 'badge-danger';
+      return '<span class="badge ' + cls + '">' + num + '/10</span>';
+    }
 
     container.innerHTML = `<div class="entry-list">` +
       arr.map(function (e) {
         return `<div class="entry-card">
           <div class="entry-meta">
             <span class="entry-time">🕐 ${e.timestamp || ''}</span>
-            <span class="badge ${ratingColor(e.rating)}">${e.rating}/10</span>
+            ${ratingBadge(e.rating)}
           </div>
           <div class="entry-message">${escapeHtml(e.message)}</div>
         </div>`;

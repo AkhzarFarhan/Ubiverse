@@ -13,6 +13,7 @@ window.VibexModule = (function () {
   var messageListener = null;
   var usersListener   = null;
   var presenceListener = null;
+  var deliveryListeners = {};
   var allUsers = {};
 
   /* ── Helpers ──────────────────────────────────────────────── */
@@ -114,6 +115,11 @@ window.VibexModule = (function () {
     if (usersListener)    { usersListener.off();    usersListener    = null; }
     if (presenceListener) { presenceListener.off(); presenceListener = null; }
     currentChatUser = null;
+
+    Object.keys(deliveryListeners || {}).forEach(function(chatId) {
+      deliveryListeners[chatId].off();
+    });
+    deliveryListeners = {};
   }
 
   /* Clean up when navigating away from Vibex */
@@ -188,6 +194,27 @@ window.VibexModule = (function () {
     ref.on('value', function (snap) {
       allUsers = snap.val() || {};
       renderContacts();
+      updateDeliveryListeners();
+    });
+  }
+
+  function updateDeliveryListeners() {
+    var username = window.AppState.username;
+    if (!username) return;
+
+    Object.keys(allUsers).forEach(function (uname) {
+      if (uname === username) return;
+      var chatId = getChatId(username, uname);
+      if (!deliveryListeners[chatId]) {
+        var ref = db.ref(CHATS_PATH + '/' + chatId + '/messages').orderByChild('delivered').equalTo(false);
+        deliveryListeners[chatId] = ref;
+        ref.on('child_added', function (msgSnap) {
+          var msg = msgSnap.val();
+          if (msg && msg.sender !== username && !msg.delivered) {
+            msgSnap.ref.update({ delivered: true }).catch(function(){});
+          }
+        });
+      }
     });
   }
 
@@ -300,7 +327,6 @@ window.VibexModule = (function () {
     var chatId = getChatId(window.AppState.username, targetUser);
     loadMessages(chatId);
     listenUserStatus(targetUser);
-    markAsRead(chatId);
   }
 
   /* ── Send ──────────────────────────────────────────────────── */
@@ -349,8 +375,7 @@ window.VibexModule = (function () {
       renderMessages(messages);
 
       if (currentChatUser) {
-        markDelivered(chatId, messages);
-        markAsRead(chatId);
+        markAsRead(chatId, messages);
       }
 
       var container = document.getElementById('vibex-messages');
@@ -416,41 +441,21 @@ window.VibexModule = (function () {
 
   /* ── Delivery / read receipts ──────────────────────────────── */
 
-  async function markDelivered(chatId, messages) {
+  async function markAsRead(chatId, messages) {
+    if (!currentChatUser) return;
     var username = window.AppState.username;
     var updates = {};
     messages.forEach(function (msg) {
-      if (msg.sender !== username && !msg.delivered) {
-        updates[CHATS_PATH + '/' + chatId + '/messages/' + msg._key + '/delivered'] = true;
+      if (msg.sender !== username && !msg.read) {
+        updates[CHATS_PATH + '/' + chatId + '/messages/' + msg._key + '/read'] = true;
+        if (!msg.delivered) {
+          updates[CHATS_PATH + '/' + chatId + '/messages/' + msg._key + '/delivered'] = true;
+        }
       }
     });
     if (Object.keys(updates).length) {
-      try { await db.ref().update(updates); } catch (e) { console.warn('Vibex: mark delivered failed', e); }
+      try { await db.ref().update(updates); } catch (e) { console.warn('Vibex: mark read failed', e); }
     }
-  }
-
-  async function markAsRead(chatId) {
-    if (!currentChatUser) return;
-    var username = window.AppState.username;
-    try {
-      var snap = await db.ref(CHATS_PATH + '/' + chatId + '/messages').once('value');
-      var data = snap.val();
-      if (!data) return;
-      var updates = {};
-      Object.entries(data).forEach(function (pair) {
-        var key = pair[0];
-        var msg = pair[1];
-        if (msg.sender !== username && !msg.read) {
-          updates[CHATS_PATH + '/' + chatId + '/messages/' + key + '/read'] = true;
-          if (!msg.delivered) {
-            updates[CHATS_PATH + '/' + chatId + '/messages/' + key + '/delivered'] = true;
-          }
-        }
-      });
-      if (Object.keys(updates).length) {
-        await db.ref().update(updates);
-      }
-    } catch (e) { console.warn('Vibex: mark read failed', e); }
   }
 
   /* ── User status listener (chat header) ────────────────────── */

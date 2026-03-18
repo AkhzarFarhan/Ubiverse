@@ -104,10 +104,11 @@ async function sendTelegramForLedger(entry, username) {
   if (!TG_BOT_TOKEN || !TG_LEDGER_CHAT_ID) return;
 
   const escapeHtml = (str) => String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const getIntINR = (val) => getINR(val).replace(/\.\d{2}$/, '');
 
   const separator = '=========================';
   const type   = entry.credit > 0 ? 'CREDIT' : 'DEBIT';
-  const amount = entry.credit > 0 ? getINR(entry.credit) : getINR(entry.debit);
+  const amount = entry.credit > 0 ? getIntINR(entry.credit) : getIntINR(entry.debit);
 
   let text = separator + '\n';
   text += '                     <b>' + type + '</b>\n';
@@ -116,9 +117,9 @@ async function sendTelegramForLedger(entry, username) {
   text += (entry.credit > 0 ? 'Credit' : 'Debit') + ':  <b>' + amount + '</b>\n';
   text += 'Details:  <b>' + escapeHtml(entry.details) + '</b>\n';
   text += 'Mode:  <b>' + escapeHtml(entry.mode) + '</b>\n';
-  text += 'Cash Balance:  <b>' + getINR(entry.cash) + '</b>\n';
-  text += 'Bank Balance:  <b>' + getINR(entry.bank) + '</b>\n\n';
-  text += 'Total Balance:  <b>' + getINR(entry.total) + '</b>';
+  text += 'Cash Balance:  <b>' + getIntINR(entry.cash) + '</b>\n';
+  text += 'Bank Balance:  <b>' + getIntINR(entry.bank) + '</b>\n\n';
+  text += 'Total Balance:  <b>' + getIntINR(entry.total) + '</b>';
 
   const url = 'https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage';
   try {

@@ -75,34 +75,40 @@ const TG_LEDGER_CHAT_ID = env.TG_LEDGER_CHAT_ID || '';
 const TG_USERNAME       = env.TG_USERNAME       || '';
 
 async function sendTelegramForLedger(entry, username) {
-  if (username !== TG_USERNAME) return;
+  if (TG_USERNAME && username !== TG_USERNAME) return;
+  if (!TG_BOT_TOKEN || !TG_LEDGER_CHAT_ID) return;
+
+  const escapeHtml = (str) => String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
   const separator = '=========================';
   const type   = entry.credit > 0 ? 'CREDIT' : 'DEBIT';
   const amount = entry.credit > 0 ? getINR(entry.credit) : getINR(entry.debit);
 
   let text = separator + '\n';
-  text += '                     *' + type + '*\n';
+  text += '                     <b>' + type + '</b>\n';
   text += separator + '\n';
-  text += 'ID:  *' + entry.transaction_id + '*\n';
-  text += (entry.credit > 0 ? 'Credit' : 'Debit') + ':  *' + amount + '*\n';
-  text += 'Details:  *' + entry.details + '*\n';
-  text += 'Mode:  *' + entry.mode + '*\n';
-  text += 'Cash Balance:  *' + getINR(entry.cash) + '*\n';
-  text += 'Bank Balance:  *' + getINR(entry.bank) + '*\n\n';
-  text += 'Total Balance:  *' + getINR(entry.total) + '*';
+  text += 'ID:  <b>' + entry.transaction_id + '</b>\n';
+  text += (entry.credit > 0 ? 'Credit' : 'Debit') + ':  <b>' + amount + '</b>\n';
+  text += 'Details:  <b>' + escapeHtml(entry.details) + '</b>\n';
+  text += 'Mode:  <b>' + escapeHtml(entry.mode) + '</b>\n';
+  text += 'Cash Balance:  <b>' + getINR(entry.cash) + '</b>\n';
+  text += 'Bank Balance:  <b>' + getINR(entry.bank) + '</b>\n\n';
+  text += 'Total Balance:  <b>' + getINR(entry.total) + '</b>';
 
   const url = 'https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage';
   try {
-    await fetch(url, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: TG_LEDGER_CHAT_ID,
         text: text,
-        parse_mode: 'Markdown'
+        parse_mode: 'HTML'
       })
     });
+    if (!res.ok) {
+      console.warn('Telegram API error:', await res.text());
+    }
   } catch (e) {
     console.warn('Telegram notification failed:', e);
   }

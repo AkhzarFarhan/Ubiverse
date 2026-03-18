@@ -22,21 +22,6 @@ window.LedgerModule = (function () {
           <p>Personal finance tracker</p>
         </div>
 
-        <div class="stat-cards" id="ledger-balances">
-          <div class="stat-card">
-            <div class="stat-label">Cash Balance</div>
-            <div class="stat-value" id="bal-cash">₹0.00</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Bank Balance</div>
-            <div class="stat-value" id="bal-bank">₹0.00</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Total Balance</div>
-            <div class="stat-value" id="bal-total">₹0.00</div>
-          </div>
-        </div>
-
         <form class="form-card" id="ledger-form" novalidate>
           <div class="card-title">New Transaction</div>
           <div id="ledger-alert"></div>
@@ -105,6 +90,21 @@ window.LedgerModule = (function () {
               </thead>
               <tbody id="ledger-monthly"></tbody>
             </table>
+          </div>
+        </div>
+
+        <div class="stat-cards" id="ledger-balances">
+          <div class="stat-card">
+            <div class="stat-label">Cash Balance</div>
+            <div class="stat-value" id="bal-cash">₹0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Bank Balance</div>
+            <div class="stat-value" id="bal-bank">₹0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Balance</div>
+            <div class="stat-value" id="bal-total">₹0.00</div>
           </div>
         </div>
       </div>

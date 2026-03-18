@@ -143,11 +143,23 @@ window.QuranModule = (function () {
   /* ── XML loading ─────────────────────────────────────────────── */
   async function loadXML() {
     if (_xmlDoc) return _xmlDoc;
-    var resp = await fetch('assets/quran-simple-plain.xml');
-    var text = await resp.text();
-    var parser = new DOMParser();
-    _xmlDoc = parser.parseFromString(text, 'text/xml');
-    return _xmlDoc;
+    try {
+      var resp = await fetch('assets/quran-simple-plain.xml');
+      if (!resp.ok) throw new Error('Network response was not ok');
+      var text = await resp.text();
+      var parser = new DOMParser();
+      _xmlDoc = parser.parseFromString(text, 'text/xml');
+      
+      // Check for parsing errors
+      var parseError = _xmlDoc.querySelector('parsererror');
+      if (parseError) {
+        throw new Error('Error parsing XML: ' + parseError.textContent);
+      }
+      return _xmlDoc;
+    } catch (error) {
+      console.error('Failed to load Quran XML:', error);
+      throw error;
+    }
   }
 
   function getSurahAyahs(doc, surahIndex) {
@@ -166,28 +178,16 @@ window.QuranModule = (function () {
   }
 
   /* ── Progress persistence ────────────────────────────────────── */
-  async function loadProgress() {
+  function loadProgress() {
     try {
-      var data = await firebaseGet(FIREBASE_PATH());
-      if (data) {
-        _progress = data;
-        localStorage.setItem(STORAGE_KEY(), JSON.stringify(_progress));
-      } else {
-        _progress = JSON.parse(localStorage.getItem(STORAGE_KEY())) || {};
-      }
-    } catch (e) {
-      console.warn('Firebase read failed, using localStorage:', e);
       _progress = JSON.parse(localStorage.getItem(STORAGE_KEY())) || {};
+    } catch (e) {
+      _progress = {};
     }
   }
 
-  async function saveProgress() {
+  function saveProgress() {
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(_progress));
-    try {
-      await firebasePut(FIREBASE_PATH(), _progress);
-    } catch (e) {
-      console.warn('Firebase write failed:', e);
-    }
   }
 
   function markSurahProgress(surahIndex, lastAyah, completed) {
@@ -205,10 +205,8 @@ window.QuranModule = (function () {
   function render() {
     _view = 'index';
     _currentSurah = 1;
+    loadProgress();
     renderIndex();
-    loadProgress().then(function () {
-      renderIndex();
-    });
   }
 
   /* ── Surah index view ────────────────────────────────────────── */
@@ -308,9 +306,23 @@ window.QuranModule = (function () {
       + '<p>Loading Surah ' + s.ename + '...</p>'
       + '</div></div>';
 
-    var doc = await loadXML();
-    var ayahs = getSurahAyahs(doc, surahIndex);
-    renderReader(surahIndex, ayahs);
+    try {
+      var doc = await loadXML();
+      var ayahs = getSurahAyahs(doc, surahIndex);
+      if (!ayahs || ayahs.length === 0) {
+        throw new Error('No ayahs found for surah ' + surahIndex);
+      }
+      renderReader(surahIndex, ayahs);
+    } catch (error) {
+      // Basic sanitize for error message
+      var safeError = String(error.message).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      document.getElementById('app').innerHTML =
+        '<div class="quran-container fade-in" style="padding: 2rem; text-align: center;">'
+        + '<h3 style="color: var(--color-danger); margin-bottom: 1rem;">Failed to load Quran text</h3>'
+        + '<p style="color: var(--text-muted); margin-bottom: 2rem;">' + safeError + '</p>'
+        + '<button class="btn btn-primary" onclick="window.QuranModule.render()">Go Back</button>'
+        + '</div>';
+    }
   }
 
   function renderReader(surahIndex, ayahs) {

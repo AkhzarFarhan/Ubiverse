@@ -62,6 +62,24 @@ function getKolkataTimestamp() {
   return `${p.day}-${p.month}-${p.year} ${p.hour}:${p.minute}:${p.second} ${p.dayPeriod.toUpperCase()}`;
 }
 
+/**
+ * Returns current date in Asia/Kolkata timezone.
+ * Format: "YYYY-MM-DD"
+ */
+function getKolkataDate() {
+  const now = new Date();
+  const opts = {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  };
+  const parts = new Intl.DateTimeFormat('en-IN', opts).formatToParts(now);
+  const p = {};
+  parts.forEach(({ type, value }) => { p[type] = value; });
+  return `${p.year}-${p.month}-${p.day}`;
+}
+
 /** Format a plain date string (YYYY-MM-DD) to "DD MMM YYYY". */
 function formatDate(dateStr) {
   if (!dateStr) return '';

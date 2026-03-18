@@ -80,6 +80,15 @@ window.SalahModule = (function () {
     loadData();
   }
 
+  function dateDiffDays(d1, d2) {
+    if (!d1 || !d2) return 0;
+    const date1 = new Date(d1 + 'T00:00:00');
+    const date2 = new Date(d2 + 'T00:00:00');
+    if (isNaN(date1) || isNaN(date2)) return 0;
+    const diffTime = date2 - date1;
+    return Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
   /* ── Submit ───────────────────────────────────────────────── */
   async function submit() {
     const newValues = PRAYERS.map(function (_, i) {
@@ -88,17 +97,24 @@ window.SalahModule = (function () {
     const note = document.getElementById('salah-note').value.trim();
 
     const arr = await getEntries();
+    const today = getKolkataDate();
+    
+    // Default to 'today' for first run so 1 day debt is established
+    const lastDate = arr.length > 0 ? (arr[arr.length - 1].date || today) : today;
+    let daysPassed = dateDiffDays(lastDate, today);
+    
+    // If it's the very first entry, initialize with 1 day's worth of Farz debt
+    if (arr.length === 0) {
+      daysPassed = 1;
+    }
+
     const last = arr.length > 0 ? arr[arr.length - 1].prayers : Array(PRAYERS.length).fill(0);
 
-    // For each prayer: if new_value != 0 → updated = existing + new - farz; else keep
     const updated = PRAYERS.map(function (_, i) {
-      if (newValues[i] !== 0) {
-        return last[i] + newValues[i] - FARZ_RAKA[i];
-      }
-      return last[i];
+      const baseline = last[i] - (daysPassed * FARZ_RAKA[i]);
+      return baseline + newValues[i];
     });
 
-    const today = new Date().toISOString().slice(0, 10);
     const entry = {
       prayers:   updated,
       note:      note || '',
@@ -147,7 +163,11 @@ window.SalahModule = (function () {
 
     const firstRow = arr[0].prayers;
     const lastRow  = arr[arr.length - 1].prayers;
-    const timeTaken = arr.length - 1;
+    
+    const firstDate = arr[0].date || '';
+    const lastDate = arr[arr.length - 1].date || '';
+    // timeTaken shouldn't be zero to avoid divide by zero, but zero days is fine if we cap it to 1
+    const timeTaken = Math.max(1, dateDiffDays(firstDate, lastDate));
 
     const predicted = predictDaysLeft(firstRow, lastRow, timeTaken);
     const actual    = actualDaysLeft(lastRow);
@@ -246,8 +266,9 @@ window.SalahModule = (function () {
     if (!tbody) return;
 
     tbody.innerHTML = arr.map(function (e, i) {
+      const displayDate = e.date ? formatDate(e.date) : `Day ${i + 1}`;
       return `<tr>
-        <td>Day ${i + 1}</td>
+        <td>${displayDate}</td>
         <td>${escapeHtml(e.note || '')}</td>
         ${e.prayers.map(function (v) {
           const cls = v < 0 ? 'td-negative' : v > 0 ? 'td-positive' : '';

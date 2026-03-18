@@ -35,8 +35,11 @@ window.SalahModule = (function () {
           <div class="form-row">
             ${PRAYERS.map(function (p, i) {
               return `<div class="form-group">
-                <label for="salah-input-${i}">${p} (Farz: ${FARZ_RAKA[i]})</label>
-                <input type="number" id="salah-input-${i}" placeholder="0" min="0" />
+                <input type="number" id="salah-input-${i}" placeholder="${p} (Farz: ${FARZ_RAKA[i]})" min="0" />
+                <label style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; font-weight: normal;">
+                  <input type="checkbox" id="salah-jamaat-${i}" style="width: auto; margin: 0; min-height: auto;" />
+                  With Jamaat
+                </label>
               </div>`;
             }).join('')}
           </div>
@@ -94,6 +97,9 @@ window.SalahModule = (function () {
     const newValues = PRAYERS.map(function (_, i) {
       return parseInt(document.getElementById('salah-input-' + i).value, 10) || 0;
     });
+    const jamaatValues = PRAYERS.map(function (_, i) {
+      return document.getElementById('salah-jamaat-' + i).checked;
+    });
     const note = document.getElementById('salah-note').value.trim();
 
     const arr = await getEntries();
@@ -112,7 +118,13 @@ window.SalahModule = (function () {
 
     const updated = PRAYERS.map(function (_, i) {
       const baseline = last[i] - (daysPassed * FARZ_RAKA[i]);
-      return baseline + newValues[i];
+      let entered = newValues[i];
+      if (entered > 0 && jamaatValues[i]) {
+        let farzPart = Math.min(entered, FARZ_RAKA[i]);
+        let surplusPart = Math.max(0, entered - FARZ_RAKA[i]);
+        entered = (farzPart * 27) + surplusPart;
+      }
+      return baseline + entered;
     });
 
     const entry = {
@@ -132,6 +144,7 @@ window.SalahModule = (function () {
 
     PRAYERS.forEach(function (_, i) {
       document.getElementById('salah-input-' + i).value = '';
+      document.getElementById('salah-jamaat-' + i).checked = false;
     });
     document.getElementById('salah-note').value = '';
 

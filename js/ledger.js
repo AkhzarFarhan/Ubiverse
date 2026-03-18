@@ -284,7 +284,26 @@ window.LedgerModule = (function () {
 
     const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    tbody.innerHTML = Object.keys(months).sort().map(function (k) {
+    tbody.innerHTML = Object.keys(months).sort(function (a, b) {
+      if (a === 'Unknown') return 1;
+      if (b === 'Unknown') return -1;
+
+      const [am, ay] = a.split('-').map(function (x) { return parseInt(x, 10); });
+      const [bm, by] = b.split('-').map(function (x) { return parseInt(x, 10); });
+
+      if (ay !== by) return ay - by;
+      return am - bm;
+    }).map(function (k) {
+      if (k === 'Unknown') {
+        const netUnknown = months[k].credit - months[k].debit;
+        return `<tr>
+        <td>Unknown</td>
+        <td class="td-num td-positive">${getINR(months[k].credit)}</td>
+        <td class="td-num td-negative">${getINR(months[k].debit)}</td>
+        <td class="td-num ${netUnknown >= 0 ? 'td-positive' : 'td-negative'} font-bold">${getINR(netUnknown)}</td>
+      </tr>`;
+      }
+
       const [mm, yyyy] = k.split('-');
       const name = monthNames[parseInt(mm, 10) - 1] + ' ' + yyyy;
       const net  = months[k].credit - months[k].debit;

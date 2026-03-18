@@ -180,12 +180,12 @@ window.SalahModule = (function () {
       });
       const addedStrs = [];
       PRAYERS.forEach(function(p, i) {
-        if (addedArr[i] > 0) addedStrs.push(p + ': +' + addedArr[i]);
+        if (addedArr[i] > 0) addedStrs.push('+' + addedArr[i] + ' ' + p);
       });
       if (addedStrs.length > 0) {
-        addedText = '<br><span class="text-xs" style="color: var(--text-muted);">Recorded: ' + addedStrs.join(', ') + '</span>';
+        addedText = '<br><span class="text-xs" style="color: var(--text-muted);">Added: ' + addedStrs.join(', ') + '</span>';
       } else {
-        addedText = '<br><span class="text-xs" style="color: var(--text-muted);">Recorded: No additional rakah.</span>';
+        addedText = '<br><span class="text-xs" style="color: var(--text-muted);">Updated with no additions</span>';
       }
     } else {
       addedText = '<br><span class="text-xs" style="color: var(--text-muted);">Initial sync logged.</span>';
@@ -195,9 +195,12 @@ window.SalahModule = (function () {
     const formattedDate = isNaN(d) ? lastEntry.date : d.toLocaleDateString('en-IN', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
+    
+    // If timestamp is available, use it directly (it contains date and time)
+    const displayTimestamp = lastEntry.timestamp ? lastEntry.timestamp : formattedDate;
 
     infoDiv.style.display = 'block';
-    infoDiv.innerHTML = 'Last updated on: <strong>' + formattedDate + '</strong>' + addedText;
+    infoDiv.innerHTML = 'Last updated: <strong>' + displayTimestamp + '</strong>' + addedText;
   }
 
   /* ── Stats ────────────────────────────────────────────────── */

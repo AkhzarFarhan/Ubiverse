@@ -109,11 +109,42 @@ function clearAlert(containerId) {
   if (el) el.innerHTML = '';
 }
 
-/* ── Data helpers ──────────────────────────────────────────── */
+  /**
+   * Display a floating global toast notification.
+   * @param {string} message 
+   * @param {'success'|'error'|'warning'} type 
+   */
+  function showToast(message, type = 'error') {
+    const icons = { success: '✅', error: '❌', warning: '⚠️' };
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-' + type;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '9999';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    toast.style.minWidth = '250px';
+    toast.style.margin = '0';
+    toast.style.transition = 'opacity 0.3s ease';
 
-/**
- * Convert a Firebase-style object {key: value, ...} to an array of values.
- * Returns [] when input is null/undefined.
+    const iconSpan = document.createElement('span');
+    iconSpan.textContent = icons[type] || '';
+
+    const msgSpan = document.createElement('span');
+    msgSpan.textContent = message;
+
+    toast.appendChild(iconSpan);
+    toast.appendChild(msgSpan);
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 300);
+    }, 4500);
+  }
+ /* Returns [] when input is null/undefined.
  */
 function objectToArray(obj) {
   if (!obj || typeof obj !== 'object') return [];

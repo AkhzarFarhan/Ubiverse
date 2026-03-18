@@ -28,28 +28,53 @@ const db   = firebase.database();
 /* ── CRUD helpers ──────────────────────────────────────────── */
 
 async function firebaseGet(path) {
-  const snapshot = await db.ref(path).once('value');
-  return snapshot.val();
+  try {
+    const snapshot = await db.ref(path).once('value');
+    return snapshot.val();
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase read error: ' + (e.message || e), 'error');
+    throw e;
+  }
 }
 
 async function firebasePost(path, data) {
-  const ref = await db.ref(path).push(data);
-  return { name: ref.key };
+  try {
+    const ref = await db.ref(path).push(data);
+    return { name: ref.key };
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase write error: ' + (e.message || e), 'error');
+    throw e;
+  }
 }
 
 async function firebasePut(path, data) {
-  await db.ref(path).set(data);
-  return true;
+  try {
+    await db.ref(path).set(data);
+    return true;
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase write error: ' + (e.message || e), 'error');
+    throw e;
+  }
 }
 
 async function firebasePatch(path, data) {
-  await db.ref(path).update(data);
-  return true;
+  try {
+    await db.ref(path).update(data);
+    return true;
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase update error: ' + (e.message || e), 'error');
+    throw e;
+  }
 }
 
 async function firebaseDelete(path) {
-  await db.ref(path).remove();
-  return true;
+  try {
+    await db.ref(path).remove();
+    return true;
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase delete error: ' + (e.message || e), 'error');
+    throw e;
+  }
 }
 
 /* ── Auth helpers ──────────────────────────────────────────── */
@@ -107,10 +132,10 @@ async function sendTelegramForLedger(entry, username) {
       })
     });
     if (!res.ok) {
-      console.warn('Telegram API error:', await res.text());
-    }
-  } catch (e) {
-    console.warn('Telegram notification failed:', e);
-  }
-}
-
+        const errText = await res.text();
+        console.warn('Telegram API error:', errText);
+        if (typeof window.showToast === 'function') window.showToast('Telegram API error', 'error');
+      }
+    } catch (e) {
+      console.warn('Telegram notification failed:', e);
+      if (typeof window.showToast === 'function') window.showToast('Telegram dispatch failed: ' + (e.message || e), 'error');

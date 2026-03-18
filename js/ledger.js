@@ -300,6 +300,13 @@ window.LedgerModule = (function () {
       const ldEl = document.getElementById('bal-lifetime-debits');
       if (lcEl) lcEl.textContent = getINR(lifetimeCredit);
       if (ldEl) ldEl.textContent = getINR(lifetimeDebit);
+    }
+
+  /* ── Transaction table ────────────────────────────────────── */
+  function renderTable(arr) {
+    const tbody = document.getElementById('ledger-tbody');
+    if (!tbody) return;
+
     tbody.innerHTML = arr.slice().reverse().map(function (e) {
       const dateOnly = (e.timestamp || '').split(' ')[0] || e.timestamp;
       return `<tr>

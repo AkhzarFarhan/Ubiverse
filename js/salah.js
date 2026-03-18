@@ -27,6 +27,7 @@ window.SalahModule = (function () {
 
         <form class="form-card" id="salah-form" novalidate>
           <div class="card-title">Log Progress</div>
+          <div id="salah-latest-info" class="text-sm text-primary mb-sm" style="display: none; margin-bottom: 1rem; padding: 0.5rem; background: var(--surface-hover); border-radius: var(--radius-sm); border-left: 3px solid var(--primary);"></div>
           <div id="salah-alert"></div>
           <p class="text-sm text-muted mb-sm">
             Enter the number of <strong>rakah you prayed today</strong> per prayer.
@@ -156,9 +157,47 @@ window.SalahModule = (function () {
       return;
     }
 
+    renderLatestInfo(arr);
     renderStats(arr);
     renderChart(arr);
     renderTable(arr);
+  }
+
+  /* ── Latest Info ──────────────────────────────────────────── */
+  function renderLatestInfo(arr) {
+    const infoDiv = document.getElementById('salah-latest-info');
+    if (!infoDiv || arr.length === 0) return;
+
+    const lastEntry = arr[arr.length - 1];
+    const prevEntry = arr.length > 1 ? arr[arr.length - 2] : null;
+
+    let addedText = "";
+    if (prevEntry) {
+      const daysPassed = dateDiffDays(prevEntry.date, lastEntry.date);
+      const addedArr = PRAYERS.map(function(_, i) {
+        const baseline = prevEntry.prayers[i] - (daysPassed * FARZ_RAKA[i]);
+        return lastEntry.prayers[i] - baseline;
+      });
+      const addedStrs = [];
+      PRAYERS.forEach(function(p, i) {
+        if (addedArr[i] > 0) addedStrs.push(p + ': +' + addedArr[i]);
+      });
+      if (addedStrs.length > 0) {
+        addedText = '<br><span class="text-xs" style="color: var(--text-muted);">Recorded: ' + addedStrs.join(', ') + '</span>';
+      } else {
+        addedText = '<br><span class="text-xs" style="color: var(--text-muted);">Recorded: No additional rakah.</span>';
+      }
+    } else {
+      addedText = '<br><span class="text-xs" style="color: var(--text-muted);">Initial sync logged.</span>';
+    }
+
+    const d = new Date(lastEntry.date + 'T00:00:00');
+    const formattedDate = isNaN(d) ? lastEntry.date : d.toLocaleDateString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+
+    infoDiv.style.display = 'block';
+    infoDiv.innerHTML = 'Last updated on: <strong>' + formattedDate + '</strong>' + addedText;
   }
 
   /* ── Stats ────────────────────────────────────────────────── */

@@ -107,6 +107,14 @@ window.LedgerModule = (function () {
             <div class="stat-value" id="bal-total">₹0.00</div>
           </div>
         </div>
+
+        <div class="card" id="ledger-chart-card">
+          <div class="card-title">📈 Financial Timeline</div>
+          <div style="position: relative; height: 300px; width: 100%; margin-top: 1rem;" id="ledger-chart-wrapper">
+            <div id="ledger-chart-loader" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.875rem;">Loading graph...</div>
+            <canvas id="ledger-chart" style="display:none;"></canvas>
+          </div>
+        </div>
       </div>
     `;
 
@@ -185,6 +193,7 @@ window.LedgerModule = (function () {
     updateBalances(arr);
     renderTable(arr);
     renderMonthly(arr);
+    renderChartLazy(arr);
   }
 
   /* ── Process ledger entry ─────────────────────────────────── */
@@ -237,6 +246,7 @@ window.LedgerModule = (function () {
     updateBalances(arr);
     renderTable(arr);
     renderMonthly(arr);
+    renderChartLazy(arr);
   }
 
   /* ── Update balance cards ─────────────────────────────────── */
@@ -314,6 +324,129 @@ window.LedgerModule = (function () {
         <td class="td-num ${net >= 0 ? 'td-positive' : 'td-negative'} font-bold">${getINR(net)}</td>
       </tr>`;
     }).join('');
+  }
+
+  /* ── Timeline Chart ───────────────────────────────────────── */
+  let chartInstance = null;
+  let chartDataCache = null;
+  let chartIntersectionObserver = null;
+
+  function renderChartLazy(arr) {
+    chartDataCache = arr;
+    const card = document.getElementById('ledger-chart-card');
+    if (!card) return;
+
+    if (window.IntersectionObserver) {
+      if (chartIntersectionObserver) chartIntersectionObserver.disconnect();
+      chartIntersectionObserver = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          chartIntersectionObserver.disconnect();
+          loadChartJsAndDraw();
+        }
+      }, { rootMargin: '0px 0px 200px 0px' });
+      chartIntersectionObserver.observe(card);
+    } else {
+      loadChartJsAndDraw();
+    }
+  }
+
+  function loadChartJsAndDraw() {
+    if (window.Chart) {
+      drawChart();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    script.onload = function() {
+      drawChart();
+    };
+    document.head.appendChild(script);
+  }
+
+  function drawChart() {
+    if (!window.Chart || !chartDataCache) return;
+    const canvas = document.getElementById('ledger-chart');
+    if (!canvas) return;
+    const loader = document.getElementById('ledger-chart-loader');
+    if (loader) loader.style.display = 'none';
+    canvas.style.display = 'block';
+
+    const months = {};
+    chartDataCache.forEach(function (e) {
+      const parts = (e.timestamp || '').split(' ')[0].split('-');
+      const key   = parts.length === 3 ? parts[1] + '-' + parts[2] : 'Unknown';
+      if (key === 'Unknown') return;
+      if (!months[key]) months[key] = { credit: 0, debit: 0 };
+      months[key].credit += (e.credit || 0);
+      months[key].debit  += (e.debit  || 0);
+    });
+
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    
+    // Sort chronologically
+    const sortedKeys = Object.keys(months).sort(function (a, b) {
+      const [am, ay] = a.split('-').map(function (x) { return parseInt(x, 10); });
+      const [bm, by] = b.split('-').map(function (x) { return parseInt(x, 10); });
+      if (ay !== by) return ay - by;
+      return am - bm;
+    });
+
+    const labels = sortedKeys.map(function(k) {
+      const [mm, yyyy] = k.split('-');
+      return monthNames[parseInt(mm, 10) - 1] + ' ' + (yyyy.substring(2));
+    });
+
+    const creditData = sortedKeys.map(function(k) { return months[k].credit; });
+    const debitData = sortedKeys.map(function(k) { return months[k].debit; });
+
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    // Check if body has a dark theme or light theme to adjust text colors
+    const isDark = document.body.style.backgroundColor !== '#ffffff' && document.body.style.backgroundColor !== 'white' && !document.body.classList.contains('light-theme');
+    const textColor = isDark ? '#9ca3af' : '#6b7280';
+    const gridColor = isDark ? '#374151' : '#e5e7eb';
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Credit',
+            data: creditData,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: 'Debit',
+            data: debitData,
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top', labels: { color: textColor } }
+        },
+        scales: {
+          x: { ticks: { color: textColor }, grid: { display: false } },
+          y: { ticks: { color: textColor }, grid: { color: gridColor } }
+        }
+      }
+    });
   }
 
   /* ── Storage helpers ──────────────────────────────────────── */

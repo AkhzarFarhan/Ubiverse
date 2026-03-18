@@ -57,22 +57,27 @@ window.LedgerModule = (function () {
         </form>
 
         <div class="card">
-          <div class="card-title">📋 Transactions</div>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Timestamp</th>
-                  <th>Details</th>
-                  <th>Mode</th>
-                  <th class="td-num">Credit</th>
-                  <th class="td-num">Debit</th>
-                  <th class="td-num">Total Balance</th>
-                </tr>
-              </thead>
-              <tbody id="ledger-tbody"><tr><td colspan="7" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
-            </table>
+          <div class="card-title" id="ledger-transactions-toggle" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            <span>📋 Transactions</span>
+            <span id="ledger-transactions-chevron">▼</span>
+          </div>
+          <div id="ledger-transactions-content" style="display: none;">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Timestamp</th>
+                    <th>Details</th>
+                    <th>Mode</th>
+                    <th class="td-num">Credit</th>
+                    <th class="td-num">Debit</th>
+                    <th class="td-num">Total Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="ledger-tbody"><tr><td colspan="7" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -115,8 +120,35 @@ window.LedgerModule = (function () {
             <canvas id="ledger-chart" style="display:none;"></canvas>
           </div>
         </div>
+
+        <div class="stat-cards" id="ledger-lifetime-stats" style="margin-top: 1.5rem;">
+          <div class="stat-card">
+            <div class="stat-label">Lifetime Credits</div>
+            <div class="stat-value td-positive" id="bal-lifetime-credits">₹0.00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Lifetime Debits</div>
+            <div class="stat-value td-negative" id="bal-lifetime-debits">₹0.00</div>
+          </div>
+        </div>
       </div>
     `;
+
+    // Transactions collapsable toggle
+    const txToggle = document.getElementById('ledger-transactions-toggle');
+    if (txToggle) {
+      txToggle.addEventListener('click', function() {
+        const content = document.getElementById('ledger-transactions-content');
+        const chevron = document.getElementById('ledger-transactions-chevron');
+        if (content.style.display === 'none') {
+          content.style.display = 'block';
+          chevron.textContent = '▲';
+        } else {
+          content.style.display = 'none';
+          chevron.textContent = '▼';
+        }
+      });
+    }
 
     // Type toggle (credit / debit)
     document.querySelectorAll('.ledger-type-btn').forEach(function (btn) {
@@ -256,13 +288,18 @@ window.LedgerModule = (function () {
     document.getElementById('bal-cash').textContent  = getINR(last.cash);
     document.getElementById('bal-bank').textContent  = getINR(last.bank);
     document.getElementById('bal-total').textContent = getINR(last.total);
-  }
 
-  /* ── Transaction table ────────────────────────────────────── */
-  function renderTable(arr) {
-    const tbody = document.getElementById('ledger-tbody');
-    if (!tbody) return;
-
+      let lifetimeCredit = 0;
+      let lifetimeDebit = 0;
+      arr.forEach(function(e) {
+        if (e.credit) lifetimeCredit += parseFloat(e.credit);
+        if (e.debit) lifetimeDebit += parseFloat(e.debit);
+      });
+      
+      const lcEl = document.getElementById('bal-lifetime-credits');
+      const ldEl = document.getElementById('bal-lifetime-debits');
+      if (lcEl) lcEl.textContent = getINR(lifetimeCredit);
+      if (ldEl) ldEl.textContent = getINR(lifetimeDebit);
     tbody.innerHTML = arr.slice().reverse().map(function (e) {
       const dateOnly = (e.timestamp || '').split(' ')[0] || e.timestamp;
       return `<tr>

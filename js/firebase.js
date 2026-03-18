@@ -132,10 +132,12 @@ async function sendTelegramForLedger(entry, username) {
       })
     });
     if (!res.ok) {
-        const errText = await res.text();
-        console.warn('Telegram API error:', errText);
-        if (typeof window.showToast === 'function') window.showToast('Telegram API error', 'error');
-      }
-    } catch (e) {
-      console.warn('Telegram notification failed:', e);
-      if (typeof window.showToast === 'function') window.showToast('Telegram dispatch failed: ' + (e.message || e), 'error');
+      const errText = await res.text();
+      console.warn('Telegram API error:', errText);
+      if (typeof window.showToast === 'function') window.showToast('Telegram API error', 'error');
+    }
+  } catch (e) {
+    console.warn('Telegram notification failed:', e);
+    if (typeof window.showToast === 'function') window.showToast('Telegram dispatch failed: ' + (e.message || e), 'error');
+  }
+}

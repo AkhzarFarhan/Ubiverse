@@ -218,7 +218,23 @@ const SalahModule = (function () {
     // If timestamp is available, use it directly (it contains date and time)
     const displayTimestamp = lastEntry.timestamp ? lastEntry.timestamp : formattedDate;
 
-    const currentDisplay = getKolkataTimestamp();
+    const currentDisplay = (function () {
+      const now = new Date();
+      const opts = {
+        timeZone: 'Asia/Kolkata',
+        year:     'numeric',
+        month:    '2-digit',
+        day:      '2-digit',
+        hour:     '2-digit',
+        minute:   '2-digit',
+        second:   '2-digit',
+        hour12:   true,
+      };
+      const parts = new Intl.DateTimeFormat('en-IN', opts).formatToParts(now);
+      const p = {};
+      parts.forEach(function ({ type, value }) { p[type] = value; });
+      return p.day + '-' + p.month + '-' + p.year + ' ' + p.hour + ':' + p.minute + ':' + p.second + ' ' + p.dayPeriod.toUpperCase();
+    }());
 
     infoDiv.style.display = 'block';
     infoDiv.innerHTML = 'Current time: <strong>' + currentDisplay + '</strong><br>Last updated: <strong>' + displayTimestamp + '</strong>' + addedText;
@@ -341,7 +357,9 @@ const SalahModule = (function () {
     const tbody = document.getElementById('salah-tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = arr.map(function (e, i) {
+    const consolidated = consolidateByDate(arr);
+
+    tbody.innerHTML = consolidated.map(function (e, i) {
       const displayDate = e.date ? formatDate(e.date) : `Day ${i + 1}`;
       return `<tr>
         <td>${displayDate}</td>

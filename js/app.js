@@ -16,17 +16,17 @@
     { key: 'quran',  icon: '📖', label: 'Al-Qur\'an' },
   ];
 
-  const ROUTES = {
+    const ROUTES = {
     home:   () => renderHome(),
-    daily:  () => m.DailyModule.render(),
-    gym:    () => window.GymModule.render(),
-    texter: () => window.TexterModule.render(),
-    tasbih: () => window.TasbihModule.render(),
-    salah:  () => window.SalahModule.render(),
-    ledger: () => window.LedgerModule.render(),
-    car:    () => window.CarModule.render(),
-    vibex:  () => window.VibexModule.render(),
-    quran:  () => window.QuranModule.render(),
+    daily:  () => import('./daily.js').then(m => m.DailyModule.render()),
+    gym:    () => import('./gym.js').then(m => m.GymModule.render()),
+    texter: () => import('./texter.js').then(m => m.TexterModule.render()),
+    tasbih: () => import('./tasbih.js').then(m => m.TasbihModule.render()),
+    salah:  () => import('./salah.js').then(m => m.SalahModule.render()),
+    ledger: () => import('./ledger.js').then(m => m.LedgerModule.render()),
+    car:    () => import('./car.js').then(m => m.CarModule.render()),
+    vibex:  () => import('./vibex.js').then(m => m.VibexModule.render()),
+    quran:  () => import('./quran.js').then(m => m.QuranModule.render()),
   };
 
   /* ── Home (icon grid) ─────────────────────────────────────── */
@@ -137,7 +137,7 @@
 
   /* ── Router ───────────────────────────────────────────────── */
 
-  function navigate() {
+  async function navigate() {
     const hash = window.location.hash.replace('#', '') || 'home';
     const page = ROUTES[hash] ? hash : 'home';
 
@@ -153,7 +153,7 @@
 
     // Render page module
     try {
-      ROUTES[page]();
+      await ROUTES[page]();
     } catch (err) {
       document.getElementById('app').innerHTML =
         `<div class="card"><p class="text-muted">⚠️ Error loading page: ${err.message}</p></div>`;

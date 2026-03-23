@@ -218,11 +218,7 @@ const SalahModule = (function () {
     // If timestamp is available, use it directly (it contains date and time)
     const displayTimestamp = lastEntry.timestamp ? lastEntry.timestamp : formattedDate;
 
-    const now = new Date();
-    const currentDisplay = now.toLocaleString('en-IN', {
-      day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: true
-    });
+    const currentDisplay = getKolkataTimestamp();
 
     infoDiv.style.display = 'block';
     infoDiv.innerHTML = 'Current time: <strong>' + currentDisplay + '</strong><br>Last updated: <strong>' + displayTimestamp + '</strong>' + addedText;

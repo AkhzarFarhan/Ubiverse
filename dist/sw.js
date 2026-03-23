@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ubiverse-f390c5e2';
+const CACHE_NAME = 'ubiverse-4b50ab50';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -26,7 +26,7 @@ self.addEventListener('fetch', (event) => {
   }
   
   event.respondWith(
-    caches.match(event.request)
+    caches.match(event.request, { ignoreSearch: true })
       .then((cachedResponse) => {
         if (cachedResponse) {
           return cachedResponse;

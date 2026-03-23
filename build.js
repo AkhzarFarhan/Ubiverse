@@ -34,7 +34,6 @@ async function buildJS() {
       outdir: 'dist',
       minify: true,
       sourcemap: true,
-      format: 'esm',
       target: ['es2020', 'chrome80', 'firefox80', 'safari13'],
     });
     console.log('JavaScript build completed');
@@ -69,8 +68,19 @@ async function copyCriticalCSS() {
 }
 
 // Copy HTML and other static assets
+
+  // Copy HTML and other static assets
 async function copyAssets() {
   let html = fs.readFileSync('index.html', 'utf8');
+
+  // Copy env.js if exists
+  if (fs.existsSync('js/env.js')) {
+    if (!fs.existsSync('dist/js')) fs.mkdirSync('dist/js', { recursive: true });
+    fs.copyFileSync('js/env.js', 'dist/js/env.js');
+  }
+
+  // Add version cache busting for static resources
+
 
   // Add version cache busting for static resources
   html = html.replace(/href="css\/style\.css"/g, `href="css/style.css?v=${buildHash}"`);

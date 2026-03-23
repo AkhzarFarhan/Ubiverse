@@ -27,7 +27,6 @@ async function buildJS() {
         'js/salah.js',
         'js/ledger.js',
         'js/car.js',
-        'js/vibex.js',
         'js/quran.js',
         'sw.js'
       ],

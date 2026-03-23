@@ -12,7 +12,6 @@
     { key: 'salah',  icon: '🕌', label: 'Salah' },
     { key: 'ledger', icon: '💰', label: 'Ledger' },
     { key: 'car',    icon: '🚗', label: 'Car' },
-    { key: 'vibex',  icon: '💬', label: 'Vibex' },
     { key: 'quran',  icon: '📖', label: 'Al-Qur\'an' },
   ];
 
@@ -25,7 +24,6 @@
     salah:  () => import('./salah.js').then(m => m.SalahModule.render()),
     ledger: () => import('./ledger.js').then(m => m.LedgerModule.render()),
     car:    () => import('./car.js').then(m => m.CarModule.render()),
-    vibex:  () => import('./vibex.js').then(m => m.VibexModule.render()),
     quran:  () => import('./quran.js').then(m => m.QuranModule.render()),
   };
 

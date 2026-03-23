@@ -18,7 +18,7 @@
 
   const ROUTES = {
     home:   () => renderHome(),
-    daily:  () => window.DailyModule.render(),
+    daily:  () => m.DailyModule.render(),
     gym:    () => window.GymModule.render(),
     texter: () => window.TexterModule.render(),
     tasbih: () => window.TasbihModule.render(),

@@ -1,7 +1,7 @@
 // js/gym.js
 // Gym workout log module.
 
-window.GymModule = (function () {
+const GymModule = (function () {
   'use strict';
 
   const STORAGE_KEY   = () => 'gym_' + window.AppState.username;
@@ -145,3 +145,5 @@ window.GymModule = (function () {
   return { render, submit, loadData };
 }());
 
+
+export { GymModule };

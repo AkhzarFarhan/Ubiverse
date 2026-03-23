@@ -2,7 +2,7 @@
 // Al-Qur'an — Quran reader module with reading progress tracking.
 // Loads Tanzil Simple Plain XML and renders surahs with proper Arabic font.
 
-window.QuranModule = (function () {
+const QuranModule = (function () {
   'use strict';
 
   const STORAGE_KEY   = () => 'quran_' + window.AppState.username;
@@ -485,3 +485,5 @@ window.QuranModule = (function () {
 
   return { render: render };
 }());
+
+export { QuranModule };

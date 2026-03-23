@@ -2,7 +2,7 @@
 // Digital tasbih (dhikr counter) module.
 // Modes: "standard" (SubhanAllah → Alhamdulillah → Allahu Akbar) and "custom".
 
-window.TasbihModule = (function () {
+const TasbihModule = (function () {
   'use strict';
 
   const STORAGE_KEY   = () => 'tasbih_' + window.AppState.username;
@@ -288,3 +288,5 @@ window.TasbihModule = (function () {
   return { render };
 }());
 
+
+export { TasbihModule };

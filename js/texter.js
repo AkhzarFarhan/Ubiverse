@@ -1,7 +1,7 @@
 // js/texter.js
 // Quick notes / texter module.
 
-window.TexterModule = (function () {
+const TexterModule = (function () {
   'use strict';
 
   const STORAGE_KEY   = () => 'texter_' + window.AppState.username;
@@ -265,3 +265,5 @@ window.TexterModule = (function () {
   return { render, submit, loadData };
 }());
 
+
+export { TexterModule };

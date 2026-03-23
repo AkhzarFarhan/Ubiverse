@@ -1,7 +1,7 @@
 // js/daily.js
 // Daily mood / note tracker module.
 
-window.DailyModule = (function () {
+const DailyModule = (function () {
   'use strict';
 
   const STORAGE_KEY   = () => 'daily_' + window.AppState.username;
@@ -174,3 +174,5 @@ window.DailyModule = (function () {
   return { render, submit, loadData };
 }());
 
+
+export { DailyModule };

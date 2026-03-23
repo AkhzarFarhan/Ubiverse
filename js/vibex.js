@@ -1,7 +1,7 @@
 // js/vibex.js
 // Vibex — real-time chat module with WhatsApp-style UI.
 
-window.VibexModule = (function () {
+const VibexModule = (function () {
   'use strict';
 
   /* ── Constants ────────────────────────────────────────────── */
@@ -487,3 +487,5 @@ window.VibexModule = (function () {
   return { render: render };
 
 }());
+
+export { VibexModule };

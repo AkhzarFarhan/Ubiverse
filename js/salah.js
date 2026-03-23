@@ -1,7 +1,7 @@
 // js/salah.js
 // Salah (prayer) tracking module with Chart.js visualization.
 
-window.SalahModule = (function () {
+const SalahModule = (function () {
   'use strict';
 
   const PRAYERS    = ['Fajr', 'Zohar', 'Asr', 'Maghrib', 'Isha'];
@@ -10,6 +10,25 @@ window.SalahModule = (function () {
   const FIREBASE_PATH = () => 'salah/' + window.AppState.username;
 
   let _chartInstance = null;
+  let chartLoaded = false;
+
+  async function ensureChartJS() {
+    if (chartLoaded || window.Chart) {
+      chartLoaded = true;
+      return;
+    }
+
+    // Load Chart.js dynamically
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load Chart.js'));
+      document.head.appendChild(script);
+    });
+
+    chartLoaded = true;
+  }
 
   /* ── Render ───────────────────────────────────────────────── */
   function render() {
@@ -257,9 +276,16 @@ window.SalahModule = (function () {
   }
 
   /* ── Chart ────────────────────────────────────────────────── */
-  function renderChart(arr) {
+  async function renderChart(arr) {
     const canvas = document.getElementById('salah-chart');
     if (!canvas) return;
+
+    try {
+      await ensureChartJS();
+    } catch (e) {
+      console.error(e);
+      return;
+    }
 
     if (_chartInstance) {
       _chartInstance.destroy();
@@ -369,3 +395,5 @@ window.SalahModule = (function () {
   return { render, submit, loadData };
 }());
 
+
+export { SalahModule };

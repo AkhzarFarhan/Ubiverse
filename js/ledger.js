@@ -1,7 +1,7 @@
 // js/ledger.js
 // Personal finance ledger module.
 
-window.LedgerModule = (function () {
+const LedgerModule = (function () {
   'use strict';
 
   const STORAGE_KEY   = () => 'ledger_' + window.AppState.username;
@@ -555,3 +555,5 @@ window.LedgerModule = (function () {
   return { render, submit, loadData };
 }());
 
+
+export { LedgerModule };

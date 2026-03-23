@@ -1,7 +1,7 @@
 // js/car.js
 // Vehicle log module — fuel, service, odometer tracking.
 
-window.CarModule = (function () {
+const CarModule = (function () {
   'use strict';
 
   const STORAGE_KEY   = () => 'car_' + window.AppState.username;
@@ -430,3 +430,5 @@ window.CarModule = (function () {
 
   return { render, submit, loadData };
 }());
+
+export { CarModule };

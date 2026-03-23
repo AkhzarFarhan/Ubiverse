@@ -351,6 +351,26 @@ const SalahModule = (function () {
     }).join('');
   }
 
+  
+  function consolidateByDate(arr) {
+    if (!arr || arr.length === 0) return [];
+    const consolidated = [];
+    let currentKey = arr[0].date || arr[0].timestamp || 'Unknown';
+    let currentEntry = arr[0];
+    for (let i = 1; i < arr.length; i++) {
+      const key = arr[i].date || arr[i].timestamp || `Unknown-${i}`;
+      if (key === currentKey) {
+        currentEntry = arr[i];
+      } else {
+        consolidated.push(currentEntry);
+        currentKey = key;
+        currentEntry = arr[i];
+      }
+    }
+    consolidated.push(currentEntry);
+    return consolidated;
+  }
+
   /* ── Predictions ──────────────────────────────────────────── */
   function predictDaysLeft(firstRow, lastRow, timeTaken) {
     return PRAYERS.map(function (_, i) {

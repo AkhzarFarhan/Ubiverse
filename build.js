@@ -28,6 +28,7 @@ async function buildJS() {
         'js/ledger.js',
         'js/car.js',
         'js/quran.js',
+        'js/hadith.js',
         'sw.js'
       ],
       outdir: 'dist',

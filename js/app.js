@@ -13,6 +13,7 @@
     { key: 'ledger', icon: '💰', label: 'Ledger' },
     { key: 'car',    icon: '🚗', label: 'Car' },
     { key: 'quran',  icon: '📖', label: 'Al-Qur\'an' },
+    { key: 'hadith', icon: '📜', label: 'Hadith' },
   ];
 
     const ROUTES = {
@@ -25,6 +26,7 @@
     ledger: () => import('./ledger.js').then(m => m.LedgerModule.render()),
     car:    () => import('./car.js').then(m => m.CarModule.render()),
     quran:  () => import('./quran.js').then(m => m.QuranModule.render()),
+    hadith: () => import('./hadith.js').then(m => m.HadithModule.render()),
   };
 
   /* ── Home (icon grid) ─────────────────────────────────────── */

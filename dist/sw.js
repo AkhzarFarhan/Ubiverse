@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ubiverse-7db065c9';
+const CACHE_NAME = 'ubiverse-c9c19e8c';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

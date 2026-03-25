@@ -51,7 +51,8 @@
           }).join('')}
         </div>
         <footer class="home-footer">
-          <div>Developed and Maintained by <a href="https://github.com/AkhzarFarhan" target="_blank" rel="noopener">Akhzar Farhan</a></div>
+          <div>Ideation and review by <a href="https://github.com/AkhzarFarhan" target="_blank" rel="noopener">Akhzar Farhan</a></div>
+          <div style="margin-top: 0.25rem;">Coded by Claude, Gemini &amp; GPT</div>
           <div id="home-last-updated" style="margin-top: 0.5rem; opacity: 0.7;"></div>
         </footer>
       </div>

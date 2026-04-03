@@ -344,8 +344,8 @@ const LedgerModule = (function () {
       const [am, ay] = a.split('-').map(function (x) { return parseInt(x, 10); });
       const [bm, by] = b.split('-').map(function (x) { return parseInt(x, 10); });
 
-      if (ay !== by) return ay - by;
-      return am - bm;
+      if (ay !== by) return by - ay;
+      return bm - am;
     }).map(function (k) {
       if (k === 'Unknown') {
         const netUnknown = months[k].credit - months[k].debit;
@@ -478,12 +478,16 @@ const LedgerModule = (function () {
       const labels = [];
       const creditData = [];
       const debitData = [];
+      const balanceData = [];
+      let runningBalance = 0;
 
       for(let m = 1; m <= 12; m++) {
         const mStr = m.toString().padStart(2, '0');
         labels.push(monthNames[m - 1]);
         creditData.push(yData[mStr].credit);
         debitData.push(yData[mStr].debit);
+        runningBalance += (yData[mStr].credit - yData[mStr].debit);
+        balanceData.push(parseFloat(runningBalance.toFixed(2)));
       }
 
       const ctx = canvas.getContext('2d');
@@ -509,6 +513,17 @@ const LedgerModule = (function () {
               borderWidth: 2,
               tension: 0.3,
               fill: true
+            },
+            {
+              label: 'Balance',
+              data: balanceData,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.08)',
+              borderWidth: 2.5,
+              borderDash: [6, 3],
+              tension: 0.3,
+              fill: false,
+              pointRadius: 3
             }
           ]
         },

@@ -15,6 +15,20 @@ const CarpoolModule = (function () {
     try { localStorage.setItem(PREFILL_KEY, JSON.stringify(data)); } catch (_) { /* ignore */ }
   }
 
+  function titleCase(str) {
+    if (!str) return '';
+    return str.replace(/\w\S*/g, function (word) {
+      return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
+    });
+  }
+
+  function getFullName() {
+    var user = firebase.auth().currentUser;
+    if (user && user.displayName) return titleCase(user.displayName);
+    if (window.AppState && window.AppState.displayName) return titleCase(window.AppState.displayName);
+    return '';
+  }
+
   // ==========================================
   // DATE UTILITIES
   // ==========================================
@@ -140,10 +154,6 @@ const CarpoolModule = (function () {
           '<div id="carpool-alert"></div>' +
           '<form id="carpool-ride-form" novalidate>' +
             '<div class="form-group">' +
-              '<label for="cp-owner-name">Your Name</label>' +
-              '<input type="text" id="cp-owner-name" placeholder="Enter your name" required />' +
-            '</div>' +
-            '<div class="form-group">' +
               '<label for="cp-owner-phone">Phone Number (WhatsApp)</label>' +
               '<div class="carpool-phone-row">' +
                 '<span class="carpool-phone-prefix">+91</span>' +
@@ -178,13 +188,8 @@ const CarpoolModule = (function () {
               '<input type="time" id="cp-time" required />' +
             '</div>' +
             '<div class="form-group">' +
-              '<label>Your Current Location</label>' +
-              '<div class="carpool-loc-row">' +
-                '<input type="text" id="cp-loc-text" placeholder="Click to get location" readonly style="background:var(--surface-2);font-size:0.85rem;" />' +
-                '<button type="button" class="btn btn-primary btn-sm" id="cp-loc-btn">📍 Get</button>' +
-              '</div>' +
-              '<input type="hidden" id="cp-latitude" />' +
-              '<input type="hidden" id="cp-longitude" />' +
+              '<label for="cp-pickup">Pickup Point</label>' +
+              '<input type="text" id="cp-pickup" placeholder="e.g. Samsung Campus Gate 2" />' +
               '<p style="font-size:0.75rem;color:var(--text-light);margin-top:0.25rem;">This helps riders find you easily</p>' +
             '</div>' +
             '<button type="submit" class="btn btn-primary btn-full btn-lg" id="cp-submit-btn">Post Ride</button>' +
@@ -196,19 +201,17 @@ const CarpoolModule = (function () {
 
     // Prefill from last saved data
     var saved = getSavedPrefill();
-    if (saved.owner_name)      document.getElementById('cp-owner-name').value = saved.owner_name;
     if (saved.owner_phone)     document.getElementById('cp-owner-phone').value = saved.owner_phone;
     if (saved.vehicle_type)    document.getElementById('cp-vehicle-type').value = saved.vehicle_type;
     if (saved.total_seats)     document.getElementById('cp-seats').value = saved.total_seats;
     if (saved.masjid_name)     document.getElementById('cp-masjid').value = saved.masjid_name;
     if (saved.departure_time)  document.getElementById('cp-time').value = saved.departure_time;
     if (saved.extra_helmet)    document.getElementById('cp-extra-helmet').checked = saved.extra_helmet;
+    if (saved.pickup_point)    document.getElementById('cp-pickup').value = saved.pickup_point;
 
     var vehicleSelect = document.getElementById('cp-vehicle-type');
     vehicleSelect.addEventListener('change', toggleHelmetOption);
     toggleHelmetOption(); // apply bike/car state from prefill
-
-    document.getElementById('cp-loc-btn').addEventListener('click', getLocation);
 
     document.getElementById('carpool-ride-form').addEventListener('submit', function (e) {
       e.preventDefault();
@@ -230,47 +233,19 @@ const CarpoolModule = (function () {
     }
   }
 
-  function getLocation() {
-    var locBtn = document.getElementById('cp-loc-btn');
-    var locText = document.getElementById('cp-loc-text');
-    if (!navigator.geolocation) {
-      showAlert('carpool-alert', 'Geolocation is not supported by your browser', 'error');
-      return;
-    }
-    locBtn.textContent = '⏳...';
-    locBtn.disabled = true;
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        var lat = position.coords.latitude;
-        var lng = position.coords.longitude;
-        document.getElementById('cp-latitude').value = lat;
-        document.getElementById('cp-longitude').value = lng;
-        locText.value = '📍 ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
-        locBtn.textContent = '✓ Got it';
-        locBtn.style.background = 'var(--color-success)';
-      },
-      function () {
-        showAlert('carpool-alert', 'Unable to get location. Please enable location access.', 'error');
-        locBtn.textContent = '📍 Retry';
-        locBtn.disabled = false;
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  }
 
   async function handlePostRide() {
     var btn = document.getElementById('cp-submit-btn');
-    var ownerName = document.getElementById('cp-owner-name').value.trim();
+    var ownerName = getFullName();
     var ownerPhone = document.getElementById('cp-owner-phone').value.trim();
     var vehicleType = document.getElementById('cp-vehicle-type').value;
     var seats = parseInt(document.getElementById('cp-seats').value);
     var masjid = document.getElementById('cp-masjid').value.trim();
     var time = document.getElementById('cp-time').value;
     var extraHelmet = document.getElementById('cp-extra-helmet').checked;
-    var latitude = document.getElementById('cp-latitude').value;
-    var longitude = document.getElementById('cp-longitude').value;
+    var pickupPoint = document.getElementById('cp-pickup').value.trim();
 
-    if (!ownerName || !ownerPhone || !seats || !masjid || !time) {
+    if (!ownerPhone || !seats || !masjid || !time) {
       showAlert('carpool-alert', 'Please fill in all required fields.', 'error');
       return;
     }
@@ -290,21 +265,20 @@ const CarpoolModule = (function () {
       masjid_name: masjid,
       departure_time: time,
       extra_helmet: extraHelmet,
-      latitude: latitude || null,
-      longitude: longitude || null,
+      pickup_point: pickupPoint || null,
       created_at: Date.now()
     };
 
     try {
       await firebasePost(FIREBASE_PATH, rideData);
       savePrefill({
-        owner_name: ownerName,
         owner_phone: ownerPhone,
         vehicle_type: vehicleType,
         total_seats: seats,
         masjid_name: masjid,
         departure_time: time,
-        extra_helmet: extraHelmet
+        extra_helmet: extraHelmet,
+        pickup_point: pickupPoint
       });
       showAlert('carpool-alert', 'Ride Posted Successfully!', 'success');
       setTimeout(fetchAndRenderList, 800);
@@ -380,9 +354,9 @@ const CarpoolModule = (function () {
           : '<span class="badge badge-danger">⛑️ Bring your helmet</span>';
       }
 
-      var locationLink = (ride.latitude && ride.longitude)
-        ? '<a href="https://www.google.com/maps?q=' + ride.latitude + ',' + ride.longitude + '" target="_blank" class="carpool-loc-link">📍 Navigate to pickup</a>'
-        : '<span style="font-size:0.75rem;color:var(--text-light);">📍 Location not shared</span>';
+      var pickupHtml = ride.pickup_point
+        ? '<span class="carpool-loc-link">📍 ' + ride.pickup_point + '</span>'
+        : '<span style="font-size:0.75rem;color:var(--text-light);">📍 Pickup not specified</span>';
 
       var whatsappGroupText = encodeURIComponent(
         "Jumu'ah Carpool - " + fridayDateShort + "\n" +
@@ -417,7 +391,7 @@ const CarpoolModule = (function () {
             '</div>' +
             '<div class="carpool-contact-row">' +
               '<a href="tel:+91' + ride.owner_phone + '" class="carpool-phone-link">📞 +91 ' + ride.owner_phone + '</a>' +
-              locationLink +
+              pickupHtml +
             '</div>' +
           '</div>' +
 
@@ -436,7 +410,6 @@ const CarpoolModule = (function () {
                 '</div>' +
                 '<div id="carpool-confirm-' + ride.id + '" style="display:none;">' +
                   '<div class="carpool-join-form">' +
-                    '<input type="text" id="cp-pname-' + ride.id + '" placeholder="Your Name (Required)" />' +
                     '<div class="carpool-phone-row">' +
                       '<span class="carpool-phone-prefix">+91</span>' +
                       '<input type="tel" id="cp-pphone-' + ride.id + '" pattern="[0-9]{10}" maxlength="10" placeholder="WhatsApp Number (Required)" />' +
@@ -490,11 +463,11 @@ const CarpoolModule = (function () {
   }
 
   async function handleJoin(rideId) {
-    var name = document.getElementById('cp-pname-' + rideId).value.trim();
+    var name = getFullName();
     var phone = document.getElementById('cp-pphone-' + rideId).value.trim();
 
     if (!name) {
-      showToast('Name is required!', 'error');
+      showToast('Could not get your name. Please sign in again.', 'error');
       return;
     }
     if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {

@@ -62,7 +62,7 @@
       </div>
     `;
 
-    // Fetch last commit date from GitHub
+    // Fetch last commit date from GitHub (non-blocking)
     fetch('https://api.github.com/repos/AkhzarFarhan/Ubiverse/commits?per_page=1')
       .then(r => r.json())
       .then(data => {
@@ -129,11 +129,13 @@
       window.AppState.username = username;
       window.AppState.displayName = firstName;
       localStorage.setItem('ubiverse_username', username);
+      localStorage.setItem('ubiverse_displayname', firstName);
       showApp();
     } else {
       window.AppState.username = '';
       window.AppState.displayName = '';
       localStorage.removeItem('ubiverse_username');
+      localStorage.removeItem('ubiverse_displayname');
       showLogin();
     }
   });
@@ -197,14 +199,26 @@
 
   /* ── Boot ─────────────────────────────────────────────────── */
   // If a previous session is cached in localStorage, show the app shell
-  // immediately to avoid the login-screen flash while Firebase resolves
-  // the auth state. We only toggle visibility here (not calling showApp())
-  // because AppState is not yet populated — navigate() and the header
-  // username are set by onAuthStateChanged once it confirms the session.
-  // If the session has expired, onAuthStateChanged will call showLogin().
-  if (localStorage.getItem('ubiverse_username')) {
+  // AND render the home icon grid immediately — before Firebase resolves
+  // the auth state. This gives instant visual feedback. Firebase auth
+  // will run in the background; once confirmed, showApp() updates the
+  // header username. If the session expired, onAuthStateChanged reverts
+  // to the login screen.
+  const cachedUser = localStorage.getItem('ubiverse_username');
+  if (cachedUser) {
+    // Populate AppState from cache so hashchange works even before auth resolves
+    window.AppState.username = cachedUser;
+    window.AppState.displayName = localStorage.getItem('ubiverse_displayname') || cachedUser;
+
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('layout').classList.remove('hidden');
+    document.getElementById('header-user').textContent = '👤 ' + window.AppState.displayName;
+    document.getElementById('signout-btn').classList.remove('hidden');
+
+    // Render the current page immediately (home grid or deep-linked module)
+    // For home, this is instant. For modules, they'll attempt to load and
+    // Firebase auth will have resolved by the time the user interacts.
+    navigate();
   } else {
     showLogin();
   }

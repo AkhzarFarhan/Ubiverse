@@ -14,6 +14,7 @@
     { key: 'car',    icon: '🚗', label: 'Car' },
     { key: 'quran',  icon: '📖', label: 'Al-Qur\'an' },
     { key: 'hadith', icon: '📜', label: 'Hadith' },
+    { key: 'carpool', icon: '🕌', label: 'Carpool' },
   ];
 
     const ROUTES = {
@@ -27,6 +28,7 @@
     car:    () => import('./car.js').then(m => m.CarModule.render()),
     quran:  () => import('./quran.js').then(m => m.QuranModule.render()),
     hadith: () => import('./hadith.js').then(m => m.HadithModule.render()),
+    carpool: () => import('./carpool.js').then(m => m.CarpoolModule.render()),
   };
 
   /* ── Home (icon grid) ─────────────────────────────────────── */

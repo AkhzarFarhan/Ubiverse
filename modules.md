@@ -14,6 +14,7 @@
 | `car` | [js/car.js](js/car.js) | `car_<username>` | `car/<username>` | Fuel/service records and calculations |
 | `vibex` | [js/vibex.js](js/vibex.js) | none | `vibex/users/<username>`, `vibex/chats/<chatId>/messages` | Real-time chat between users |
 | `quran` | [js/quran.js](js/quran.js) | `quran_<username>` | `quran/<username>` | Qur'an reader with per-surah reading progress |
+| `carpool` | [js/carpool.js](js/carpool.js) | none | `carpool/rides` | Jumu'ah Friday carpool — shared, not per-user |
 
 ## Shared module expectations
 - Each module renders into `#app`.

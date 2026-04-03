@@ -1839,3 +1839,279 @@ tbody tr:hover { background: #fafbff; }
   padding: 3rem 1rem;
   color: var(--text-muted);
 }
+
+/* ── Carpool Module ───────────────────────────────────────── */
+
+.carpool-date-banner {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1px solid #a7f3d0;
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.carpool-date-banner p {
+  font-size: 0.88rem;
+  color: #065f46;
+}
+.carpool-date-banner .carpool-date-sub {
+  font-size: 0.75rem;
+  color: #059669;
+  margin-top: 0.15rem;
+}
+
+.carpool-action-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.carpool-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 2px solid transparent;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.carpool-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.carpool-action-card:active {
+  transform: scale(0.97);
+}
+
+.carpool-action-offer {
+  border-color: var(--color-primary);
+}
+.carpool-action-offer:hover {
+  border-color: var(--color-primary-dark);
+}
+
+.carpool-action-find {
+  border-color: #3b82f6;
+}
+.carpool-action-find:hover {
+  border-color: #2563eb;
+}
+
+.carpool-action-icon {
+  font-size: 2.2rem;
+  margin-bottom: 0.35rem;
+}
+
+.carpool-action-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.carpool-action-offer .carpool-action-title {
+  color: var(--color-primary-dark);
+}
+.carpool-action-find .carpool-action-title {
+  color: #2563eb;
+}
+
+.carpool-action-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+/* Phone input row */
+.carpool-phone-row {
+  display: flex;
+  align-items: stretch;
+}
+.carpool-phone-prefix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.65rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-right: none;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+.carpool-phone-row input[type="tel"] {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Location row */
+.carpool-loc-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.carpool-loc-row input {
+  flex: 1;
+}
+
+/* Ride list */
+.carpool-ride-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.carpool-ride-card {
+  padding: 1rem;
+}
+
+.carpool-full-ride {
+  filter: grayscale(100%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.carpool-ride-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.65rem;
+}
+
+.carpool-ride-masjid {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.carpool-ride-time {
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.carpool-driver-info {
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.carpool-driver-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.carpool-driver-name {
+  font-weight: 600;
+  font-size: 0.93rem;
+  color: var(--text);
+}
+
+.carpool-contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.carpool-phone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #15803d;
+  background: #f0fdf4;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  transition: background var(--transition);
+}
+.carpool-phone-link:hover {
+  background: #dcfce7;
+  text-decoration: none;
+}
+
+.carpool-loc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+.carpool-loc-link:hover {
+  background: #dbeafe;
+  text-decoration: none;
+}
+
+/* Passengers */
+.carpool-passengers {
+  margin-bottom: 0.65rem;
+}
+.carpool-passengers-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.carpool-passenger-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/* Actions */
+.carpool-actions {
+  border-top: 1px solid var(--border);
+  padding-top: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.carpool-join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* WhatsApp button */
+.carpool-whatsapp-btn {
+  background: #25d366;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-radius: var(--radius);
+  transition: background var(--transition);
+}
+.carpool-whatsapp-btn:hover {
+  background: #1da851;
+}
+.carpool-whatsapp-btn svg {
+  display: inline;
+  vertical-align: middle;
+}
+
+/* Admin card */
+.carpool-admin-card {
+  border-color: #fca5a5;
+}
+
+.carpool-admin-edit-form {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

@@ -32,6 +32,7 @@ Routes are hash-based and currently include:
 - `#salah`
 - `#ledger`
 - `#car`
+- `#carpool`
 
 Default route is `#home`.
 

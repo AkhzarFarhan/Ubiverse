@@ -5,6 +5,15 @@ const CarpoolModule = (function () {
   'use strict';
 
   const FIREBASE_PATH = 'carpool/rides';
+  const PREFILL_KEY = 'carpool_last_ride';
+
+  function getSavedPrefill() {
+    try { return JSON.parse(localStorage.getItem(PREFILL_KEY)) || {}; } catch (_) { return {}; }
+  }
+
+  function savePrefill(data) {
+    try { localStorage.setItem(PREFILL_KEY, JSON.stringify(data)); } catch (_) { /* ignore */ }
+  }
 
   // ==========================================
   // DATE UTILITIES
@@ -185,8 +194,19 @@ const CarpoolModule = (function () {
 
     document.getElementById('carpool-back-home').addEventListener('click', render);
 
+    // Prefill from last saved data
+    var saved = getSavedPrefill();
+    if (saved.owner_name)      document.getElementById('cp-owner-name').value = saved.owner_name;
+    if (saved.owner_phone)     document.getElementById('cp-owner-phone').value = saved.owner_phone;
+    if (saved.vehicle_type)    document.getElementById('cp-vehicle-type').value = saved.vehicle_type;
+    if (saved.total_seats)     document.getElementById('cp-seats').value = saved.total_seats;
+    if (saved.masjid_name)     document.getElementById('cp-masjid').value = saved.masjid_name;
+    if (saved.departure_time)  document.getElementById('cp-time').value = saved.departure_time;
+    if (saved.extra_helmet)    document.getElementById('cp-extra-helmet').checked = saved.extra_helmet;
+
     var vehicleSelect = document.getElementById('cp-vehicle-type');
     vehicleSelect.addEventListener('change', toggleHelmetOption);
+    toggleHelmetOption(); // apply bike/car state from prefill
 
     document.getElementById('cp-loc-btn').addEventListener('click', getLocation);
 
@@ -277,6 +297,15 @@ const CarpoolModule = (function () {
 
     try {
       await firebasePost(FIREBASE_PATH, rideData);
+      savePrefill({
+        owner_name: ownerName,
+        owner_phone: ownerPhone,
+        vehicle_type: vehicleType,
+        total_seats: seats,
+        masjid_name: masjid,
+        departure_time: time,
+        extra_helmet: extraHelmet
+      });
       showAlert('carpool-alert', 'Ride Posted Successfully!', 'success');
       setTimeout(fetchAndRenderList, 800);
     } catch (err) {

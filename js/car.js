@@ -114,7 +114,11 @@ const CarModule = (function () {
           <div class="form-row">
             <div class="form-group">
               <label for="car-mode">Driving Mode</label>
-              <input type="text" id="car-mode" placeholder="e.g. City / Highway / Mixed" />
+              <select id="car-mode">
+                <option value="City" selected>City</option>
+                <option value="Highway">Highway</option>
+                <option value="Mixed">Mixed</option>
+              </select>
             </div>
             <div class="form-group">
               <label for="car-notes">Notes</label>
@@ -131,24 +135,13 @@ const CarModule = (function () {
             <table>
               <thead>
                 <tr>
-                  <th>#</th>
                   <th>Date</th>
-                  <th>Type</th>
-                  <th class="td-num">Odo</th>
-                  <th class="td-num">Dist</th>
-                  <th>Mode</th>
-                  <th class="td-num">Fuel L</th>
-                  <th class="td-num">Fuel ₹</th>
-                  <th class="td-num">₹/L</th>
-                  <th class="td-num">km/L</th>
-                  <th>Full</th>
-                  <th>Station</th>
-                  <th class="td-num">Svc ₹</th>
-                  <th>Service</th>
+                  <th class="td-num">ODO</th>
+                  <th class="td-num">Cost</th>
                   <th>Notes</th>
                 </tr>
               </thead>
-              <tbody id="car-tbody"><tr><td colspan="15" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
+              <tbody id="car-tbody"><tr><td colspan="4" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -223,7 +216,7 @@ const CarModule = (function () {
     const station   = document.getElementById('car-station').value.trim();
     const svcCost   = parseFloat(document.getElementById('car-svc-cost').value)    || 0;
     const svcDetails = document.getElementById('car-svc-details').value.trim();
-    const mode      = document.getElementById('car-mode').value.trim();
+    const mode      = document.getElementById('car-mode').value;
     const notes     = document.getElementById('car-notes').value.trim();
 
     // Validation
@@ -289,7 +282,7 @@ const CarModule = (function () {
     document.getElementById('car-station').value    = '';
     document.getElementById('car-svc-cost').value   = '';
     document.getElementById('car-svc-details').value = '';
-    document.getElementById('car-mode').value       = '';
+    document.getElementById('car-mode').value       = 'City';
     document.getElementById('car-notes').value      = '';
 
     renderSummary(arr);
@@ -342,7 +335,7 @@ const CarModule = (function () {
 
     if (arr.length === 0) {
       const tbody = document.getElementById('car-tbody');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="15" class="text-muted text-sm text-center">No entries yet.</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted text-sm text-center">No entries yet.</td></tr>';
       return;
     }
 
@@ -380,27 +373,21 @@ const CarModule = (function () {
     if (!tbody) return;
 
     tbody.innerHTML = arr.slice().reverse().map(function (e) {
-      const typeBadge = {
-        fuel: 'badge-primary', service: 'badge-warning',
-        'fuel+service': 'badge-success', odometer: 'badge-neutral',
-      }[e.entryType] || 'badge-neutral';
+      var totalCost = (e.totalCost || 0) + (e.serviceCost || 0);
+
+      // Notes column: "Fuel" for fuel entries, service details for service, combine if both
+      var noteParts = [];
+      if (e.fuelVolume > 0) noteParts.push('Fuel');
+      if (e.serviceCost > 0 && e.serviceDetails) noteParts.push(e.serviceDetails);
+      else if (e.serviceCost > 0) noteParts.push('Service');
+      if (e.notes) noteParts.push(e.notes);
+      var noteText = noteParts.join(' | ') || '—';
 
       return `<tr>
-        <td>${e.entry_id}</td>
         <td style="white-space:nowrap">${formatDate(e.date)}</td>
-        <td><span class="badge ${typeBadge}">${e.entryType}</span></td>
         <td class="td-num">${e.odometer.toLocaleString()}</td>
-        <td class="td-num">${e.distanceTraveled > 0 ? '+' + e.distanceTraveled : '—'}</td>
-        <td>${escapeHtml(e.drivingMode || '')}</td>
-        <td class="td-num">${e.fuelVolume  > 0 ? e.fuelVolume  : '—'}</td>
-        <td class="td-num">${e.totalCost   > 0 ? getINR(e.totalCost) : '—'}</td>
-        <td class="td-num">${e.pricePerUnit > 0 ? e.pricePerUnit.toFixed(1) : '—'}</td>
-        <td class="td-num">${e.mileage != null ? e.mileage + ' km/L' : '—'}</td>
-        <td class="td-center">${e.fullTank ? '✅' : ''}</td>
-        <td>${escapeHtml(e.station || '')}</td>
-        <td class="td-num">${e.serviceCost > 0 ? getINR(e.serviceCost) : '—'}</td>
-        <td>${escapeHtml(e.serviceDetails || '')}</td>
-        <td>${escapeHtml(e.notes || '')}</td>
+        <td class="td-num">${totalCost > 0 ? getINR(totalCost) : '—'}</td>
+        <td>${escapeHtml(noteText)}</td>
       </tr>`;
     }).join('');
   }

@@ -288,25 +288,27 @@ const LedgerModule = (function () {
     document.getElementById('bal-bank').textContent  = getINR(last.bank);
     document.getElementById('bal-total').textContent = getINR(last.total);
 
-      let lifetimeCredit = 0;
-      let lifetimeDebit = 0;
-      arr.forEach(function(e) {
-        // Skip internal transfers — they don't affect total balance
-        if (e.mode === 'CashToBank' || e.mode === 'BankToCash') return;
-        if (e.credit) lifetimeCredit += parseFloat(e.credit);
-        if (e.debit) lifetimeDebit += parseFloat(e.debit);
-      });
-      
-      const lcEl = document.getElementById('bal-lifetime-credits');
-      const ldEl = document.getElementById('bal-lifetime-debits');
-      if (lcEl) lcEl.textContent = getINR(lifetimeCredit);
-      if (ldEl) ldEl.textContent = getINR(lifetimeDebit);
-    }
+    let lifetimeCredit = 0;
+    let lifetimeDebit = 0;
+    arr.forEach(function(e) {
+      // Skip internal transfers — they don't affect total balance
+      if (e.mode === 'CashToBank' || e.mode === 'BankToCash') return;
+      if (e.credit) lifetimeCredit += parseFloat(e.credit);
+      if (e.debit) lifetimeDebit += parseFloat(e.debit);
+    });
+
+    const lcEl = document.getElementById('bal-lifetime-credits');
+    const ldEl = document.getElementById('bal-lifetime-debits');
+    if (lcEl) lcEl.textContent = getINR(lifetimeCredit);
+    if (ldEl) ldEl.textContent = getINR(lifetimeDebit);
+  }
 
   /* ── Transaction table ────────────────────────────────────── */
   function renderTable(arr) {
     const tbody = document.getElementById('ledger-tbody');
     if (!tbody) return;
+
+    const isTransfer = function (mode) { return mode === 'CashToBank' || mode === 'BankToCash'; };
 
     tbody.innerHTML = arr.slice().reverse().map(function (e) {
       const dateOnly = (e.timestamp || '').split(' ')[0] || e.timestamp;
@@ -315,8 +317,8 @@ const LedgerModule = (function () {
         <td style="white-space:nowrap;font-size:.75rem">${dateOnly}</td>
         <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(e.details || '')}">${escapeHtml(e.details || '')}</td>
         <td><span class="badge badge-neutral">${MODE_SHORT[e.mode] || e.mode}</span></td>
-        <td class="td-num td-positive">${e.credit > 0 ? getINR(e.credit) : '—'}</td>
-        <td class="td-num td-negative">${e.debit  > 0 ? getINR(e.debit)  : '—'}</td>
+        <td class="td-num td-positive">${isTransfer(e.mode) ? '—' : (e.credit > 0 ? getINR(e.credit) : '—')}</td>
+        <td class="td-num td-negative">${isTransfer(e.mode) ? '—' : (e.debit  > 0 ? getINR(e.debit)  : '—')}</td>
         <td class="td-num font-bold">${getINR(e.total)}</td>
       </tr>`;
     }).join('');
@@ -420,13 +422,13 @@ const LedgerModule = (function () {
     wrapper.innerHTML = ''; // Clear loader and previous canvases
 
     const yearsData = {}; // { 'YYYY': { 'MM': { credit: 0, debit: 0 } } }
-    
+
     chartDataCache.forEach(function (e) {
       // Skip internal transfers — they don't affect total balance
       if (e.mode === 'CashToBank' || e.mode === 'BankToCash') return;
       const parts = (e.timestamp || '').split(' ')[0].split('-');
       if (parts.length < 3) return;
-      
+
       const mm = parts[1];
       const yyyy = parts[2];
 
@@ -437,7 +439,7 @@ const LedgerModule = (function () {
           yearsData[yyyy][mStr] = { credit: 0, debit: 0 };
         }
       }
-      
+
       yearsData[yyyy][mm].credit += (e.credit || 0);
       yearsData[yyyy][mm].debit  += (e.debit  || 0);
     });
@@ -462,7 +464,7 @@ const LedgerModule = (function () {
       // Create UI block for year
       const yearBlock = document.createElement('div');
       yearBlock.style.marginBottom = '2.5rem';
-      
+
       const yearTitle = document.createElement('h3');
       yearTitle.style.fontSize = '1.1rem';
       yearTitle.style.marginBottom = '0.5rem';
@@ -474,7 +476,7 @@ const LedgerModule = (function () {
       canvasContainer.style.position = 'relative';
       canvasContainer.style.height = '250px';
       canvasContainer.style.width = '100%';
-      
+
       const canvas = document.createElement('canvas');
       canvasContainer.appendChild(canvas);
       yearBlock.appendChild(canvasContainer);
@@ -575,6 +577,5 @@ const LedgerModule = (function () {
 
   return { render, submit, loadData };
 }());
-
 
 export { LedgerModule };

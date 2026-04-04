@@ -291,6 +291,8 @@ const LedgerModule = (function () {
       let lifetimeCredit = 0;
       let lifetimeDebit = 0;
       arr.forEach(function(e) {
+        // Skip internal transfers — they don't affect total balance
+        if (e.mode === 'CashToBank' || e.mode === 'BankToCash') return;
         if (e.credit) lifetimeCredit += parseFloat(e.credit);
         if (e.debit) lifetimeDebit += parseFloat(e.debit);
       });
@@ -327,6 +329,8 @@ const LedgerModule = (function () {
 
     const months = {};
     arr.forEach(function (e) {
+      // Skip internal transfers — they don't affect total balance
+      if (e.mode === 'CashToBank' || e.mode === 'BankToCash') return;
       // Parse month from timestamp "DD-MM-YYYY ..."
       const parts = (e.timestamp || '').split(' ')[0].split('-');
       const key   = parts.length === 3 ? parts[1] + '-' + parts[2] : 'Unknown';
@@ -418,6 +422,8 @@ const LedgerModule = (function () {
     const yearsData = {}; // { 'YYYY': { 'MM': { credit: 0, debit: 0 } } }
     
     chartDataCache.forEach(function (e) {
+      // Skip internal transfers — they don't affect total balance
+      if (e.mode === 'CashToBank' || e.mode === 'BankToCash') return;
       const parts = (e.timestamp || '').split(' ')[0].split('-');
       if (parts.length < 3) return;
       

@@ -137,11 +137,12 @@ const CarModule = (function () {
                 <tr>
                   <th>Date</th>
                   <th class="td-num">ODO</th>
+                  <th class="td-num">Driven</th>
                   <th class="td-num">Cost</th>
                   <th>Notes</th>
                 </tr>
               </thead>
-              <tbody id="car-tbody"><tr><td colspan="4" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
+              <tbody id="car-tbody"><tr><td colspan="5" class="text-muted text-sm text-center">Loading…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -335,7 +336,7 @@ const CarModule = (function () {
 
     if (arr.length === 0) {
       const tbody = document.getElementById('car-tbody');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-muted text-sm text-center">No entries yet.</td></tr>';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-sm text-center">No entries yet.</td></tr>';
       return;
     }
 
@@ -383,9 +384,11 @@ const CarModule = (function () {
       if (e.notes) noteParts.push(e.notes);
       var noteText = noteParts.join(' | ') || '—';
 
+      var driven = e.distanceTraveled || 0;
       return `<tr>
         <td style="white-space:nowrap">${formatDate(e.date)}</td>
         <td class="td-num">${e.odometer.toLocaleString()}</td>
+        <td class="td-num">${driven > 0 ? driven.toLocaleString() + ' km' : '—'}</td>
         <td class="td-num">${totalCost > 0 ? getINR(totalCost) : '—'}</td>
         <td>${escapeHtml(noteText)}</td>
       </tr>`;

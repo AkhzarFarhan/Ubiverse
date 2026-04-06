@@ -57,7 +57,8 @@
         <footer class="home-footer">
           <div>Ideation and review by <a href="https://github.com/AkhzarFarhan" target="_blank" rel="noopener">Akhzar Farhan</a></div>
           <div style="margin-top: 0.25rem;">Coded by Claude, Gemini &amp; GPT</div>
-          <div id="home-last-updated" style="margin-top: 0.5rem; opacity: 0.7;"></div>
+          <div id="home-visit-count" style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.8;">Visits: Loading...</div>
+          <div id="home-last-updated" style="margin-top: 0.25rem; opacity: 0.7;"></div>
         </footer>
       </div>
     `;
@@ -80,16 +81,36 @@
       .catch(e => {
         console.warn('Could not fetch last update time', e);
       });
+
+    // Increment and display visit count using Firebase Realtime Database
+    if (window.firebase && window.firebase.database) {
+      const visitRef = window.firebase.database().ref('public_stats/visitCount');
+      visitRef.transaction(function(current) {
+        return (current || 0) + 1;
+      }, function(error, committed, snapshot) {
+        const countEl = document.getElementById('home-visit-count');
+        if (countEl) {
+          if (error) {
+            countEl.innerHTML = 'Visits: Unavailable';
+          } else {
+            countEl.innerHTML = 'Visits: ' + snapshot.val().toLocaleString();
+          }
+        }
+      });
+    }
   }
 
   /* ── Auth ─────────────────────────────────────────────────── */
 
-  function showApp() {
+  // Track whether the boot section already rendered the page
+  let appAlreadyRendered = false;
+
+  function showApp(skipNavigate) {
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('layout').classList.remove('hidden');
     document.getElementById('header-user').textContent = '👤 ' + window.AppState.displayName;
     document.getElementById('signout-btn').classList.remove('hidden');
-    navigate();
+    if (!skipNavigate) navigate();
   }
 
   function showLogin() {
@@ -130,7 +151,14 @@
       window.AppState.displayName = firstName;
       localStorage.setItem('ubiverse_username', username);
       localStorage.setItem('ubiverse_displayname', firstName);
-      showApp();
+
+      // If the boot section already rendered the page from cache,
+      // just update the header — don't re-render and cause a jitter.
+      if (appAlreadyRendered) {
+        showApp(true);   // skip navigate()
+      } else {
+        showApp(false);  // fresh sign-in, render the page
+      }
     } else {
       window.AppState.username = '';
       window.AppState.displayName = '';
@@ -219,6 +247,7 @@
     // For home, this is instant. For modules, they'll attempt to load and
     // Firebase auth will have resolved by the time the user interacts.
     navigate();
+    appAlreadyRendered = true;
   } else {
     showLogin();
   }

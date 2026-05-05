@@ -1,12 +1,8 @@
 // js/lte.js
 // LTE MAC Sub-Webapp - Displays 3GPP LTE interactions
 
-(function () {
+const LteModule = (function () {
   'use strict';
-
-  window.LteModule = {
-    render: render
-  };
 
   const STYLES = `
     .lte-container { max-width: 1000px; margin: 0 auto; padding-bottom: 2rem; font-family: 'Inter', var(--font); }
@@ -282,6 +278,7 @@
         ` : ''}
       </div>
     `;
-  }
+  return { render };
+}());
 
-})();
+export { LteModule };

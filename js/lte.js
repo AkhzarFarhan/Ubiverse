@@ -75,14 +75,14 @@
       document.head.appendChild(styleEl);
     }
 
-    appEl.innerHTML = \`
+    appEl.innerHTML = `
       <div class="lte-container">
         <div class="lte-loading">
           <div class="lte-spinner"></div>
           <div>Loading 3GPP Specifications...</div>
         </div>
       </div>
-    \`;
+    `;
 
     try {
       const response = await fetch('assets/3gpp-lte.json');
@@ -90,35 +90,35 @@
       const data = await response.json();
       renderContent(appEl, data);
     } catch (err) {
-      appEl.innerHTML = \`
+      appEl.innerHTML = `
         <div class="lte-container">
           <div class="card" style="border-left: 4px solid var(--color-danger);">
             <h3 style="color: var(--color-danger); margin-bottom: 0.5rem;">Error Loading Data</h3>
-            <p>\${err.message}</p>
+            <p>${err.message}</p>
           </div>
         </div>
-      \`;
+      `;
     }
   }
 
   function renderContent(appEl, data) {
     const doc = data.document;
     
-    let html = \`
+    let html = `
       <div class="lte-container fade-in">
         <header class="lte-header">
-          <h1 class="lte-title">📡 \${doc.title}</h1>
-          <p class="lte-subtitle">\${doc.expert_overview}</p>
+          <h1 class="lte-title">📡 ${doc.title}</h1>
+          <p class="lte-subtitle">${doc.expert_overview}</p>
           <div class="lte-ref-container">
-            \${doc.standard_references.map(ref => \`<span class="lte-ref-badge">\${ref}</span>\`).join('')}
+            ${doc.standard_references.map(ref => `<span class="lte-ref-badge">${ref}</span>`).join('')}
           </div>
         </header>
 
         <div class="lte-tab-container">
           <button class="lte-tab active" data-target="overview">Overview</button>
-          <button class="lte-tab" data-target="mac_rlc">MAC ↔ RLC (\${data.summary_interaction_count.mac_rlc})</button>
-          <button class="lte-tab" data-target="mac_rrc">MAC ↔ RRC (\${data.summary_interaction_count.mac_rrc})</button>
-          <button class="lte-tab" data-target="mac_phy">MAC ↔ PHY (\${data.summary_interaction_count.mac_phy})</button>
+          <button class="lte-tab" data-target="mac_rlc">MAC ↔ RLC (${data.summary_interaction_count.mac_rlc})</button>
+          <button class="lte-tab" data-target="mac_rrc">MAC ↔ RRC (${data.summary_interaction_count.mac_rrc})</button>
+          <button class="lte-tab" data-target="mac_phy">MAC ↔ PHY (${data.summary_interaction_count.mac_phy})</button>
         </div>
 
         <div id="lte-sections">
@@ -128,41 +128,41 @@
               <div class="lte-overview-card" style="grid-column: 1 / -1;">
                 <h3>🧠 Expert Architectural Assessment</h3>
                 <p style="color: var(--text-muted); line-height: 1.6; font-size: 1.05rem; margin-bottom: 1.5rem;">
-                  \${data.overall_expert_commentary.architecture_assessment}
+                  ${data.overall_expert_commentary.architecture_assessment}
                 </p>
                 <div class="lte-info-grid">
                   <div class="lte-info-box">
                     <div class="lte-info-title">✨ Key Design Principles</div>
                     <ul class="lte-list">
-                      \${data.overall_expert_commentary.key_design_principles.map(p => \`<li>\${p}</li>\`).join('')}
+                      ${data.overall_expert_commentary.key_design_principles.map(p => `<li>${p}</li>`).join('')}
                     </ul>
                   </div>
                   <div class="lte-info-box" style="background: #fef2f2; border-color: #fecaca;">
                     <div class="lte-info-title" style="color: #b91c1c;">⚠️ Known Limitations</div>
                     <ul class="lte-list lte-constraint-list">
-                      \${data.overall_expert_commentary.known_limitations.map(l => \`<li>\${l}</li>\`).join('')}
+                      ${data.overall_expert_commentary.known_limitations.map(l => `<li>${l}</li>`).join('')}
                     </ul>
                   </div>
                 </div>
                 <div class="lte-expert-box" style="margin-top: 0; background: #f8fafc; border-left-color: #3b82f6;">
                   <div class="lte-expert-title" style="color: #1d4ed8;">🚀 Comparison to 5G NR</div>
-                  <div class="lte-expert-content" style="color: #1e40af;">\${data.overall_expert_commentary.comparison_to_nr}</div>
+                  <div class="lte-expert-content" style="color: #1e40af;">${data.overall_expert_commentary.comparison_to_nr}</div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- MAC-RLC Section -->
-          \${renderInteractionSection('mac_rlc', data.mac_rlc_interactions)}
+          ${renderInteractionSection('mac_rlc', data.mac_rlc_interactions)}
 
           <!-- MAC-RRC Section -->
-          \${renderInteractionSection('mac_rrc', data.mac_rrc_interactions)}
+          ${renderInteractionSection('mac_rrc', data.mac_rrc_interactions)}
 
           <!-- MAC-PHY Section -->
-          \${renderInteractionSection('mac_phy', data.mac_phy_interactions)}
+          ${renderInteractionSection('mac_phy', data.mac_phy_interactions)}
         </div>
       </div>
-    \`;
+    `;
 
     appEl.innerHTML = html;
 
@@ -188,17 +188,17 @@
   }
 
   function renderInteractionSection(id, sectionData) {
-    return \`
-      <div class="lte-section-content" id="sec-\${id}">
+    return `
+      <div class="lte-section-content" id="sec-${id}">
         <div style="margin-bottom: 2rem;">
-          <p style="font-size: 1.1rem; color: var(--text); line-height: 1.6;">\${sectionData.description}</p>
+          <p style="font-size: 1.1rem; color: var(--text); line-height: 1.6;">${sectionData.description}</p>
           <div style="margin-top: 0.5rem; display: inline-block; background: var(--surface-2); padding: 0.4rem 1rem; border-radius: var(--radius); font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">
-            \${sectionData.direction_note}
+            ${sectionData.direction_note}
           </div>
         </div>
-        \${sectionData.primitives.map(renderPrimitive).join('')}
+        ${sectionData.primitives.map(renderPrimitive).join('')}
       </div>
-    \`;
+    `;
   }
 
   function renderPrimitive(prim) {
@@ -207,81 +207,81 @@
       if (!params) return '';
       if (Array.isArray(params)) {
         if (typeof params[0] === 'string') {
-          return \`<ul class="lte-list lte-param-list">
-            \${params.map(p => {
+          return `<ul class="lte-list lte-param-list">
+            ${params.map(p => {
               const parts = p.split(':');
               if (parts.length > 1) {
-                return \`<li class="lte-param-item"><span class="lte-param-key">\${parts[0].trim()}</span>: \${parts.slice(1).join(':').trim()}</li>\`;
+                return `<li class="lte-param-item"><span class="lte-param-key">${parts[0].trim()}</span>: ${parts.slice(1).join(':').trim()}</li>`;
               }
-              return \`<li class="lte-param-item">\${p}</li>\`;
+              return `<li class="lte-param-item">${p}</li>`;
             }).join('')}
-          </ul>\`;
+          </ul>`;
         } else if (typeof params[0] === 'object' && params[0].parameter) {
           // Object format
-          return \`<ul class="lte-list lte-param-list">
-            \${params.map(p => \`<li class="lte-param-item"><span class="lte-param-key">\${p.parameter}</span>: \${p.meaning}</li>\`).join('')}
-          </ul>\`;
+          return `<ul class="lte-list lte-param-list">
+            ${params.map(p => `<li class="lte-param-item"><span class="lte-param-key">${p.parameter}</span>: ${p.meaning}</li>`).join('')}
+          </ul>`;
         }
       }
       return String(params);
     };
 
-    return \`
+    return `
       <div class="lte-card">
         <div class="lte-primitive-name">
-          <span>\${prim.primitive_name}</span>
-          \${prim.direction ? \`<span class="lte-direction-badge">🔁 \${prim.direction}</span>\` : ''}
+          <span>${prim.primitive_name}</span>
+          ${prim.direction ? `<span class="lte-direction-badge">🔁 ${prim.direction}</span>` : ''}
         </div>
         
-        \${prim.also_known_as ? \`<div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem; font-style: italic;">AKA: \${prim.also_known_as}</div>\` : ''}
+        ${prim.also_known_as ? `<div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem; font-style: italic;">AKA: ${prim.also_known_as}</div>` : ''}
         
-        <div class="lte-card-desc">\${prim.description}</div>
+        <div class="lte-card-desc">${prim.description}</div>
         
         <div class="lte-info-grid">
           <div class="lte-info-box">
             <div class="lte-info-title">📚 Specification</div>
-            <div class="lte-info-content" style="font-family: monospace; font-size: 0.9rem;">\${prim.spec_reference || 'N/A'}</div>
+            <div class="lte-info-content" style="font-family: monospace; font-size: 0.9rem;">${prim.spec_reference || 'N/A'}</div>
           </div>
           
-          \${prim.logical_channel_involved ? \`
+          ${prim.logical_channel_involved ? `
             <div class="lte-info-box">
               <div class="lte-info-title">🛤️ Logical Channels</div>
-              <div class="lte-info-content">\${prim.logical_channel_involved}</div>
+              <div class="lte-info-content">${prim.logical_channel_involved}</div>
             </div>
-          \` : ''}
+          ` : ''}
           
-          \${prim.rrc_message_carrier ? \`
+          ${prim.rrc_message_carrier ? `
             <div class="lte-info-box">
               <div class="lte-info-title">✉️ RRC Carrier</div>
-              <div class="lte-info-content">\${prim.rrc_message_carrier}</div>
+              <div class="lte-info-content">${prim.rrc_message_carrier}</div>
             </div>
-          \` : ''}
+          ` : ''}
         </div>
 
-        \${prim.parameters || prim.key_parameters ? \`
+        ${prim.parameters || prim.key_parameters ? `
           <div class="lte-info-box" style="margin-bottom: 1rem; background: var(--surface);">
             <div class="lte-info-title">⚙️ Parameters</div>
-            \${formatParams(prim.parameters || prim.key_parameters)}
+            ${formatParams(prim.parameters || prim.key_parameters)}
           </div>
-        \` : ''}
+        ` : ''}
 
-        \${prim.constraints && prim.constraints.length > 0 ? \`
+        ${prim.constraints && prim.constraints.length > 0 ? `
           <div style="margin-bottom: 1rem; margin-top: 1.5rem;">
             <div class="lte-info-title" style="color: var(--color-danger);">⚠️ Constraints & Behaviors</div>
             <ul class="lte-list lte-constraint-list">
-              \${prim.constraints.map(c => \`<li>\${c}</li>\`).join('')}
+              ${prim.constraints.map(c => `<li>${c}</li>`).join('')}
             </ul>
           </div>
-        \` : ''}
+        ` : ''}
 
-        \${prim.expert_comment ? \`
+        ${prim.expert_comment ? `
           <div class="lte-expert-box">
             <div class="lte-expert-title">💡 Expert Comment</div>
-            <div class="lte-expert-content">\${prim.expert_comment}</div>
+            <div class="lte-expert-content">${prim.expert_comment}</div>
           </div>
-        \` : ''}
+        ` : ''}
       </div>
-    \`;
+    `;
   }
 
 })();

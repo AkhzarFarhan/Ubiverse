@@ -15,6 +15,7 @@
 | `vibex` | [js/vibex.js](js/vibex.js) | none | `vibex/users/<username>`, `vibex/chats/<chatId>/messages` | Real-time chat between users |
 | `quran` | [js/quran.js](js/quran.js) | `quran_<username>` | `quran/<username>` | Qur'an reader with per-surah reading progress |
 | `carpool` | [js/carpool.js](js/carpool.js) | none | `carpool/rides` | Jumu'ah Friday carpool — shared, not per-user |
+| `lte` | [js/lte.js](js/lte.js) | none | none | LTE MAC 3GPP Interactions Viewer |
 
 ## Shared module expectations
 - Each module renders into `#app`.

@@ -1,0 +1,654 @@
+{
+  "document": {
+    "title": "LTE MAC Layer: All Interactions with RLC, RRC, and PHY",
+    "standard_references": [
+      "3GPP TS 36.321 — E-UTRA MAC protocol specification",
+      "3GPP TS 36.322 — E-UTRA RLC protocol specification",
+      "3GPP TS 36.331 — E-UTRA RRC protocol specification",
+      "3GPP TS 36.211 — E-UTRA Physical Channels and Modulation",
+      "3GPP TS 36.212 — E-UTRA Multiplexing and Channel Coding",
+      "3GPP TS 36.213 — E-UTRA Physical Layer Procedures"
+    ],
+    "expert_overview": "The MAC (Medium Access Control) sublayer in LTE E-UTRA is the central hub of the Layer 2 protocol stack. It interfaces upward with RLC (for SDU/PDU data exchange and status), laterally with RRC (for configuration and control commands), and downward with PHY (for transport block delivery, scheduling grants, timing, and physical channel measurements). Understanding these three sets of interactions is critical to comprehending how LTE achieves its scheduling efficiency, HARQ reliability, and QoS guarantees. All interactions are primitive-based in the 3GPP model, though real implementations use internal APIs, shared memory, or inter-task messaging."
+  },
+
+  "mac_rlc_interactions": {
+    "description": "Interactions between MAC and RLC layers as defined in TS 36.321 and TS 36.322. MAC sits below RLC and is responsible for multiplexing/demultiplexing RLC PDUs into MAC PDUs (transport blocks). The interface is built around logical channels.",
+    "direction_note": "Logical channels define WHAT data is transferred. MAC maps logical channels to transport channels for actual transmission.",
+
+    "primitives": [
+
+      {
+        "primitive_name": "MAC-DATA-REQ (UL direction: RLC → MAC)",
+        "also_known_as": "RLC SDU / RLC PDU submission to MAC",
+        "direction": "RLC → MAC (Uplink path)",
+        "spec_reference": "TS 36.321 §5.4, TS 36.322",
+        "logical_channel_involved": "All UL logical channels: CCCH, DCCH, DTCH",
+        "description": "When MAC has scheduled uplink resources (via UL grant from PHY), it requests PDU data from RLC entities via this interaction. MAC issues a 'data request' per logical channel, specifying the maximum byte budget. RLC responds with PDUs filled up to that budget.",
+        "parameters": [
+          "logicalChannelID (LCID): identifies which logical channel (e.g., LCID=1 for SRB1, LCID=3–10 for DRBs)",
+          "maxBytes: maximum number of bytes MAC can accept from this RLC entity for this TTI",
+          "UL_GRANT_size: derived from the UL grant received from PHY"
+        ],
+        "constraints": [
+          "MAC must respect Logical Channel Prioritization (LCP) procedure (TS 36.321 §5.4.3.1) — higher priority LCHs served first",
+          "The total bytes across all LCHs must not exceed transport block size minus MAC header overhead",
+          "If RLC has no data, it returns a zero-length PDU; MAC may pad with padding CE",
+          "In AM mode, RLC may return a combination of new data and retransmitted segments",
+          "MAC cannot split a single RLC PDU across two transport blocks (it must fit within the TB)"
+        ],
+        "expert_comment": "This is effectively a pull model — MAC drives the request. This is intentional: the scheduler at MAC has the full view of available grant size, QoS priorities, and BSR status. RLC simply fulfills requests. A common implementation pitfall is incorrect LCID-to-logical-channel mapping, especially for split bearers in LTE-NR Dual Connectivity scenarios."
+      },
+
+      {
+        "primitive_name": "MAC-DATA-IND (DL direction: MAC → RLC)",
+        "also_known_as": "RLC PDU delivery from MAC to RLC",
+        "direction": "MAC → RLC (Downlink path)",
+        "spec_reference": "TS 36.321 §5.5, TS 36.322 §5.1",
+        "logical_channel_involved": "All DL logical channels: PCCH, BCCH, CCCH, DCCH, DTCH",
+        "description": "After MAC successfully receives and decodes a transport block from PHY (HARQ ACK), it demultiplexes the MAC PDU using the MAC subheader LCIDs and delivers each RLC PDU to the correct RLC entity via this indication. This is the primary data delivery path in downlink.",
+        "parameters": [
+          "logicalChannelID (LCID): parsed from each MAC subheader",
+          "RLC_PDU: the actual payload bytes",
+          "length: byte length of the RLC PDU",
+          "RNTI: the UE's identity (C-RNTI for unicast)"
+        ],
+        "constraints": [
+          "MAC must deliver PDUs in reception order per logical channel to preserve RLC sequence integrity",
+          "HARQ retransmissions are resolved entirely at MAC — RLC only receives the final combined TB after HARQ soft combining",
+          "If TB CRC fails after max HARQ retransmissions, MAC discards the TB silently; RLC (in AM mode) eventually triggers its ARQ retransmission based on missing status",
+          "MAC must correctly handle padding CEs and not pass them to RLC",
+          "Reserved LCIDs (e.g., 0x3E for padding, 0x3F for extended) must be filtered before RLC delivery"
+        ],
+        "expert_comment": "The clean separation between HARQ (at MAC) and ARQ (at RLC AM mode) is architecturally elegant. HARQ provides fast, physical-layer error correction within ~8ms RTT; ARQ provides reliable delivery at a higher latency. The combination gives LTE its low BLER on PDSCH while maintaining data integrity. A careful implementation must ensure thread safety between HARQ combining and PDU delivery."
+      },
+
+      {
+        "primitive_name": "Buffer Status Report (BSR) — MAC ← RLC trigger",
+        "also_known_as": "BSR trigger event from RLC",
+        "direction": "RLC → MAC (event-driven notification)",
+        "spec_reference": "TS 36.321 §5.4.5",
+        "logical_channel_involved": "All UL DRB and SRB logical channels",
+        "description": "When RLC has new data arriving in its transmission buffer (new SDU from PDCP), it notifies MAC that buffered data is available. This triggers MAC to generate and transmit a BSR MAC CE in the uplink. The BSR tells the eNodeB scheduler how much data the UE has pending per logical channel group (LCG).",
+        "bsr_types": [
+          {
+            "type": "Short BSR",
+            "trigger": "Single LCG has data; triggered periodically or on new arrival",
+            "size": "2 bytes",
+            "fields": "LCG ID (2 bits) + Buffer Size (6 bits)"
+          },
+          {
+            "type": "Long BSR",
+            "trigger": "Multiple LCGs have data, or retxBSR timer expires",
+            "size": "4 bytes",
+            "fields": "Buffer Size for each of 4 LCGs (6 bits each)"
+          },
+          {
+            "type": "Truncated BSR",
+            "trigger": "Insufficient space in TB to include Long BSR",
+            "size": "2 bytes",
+            "fields": "Reports only the highest-priority LCG"
+          },
+          {
+            "type": "Periodic BSR",
+            "trigger": "periodicBSR-Timer expiry, even if no new data",
+            "size": "Short or Long depending on LCG count",
+            "fields": "Same as Short/Long"
+          }
+        ],
+        "bsr_timers": [
+          "retxBSR-Timer: if MAC has not received an UL grant after sending a BSR, retransmit BSR",
+          "periodicBSR-Timer: send a BSR periodically regardless of new data arrival"
+        ],
+        "constraints": [
+          "Buffer sizes in BSR are quantized into index tables (TS 36.321 Table 6.1.3.1-1) — not exact byte counts; this introduces quantization error in scheduler decisions",
+          "BSR is triggered only when RLC data crosses from empty to non-empty (edge trigger); sustained data does not continuously trigger new BSRs",
+          "LCG-to-logical-channel mapping is configured by RRC via logicalChannelConfig IE",
+          "A UE must cancel a pending BSR trigger if the UL grant arrives before BSR is transmitted and the grant is large enough to accommodate all pending data"
+        ],
+        "expert_comment": "BSR quantization is a known imperfection in LTE MAC design. The buffer size table maps large ranges of actual buffer size to a single index, causing the eNB scheduler to over- or under-allocate resources. In delay-sensitive VoIP traffic patterns, this can cause jitter. Some vendors implement proprietary BSR enhancements or semi-persistent scheduling to work around this for GBR bearers."
+      },
+
+      {
+        "primitive_name": "MAC-STATUS-IND / HARQ feedback to RLC (implicit)",
+        "direction": "MAC → RLC (AM mode only, implicit via TB delivery absence)",
+        "spec_reference": "TS 36.322 §5.3, TS 36.321 §5.4.1",
+        "description": "MAC does not explicitly send a HARQ failure status to RLC. Instead, the absence of PDU delivery after maximum HARQ retransmissions (NDI toggling without successful decoding) causes the RLC AM receiver to detect a missing PDU via its reordering window and t-Reordering timer. RLC AM will then send a STATUS PDU to the transmitter side requesting retransmission via ARQ.",
+        "constraints": [
+          "RLC AM ARQ and MAC HARQ are independent — both can be simultaneously active on the same data",
+          "RLC UM mode has no ARQ — data lost at HARQ max retransmissions is discarded at RLC",
+          "RLC TM mode is used for CCCH (SRB0) — no ARQ, no segmentation; most fragile mode"
+        ],
+        "expert_comment": "The implicit nature of this interaction is a double-edged sword. It avoids tight coupling between MAC and RLC, maintaining clean layer separation. However, the RLC t-Reordering timer must be tuned carefully relative to HARQ RTT (typically 8ms). If t-Reordering expires too early, spurious ARQ retransmissions occur; too late, and you accumulate unnecessary delay in AM bearers."
+      },
+
+      {
+        "primitive_name": "Scheduling Request (SR) — RLC/PDCP data triggers SR at MAC",
+        "direction": "RLC → MAC → PHY (indirect chain)",
+        "spec_reference": "TS 36.321 §5.4.4",
+        "description": "When RLC receives a new SDU from PDCP and MAC has no allocated UL resources, RLC's buffer-non-empty trigger causes MAC to initiate an SR transmission on PUCCH. The SR requests the eNB to provide an UL grant so MAC can then request data from RLC. This is an indirect chain: RLC data arrival → MAC detects no grant → MAC triggers SR on PHY.",
+        "sr_timer": "sr-ProhibitTimer: prevents SR from being sent again until this timer expires after a previous SR",
+        "constraints": [
+          "If sr-MaxTransmissions is exceeded without receiving a UL grant, MAC triggers RRC Connection Re-establishment",
+          "SR is sent on PUCCH Format 1 (1-bit positive SR or negative SR by DTX)",
+          "SR resource (PUCCH resource) is configured by RRC via schedulingRequestConfig IE"
+        ],
+        "expert_comment": "SR is a pure 1-bit signal from UE to eNB — it conveys only 'I have data to send.' The subsequent BSR gives the quantity. This two-step approach is bandwidth-efficient but adds latency: typically one TTI for SR, then one TTI for UL grant, then one TTI for actual data — adding ~3ms to first packet latency. For VoIP, semi-persistent scheduling eliminates this overhead entirely."
+      }
+    ]
+  },
+
+  "mac_rrc_interactions": {
+    "description": "Interactions between RRC and MAC as defined in TS 36.331 and TS 36.321. RRC is the control plane manager — it configures MAC and monitors MAC events to take higher-layer decisions (handover, RLF, reconfiguration). MAC reports key events upward to RRC.",
+    "direction_note": "RRC → MAC: configuration commands (setup, modify, release). MAC → RRC: event indications (radio link failure triggers, random access outcomes).",
+
+    "primitives": [
+
+      {
+        "primitive_name": "MAC-MainConfig (RRC → MAC configuration)",
+        "also_known_as": "MAC configuration IE delivery",
+        "direction": "RRC → MAC",
+        "spec_reference": "TS 36.331 §6.3.2 (mac-MainConfig IE), TS 36.321 §5",
+        "rrc_message_carrier": "RRCConnectionSetup, RRCConnectionReconfiguration, RRCConnectionReestablishment",
+        "description": "RRC delivers the mac-MainConfig Information Element to MAC to configure all MAC-layer parameters. This is the master configuration primitive that governs MAC behavior for a UE session or upon reconfiguration.",
+        "key_parameters": [
+          {
+            "parameter": "ul-SCH-Config",
+            "meaning": "Configures UL scheduling parameters: maxHARQ-Tx (max UL HARQ transmissions, 1–8), periodicBSR-Timer, retxBSR-Timer, ttiBundling (for coverage enhancement)"
+          },
+          {
+            "parameter": "drx-Config",
+            "meaning": "Configures Discontinuous Reception (DRX) — onDurationTimer, drx-InactivityTimer, drx-RetransmissionTimer, longDRX-CycleStartOffset, shortDRX-Cycle. DRX allows UE to sleep between scheduling opportunities for battery saving."
+          },
+          {
+            "parameter": "phr-Config",
+            "meaning": "Power Headroom Report configuration — periodicPHR-Timer, prohibitPHR-Timer, dl-PathlossChange threshold. PHR tells eNB how much UL transmit power margin the UE has."
+          },
+          {
+            "parameter": "sr-ProhibitTimer",
+            "meaning": "Time after SR transmission before another SR is allowed"
+          },
+          {
+            "parameter": "logicalChannelSR-Mask",
+            "meaning": "If TRUE, SR is prohibited for specific logical channels (used for low-priority background traffic)"
+          }
+        ],
+        "constraints": [
+          "MAC must apply configuration atomically — mid-TTI configuration changes are not permitted",
+          "Upon RRCConnectionReestablishment, MAC is reset to default before new configuration is applied",
+          "DRX configuration must be consistent with HARQ RTT — drx-RetransmissionTimer must be long enough to accommodate HARQ feedback timing",
+          "ttiBundling and DRX are mutually exclusive — if ttiBundling is enabled, DRX cannot be configured simultaneously"
+        ],
+        "expert_comment": "mac-MainConfig is one of the most critical IEs in LTE RRC. A misconfigured DRX cycle (e.g., too-short onDurationTimer) is a frequent root cause of scheduling failures and PDSCH reception gaps in deployed networks. Likewise, PHR timer misconfiguration can cause the eNB to operate with stale power headroom data, degrading UL link adaptation."
+      },
+
+      {
+        "primitive_name": "RadioResourceConfigDedicated — LogicalChannelConfig (RRC → MAC)",
+        "direction": "RRC → MAC",
+        "spec_reference": "TS 36.331 §6.3.2 (logicalChannelConfig IE)",
+        "rrc_message_carrier": "RRCConnectionSetup, RRCConnectionReconfiguration",
+        "description": "RRC configures each logical channel at MAC using logicalChannelConfig IE as part of RadioResourceConfigDedicated. This governs how MAC performs Logical Channel Prioritization (LCP) for uplink scheduling.",
+        "key_parameters": [
+          {
+            "parameter": "priority",
+            "meaning": "Priority level 1–16 (1 = highest). MAC serves highest priority channels first within UL grant budget"
+          },
+          {
+            "parameter": "prioritisedBitRate (PBR)",
+            "meaning": "Guaranteed minimum bit rate served before lower-priority channels get resources. Values: 0, 8, 16, 32, 64, 128, 256 kbps, infinity"
+          },
+          {
+            "parameter": "bucketSizeDuration (BSD)",
+            "meaning": "Leaky bucket duration for LCP token bucket: 50, 100, 150, 300, 500, 1000 ms. Determines burst allowance."
+          },
+          {
+            "parameter": "logicalChannelGroup (LCG)",
+            "meaning": "Groups LCHs for BSR reporting (LCG 0–3). LCH is mapped to one of 4 LCGs."
+          }
+        ],
+        "constraints": [
+          "SRB0 (CCCH) always has implicit highest priority and is not explicitly configured via logicalChannelConfig",
+          "LCP token bucket (PBR × BSD) must be served before any lower-priority LCH receives resources — this is the GBR enforcement mechanism at MAC",
+          "If PBR = infinity, the LCH can use all available UL grant before any lower-priority LCH is served",
+          "MAC must recompute LCP on every UL grant reception — it is not cached across TTIs"
+        ],
+        "expert_comment": "LCP is the primary QoS enforcement mechanism in LTE UL at the MAC layer. It is deceptively simple but critically important. Priority alone would cause starvation of low-priority DRBs; the PBR/BSD token bucket prevents this. A common design error is setting PBR = infinity on too many DRBs, effectively collapsing the QoS differentiation. Vendors often add proprietary fairness mechanisms on top of this."
+      },
+
+      {
+        "primitive_name": "RACH-ConfigCommon / RACH-ConfigDedicated (RRC → MAC)",
+        "direction": "RRC → MAC",
+        "spec_reference": "TS 36.321 §5.1, TS 36.331 §6.3.2",
+        "rrc_message_carrier": "SIB2 (common), RRCConnectionReconfiguration (dedicated)",
+        "description": "RRC provides Random Access Channel configuration to MAC. MAC uses this to execute the RACH procedure (contention-based or contention-free). The RACH procedure is MAC's mechanism for initial UL synchronization and C-RNTI assignment.",
+        "key_parameters": [
+          {
+            "parameter": "preambleInfo",
+            "meaning": "Number of RACH preambles available for contention-based access (numberOfRA-Preambles) and preambles reserved for contention-free handover (sizeOfRA-PreamblesGroupA)"
+          },
+          {
+            "parameter": "powerRampingParameters",
+            "meaning": "preambleInitialReceivedTargetPower: initial preamble power target at eNB. powerRampingStep: power increase per RACH attempt (0, 2, 4, 6 dB)"
+          },
+          {
+            "parameter": "ra-SupervisionInfo",
+            "meaning": "preambleTransMax: max preamble attempts before failure. ra-ResponseWindowSize: window to listen for RAR (2–10 subframes). mac-ContentionResolutionTimer: wait for contention resolution"
+          },
+          {
+            "parameter": "dedicatedInfoElement (rach-ConfigDedicated)",
+            "meaning": "ra-PreambleIndex: specific preamble assigned for contention-free RACH (used in handover). ra-PRACH-MaskIndex: specific PRACH resource to use"
+          }
+        ],
+        "rach_steps_mac_executes": [
+          "Step 1 (Msg1): MAC selects preamble, instructs PHY to transmit on PRACH",
+          "Step 2 (Msg2): MAC monitors PDCCH for RA-RNTI, receives RAR on PDSCH — contains Timing Advance (TA), UL grant for Msg3, Temporary C-RNTI",
+          "Step 3 (Msg3): MAC transmits RRCConnectionRequest (or equivalent) using the UL grant from RAR — this goes through RLC TM (CCCH)",
+          "Step 4 (Msg4): MAC monitors for contention resolution — eNB echoes UE identity; if matched, MAC considers RACH successful and instructs RRC"
+        ],
+        "constraints": [
+          "If preambleTransMax is exceeded, MAC notifies RRC of RACH failure — RRC may trigger RRC Connection Re-establishment or go to IDLE",
+          "Contention-free RACH must use the dedicated preamble assigned by RRC — no power ramping uncertainty since eNB knows which preamble to expect",
+          "ra-ResponseWindowSize must account for propagation delay; for large cells this window may need to be larger",
+          "MAC must start ra-ResponseWindowSize timer immediately after Msg1 transmission — not from subframe boundary"
+        ],
+        "expert_comment": "The RACH procedure is a remarkable MAC design — it handles UL synchronization, contention resolution, and identity assignment in just 4 messages. The contention-free RACH used during handover (Msg1 with dedicated preamble + skip Msg3/Msg4 in some implementations) is what makes LTE handover latency achievable below 50ms. The power ramping scheme is a beautifully simple coverage-adaptive mechanism, though it can cause RACH pile-up during network congestion events like stadium deployments."
+      },
+
+      {
+        "primitive_name": "MAC-RACH-IND (MAC → RRC)",
+        "also_known_as": "Random Access indication / RA success or failure report",
+        "direction": "MAC → RRC",
+        "spec_reference": "TS 36.321 §5.1.5",
+        "description": "Upon completion of the RACH procedure (success or failure), MAC reports the outcome to RRC. On success, MAC passes the assigned C-RNTI and Timing Advance value. On failure (max preamble attempts exhausted), MAC signals RA failure to RRC.",
+        "parameters": [
+          "ra-Outcome: SUCCESS or FAILURE",
+          "C-RNTI: the new C-RNTI assigned by eNB (from contention resolution message or RAR for CFRA)",
+          "TimingAdvance: the TA command from RAR, used by PHY to adjust UL transmission timing"
+        ],
+        "constraints": [
+          "RRC must handle RA failure by either triggering re-establishment or returning to IDLE depending on the failure cause",
+          "For handover RACH, RA failure causes handover failure and may trigger re-establishment to the source eNB",
+          "TA value from RAR is valid only at the time of reception; MAC-layer TA maintenance continues via MAC CE (Timing Advance Command CE from eNB)"
+        ],
+        "expert_comment": "This upward notification is what allows RRC to remain oblivious to PHY/MAC-level mechanics of initial access. The RRC state machine reacts to RA outcomes without needing to know whether contention-based or contention-free RACH was used. This abstraction is a good design choice, though in real implementations the RRC and MAC often share a common timer management module, blurring this boundary."
+      },
+
+      {
+        "primitive_name": "MAC-RLF-IND (MAC → RRC) — Radio Link Failure indication",
+        "direction": "MAC → RRC",
+        "spec_reference": "TS 36.321 §5.1.4, TS 36.331 §5.3.11",
+        "description": "When MAC detects radio link failure conditions — specifically, maximum HARQ retransmissions for non-adaptive HARQ or SR max retransmissions exceeded — it notifies RRC. RRC then evaluates whether to trigger T310 (RLF timer based on physical layer out-of-sync) or declare RLF and initiate re-establishment.",
+        "rlf_triggers_at_mac": [
+          "SR_MaxTransmissions exceeded without UL grant: MAC → RRC indication",
+          "RACH preambleTransMax exceeded: MAC → RRC indication",
+          "Consistent UL HARQ failures: tracked by MAC, not directly a standard primitive but vendor-defined"
+        ],
+        "constraints": [
+          "MAC does not directly declare RLF — it reports the failure condition; RRC makes the final RLF declaration based on T310/T311 timers",
+          "T310 is started by RRC when PHY reports N310 consecutive out-of-sync indications — not directly by MAC",
+          "These two pathways (PHY out-of-sync and MAC failure) both converge at RRC"
+        ],
+        "expert_comment": "The multi-layer RLF detection in LTE is well thought-out: PHY detects RF degradation quickly via CRS-based SINR, MAC detects UL signaling breakdown via SR/RACH failure, and RRC synthesizes these into a final RLF decision. This prevents premature RLF declarations from brief PHY fluctuations while still catching genuine link failures within a few hundred milliseconds."
+      },
+
+      {
+        "primitive_name": "DRX Activation / Deactivation (RRC → MAC command via MAC CE or reconfiguration)",
+        "direction": "RRC → MAC (via RRCConnectionReconfiguration or MAC CE from eNB)",
+        "spec_reference": "TS 36.321 §5.7, TS 36.331 §6.3.2",
+        "description": "RRC can activate, modify, or release DRX configuration. The DRX command can also arrive as a MAC Control Element on DL-SCH (DRX command CE), which instructs the UE to enter DRX immediately. This MAC CE is triggered by the eNB scheduler to force UE into sleep mode after a period of inactivity.",
+        "drx_mac_ce_format": "1-octet MAC CE, LCID = 0x1B, no payload — pure command",
+        "drx_timers_managed_by_mac": [
+          "onDurationTimer: how long UE monitors PDCCH at start of each DRX cycle",
+          "drx-InactivityTimer: extended monitoring after DL/UL activity — restarted on each new PDCCH grant",
+          "drx-RetransmissionTimer: monitoring window for HARQ retransmissions even during DRX OFF",
+          "longDRX-CycleStartOffset: defines periodicity of long DRX cycle",
+          "shortDRX-Cycle + drxShortCycleTimer: optional short DRX for intermediate sleep periods"
+        ],
+        "constraints": [
+          "DRX significantly impacts scheduling latency — UE may not respond to PDCCH during DRX OFF period",
+          "HARQ feedback timing is unaffected by DRX — even in DRX, PUCCH resources for HARQ ACK/NACK are preserved",
+          "drx-RetransmissionTimer ensures HARQ retransmissions can always reach the UE",
+          "Semi-persistent scheduling (SPS) has separate activation CE and interacts with DRX"
+        ],
+        "expert_comment": "DRX is one of LTE's most impactful battery-saving features and simultaneously one of the most complex to tune. A cycle that is too long increases user-perceived latency (buffering delay before onDurationTimer wakes the UE). Too short, and power savings evaporate. For applications like push notifications (infrequent, delay-tolerant), long DRX is ideal. For VoIP, short DRX or SPS is used. The interplay between DRX, HARQ timing, and scheduling grants is a rich area of implementation complexity."
+      },
+
+      {
+        "primitive_name": "Semi-Persistent Scheduling (SPS) Configuration (RRC → MAC) + Activation/Release (eNB MAC CE → UE MAC)",
+        "direction": "RRC → MAC (configuration); eNB MAC → UE MAC (activation via PDCCH with SPS-C-RNTI)",
+        "spec_reference": "TS 36.321 §5.8, TS 36.331 §6.3.2 (sps-Config IE)",
+        "description": "RRC configures SPS parameters (SPS interval, number of HARQ processes for SPS, PUCCH resource for SPS). SPS is then activated/deactivated by the eNB via special PDCCH scrambled with SPS-C-RNTI. SPS eliminates per-TTI scheduling overhead for periodic traffic (VoIP at 20ms packetization).",
+        "sps_config_parameters": [
+          "semiPersistSchedIntervalDL: DL SPS periodicity (10, 20, 32, 40, 64, 80, 128, 160, 320, 640 subframes)",
+          "numberOfConfSPS-Processes: number of HARQ processes for SPS (1–8)",
+          "n1PUCCH-AN-PersistentList: PUCCH resources for SPS HARQ feedback",
+          "semiPersistSchedIntervalUL: UL SPS interval",
+          "implicitReleaseAfter: number of empty SPS transmissions before UE implicitly releases SPS"
+        ],
+        "constraints": [
+          "SPS activation/deactivation is signaled by PDCCH NDI=0 with SPS-C-RNTI — UE must distinguish SPS PDCCH from regular PDCCH",
+          "UL SPS: UE transmits without waiting for a dynamic UL grant — pre-allocated PUSCH resources",
+          "SPS is incompatible with certain CA configurations in LTE-A; per-CC SPS must be managed separately"
+        ],
+        "expert_comment": "SPS is a brilliant solution to VoIP scheduling overhead. Without SPS, a single VoIP call requires one PDCCH grant every 20ms — in a dense cell with hundreds of VoIP users, the PDCCH capacity becomes the bottleneck, not the data plane. SPS reclaims this PDCCH capacity. The implicitReleaseAfter feature handles call termination gracefully without requiring explicit signaling for every call end."
+      },
+
+      {
+        "primitive_name": "Timing Advance Command (MAC CE — eNB MAC → UE MAC, RRC-neutral)",
+        "direction": "eNB MAC → UE MAC (as MAC Control Element on DL-SCH)",
+        "spec_reference": "TS 36.321 §5.2, §6.1.3.5",
+        "description": "The eNB MAC continuously monitors UL timing alignment of each UE and sends Timing Advance Command MAC CEs to adjust UE UL transmit timing. This keeps UL transmissions aligned at the eNB receiver to within the cyclic prefix duration. This is not RRC-controlled — it is a pure MAC-to-MAC interaction via the air interface.",
+        "mac_ce_format": "2-octet MAC CE: LCID=0x1D, TAG-ID (2 bits, for Carrier Aggregation), Timing Advance Command (6 bits, range 0–63 in steps of 16Ts ≈ 0.52 µs)",
+        "ta_timers": [
+          "timeAlignmentTimer (per TAG): configured by RRC, counts down after each TA command; if expired, UE considers UL out of sync and stops UL transmission, sends SR to re-establish TA"
+        ],
+        "constraints": [
+          "TA command is relative adjustment: positive = UE must transmit earlier; negative not possible — TA is always additive offset",
+          "For Carrier Aggregation, each Timing Advance Group (TAG) has its own TA and timeAlignmentTimer",
+          "If timeAlignmentTimer expires, MAC must flush HARQ buffers and re-initiate RACH to regain UL sync",
+          "Maximum TA range in LTE: 0–0.667 ms, corresponding to cell radius of ~100 km (though practical cells are much smaller)"
+        ],
+        "expert_comment": "TA command is a continuous closed-loop control mechanism. It operates below RRC visibility and is critical for correct PUSCH/PUCCH reception at eNB. In high-speed mobility scenarios (trains at 350 km/h), the Doppler-induced timing drift requires frequent TA updates. The timeAlignmentTimer interaction with RACH is a subtle but important recovery mechanism — if the eNB stops sending TA updates (e.g., due to UE going to cell edge), the timer expiry prevents the UE from transmitting with stale timing that would interfere with adjacent UEs."
+      },
+
+      {
+        "primitive_name": "Contention Resolution MAC CE (eNB MAC → UE MAC, during RACH Msg4)",
+        "direction": "eNB MAC → UE MAC (as MAC CE on DL-SCH, PDSCH addressed to RA-RNTI or Temp C-RNTI)",
+        "spec_reference": "TS 36.321 §5.1.5, §6.1.3.3",
+        "description": "During contention-based RACH, multiple UEs may transmit the same preamble (Msg1). The eNB includes the UE's identity (from Msg3 = CCCH SDU from RLC TM) in a MAC CE on Msg4. The UE compares this echoed identity with what it sent; if matched, RACH is successful. If not matched, the UE retries RACH.",
+        "mac_ce_format": "7-octet MAC CE: LCID=0x1C, 48-bit UE Contention Resolution Identity (copied from Msg3 CCCH SDU)",
+        "constraints": [
+          "Contention resolution identity is taken verbatim from the first 6 bytes of Msg3 CCCH SDU",
+          "UE must not apply C-RNTI until contention resolution is successful",
+          "mac-ContentionResolutionTimer starts when Msg3 is transmitted; if timer expires before receiving Msg4, RACH fails",
+          "This mechanism is not needed for contention-free RACH (dedicated preamble) — contention is by definition absent"
+        ],
+        "expert_comment": "This MAC CE elegantly solves the multiple-access collision problem without requiring a separate dedicated control channel. By echoing the UE's own identity, the eNB simultaneously confirms access and resolves contention. The 48-bit UE identity window is large enough to make hash collisions (two UEs with identical Msg3 content) extremely unlikely in practice."
+      }
+    ]
+  },
+
+  "mac_phy_interactions": {
+    "description": "Interactions between MAC and PHY as defined in TS 36.321, TS 36.211, TS 36.212, TS 36.213. These are the most timing-critical interactions in the entire protocol stack, operating at 1ms TTI granularity.",
+    "direction_note": "PHY → MAC: decoded data, channel measurements, timing. MAC → PHY: transmission requests, HARQ control, power control.",
+
+    "primitives": [
+
+      {
+        "primitive_name": "PHY-DATA-IND (PHY → MAC) — DL transport block delivery",
+        "also_known_as": "PDSCH decode result delivery to MAC",
+        "direction": "PHY → MAC",
+        "spec_reference": "TS 36.321 §5.5, TS 36.213 §7",
+        "description": "PHY decodes the PDSCH transport block for the scheduled UE (identified by C-RNTI on PDCCH) and delivers the decoded bits to MAC along with a CRC pass/fail indicator. MAC then performs HARQ combining or acceptance based on this result.",
+        "parameters": [
+          "TransportBlock: decoded bits (if CRC pass)",
+          "CRC_Result: PASS or FAIL",
+          "HARQ_ProcessID: which of 8 DL HARQ processes this TB belongs to",
+          "NDI (New Data Indicator): toggle indicates new TB vs retransmission",
+          "RV (Redundancy Version): 0,1,2,3 — indicates which portion of rate-matched coded bits were received",
+          "RNTI: C-RNTI, SI-RNTI, P-RNTI, RA-RNTI (determines what type of data this is)",
+          "Subframe_Number: subframe in which PDSCH was received"
+        ],
+        "harq_operation": "If CRC FAIL: PHY stores soft bits in HARQ buffer. On retransmission (same HARQ process, NDI unchanged), PHY combines new soft bits with stored soft bits (Chase Combining or Incremental Redundancy) before Viterbi/Turbo decoding.",
+        "constraints": [
+          "DL HARQ RTT is fixed at 8 subframes (8ms): UE sends ACK/NACK on PUCCH/PUSCH at subframe n+4, eNB retransmits at n+8 if NACK",
+          "Maximum 8 synchronous HARQ processes for FDD; for TDD, HARQ timing is TDD configuration-dependent",
+          "NDI=1 means new TB (flush old HARQ buffer); NDI=0 means retransmission (combine)",
+          "Spatial multiplexing (MIMO, 2 codewords): two TBs may arrive simultaneously per subframe, each on a separate HARQ process track",
+          "SI-RNTI, P-RNTI addressed TBs have no HARQ — they are broadcast/multicast and not retransmitted"
+        ],
+        "expert_comment": "The synchronous HARQ design in LTE FDD (fixed 8ms RTT, 8 processes) means MAC can pipeline 8 independent TB transmissions simultaneously, each in a different HARQ process. This is why LTE can sustain high throughput even with retransmissions — the pipeline never stalls. Asynchronous HARQ for UL (flexible retransmission timing) gives the scheduler more flexibility at the cost of HARQ process ID signaling overhead in PDCCH DCI."
+      },
+
+      {
+        "primitive_name": "PHY-DATA-REQ (MAC → PHY) — UL transport block submission",
+        "also_known_as": "PUSCH transport block from MAC to PHY",
+        "direction": "MAC → PHY",
+        "spec_reference": "TS 36.321 §5.4, TS 36.213 §8",
+        "description": "After MAC assembles a UL MAC PDU (multiplexing RLC PDUs and MAC CEs based on LCP), it submits the transport block to PHY for PUSCH transmission. PHY performs channel coding, rate matching, and transmission on PUSCH.",
+        "parameters": [
+          "TransportBlock: assembled MAC PDU bytes",
+          "TransportBlockSize: exact TBS derived from UL grant (MCS + number of RBs)",
+          "HARQ_ProcessID: UL HARQ process (asynchronous in FDD)",
+          "RV: redundancy version for initial transmission (always RV=0 for first attempt)",
+          "NDI: new data indicator (toggle for new TB vs adaptive retransmission)",
+          "Subframe_Number: target subframe for PUSCH transmission"
+        ],
+        "constraints": [
+          "MAC must pad the TB to exactly TransportBlockSize bytes if RLC data is insufficient — MAC padding CE fills remaining space",
+          "UL HARQ in FDD is asynchronous — retransmission subframe is indicated by PHICH (UL HARQ ACK/NACK from eNB) and subsequent PDCCH DCI 0",
+          "MAC must maintain UL HARQ buffers per process to support adaptive retransmissions with different MCS",
+          "If PHICH indicates NACK, MAC initiates UL HARQ retransmission (non-adaptive: same resource, same MCS; or adaptive if PDCCH DCI 0 provides new grant)"
+        ],
+        "expert_comment": "The distinction between non-adaptive and adaptive UL HARQ retransmission is architecturally significant. Non-adaptive retransmission (PHICH NACK only, no new DCI) is fast but inflexible — same MCS even if channel has changed. Adaptive retransmission (DCI 0 with new MCS/RBs) is slower but allows link adaptation to improve decoding probability. In practice, most vendors favor adaptive retransmission for better performance."
+      },
+
+      {
+        "primitive_name": "PHY-HARQ-IND (PHY → MAC) — DL HARQ ACK/NACK from UE PHY",
+        "direction": "UE PHY → UE MAC (for UE-side HARQ state) AND eNB PHY → eNB MAC (received HARQ feedback)",
+        "spec_reference": "TS 36.213 §7.3, TS 36.321 §5.5",
+        "description": "UE PHY sends ACK or NACK on PUCCH (Format 1a/1b) or PUSCH to the eNB for each DL TB received. At the eNB, PHY decodes the PUCCH/PUSCH and delivers the HARQ feedback (ACK=1, NACK=0, DTX=no transmission detected) to eNB MAC. MAC uses this to determine whether to retransmit.",
+        "pucch_formats_for_harq": [
+          "PUCCH Format 1a: 1-bit ACK/NACK for single codeword (TM1/2/3 or single CC)",
+          "PUCCH Format 1b: 2-bit ACK/NACK for 2 codewords (MIMO with 2 TBs) or 2 CCs (Carrier Aggregation)",
+          "PUCCH Format 1b with Channel Selection: for more than 2 CCs in CA",
+          "PUSCH-bundled: when HARQ feedback is piggybacked on UL data"
+        ],
+        "constraints": [
+          "HARQ timing: ACK/NACK is transmitted exactly 4 subframes after DL subframe (FDD) — strictly synchronized",
+          "DTX (no PUCCH transmission) is treated as NACK by eNB — conservative assumption",
+          "For TDD, HARQ bundling or multiplexing is used to map multiple DL subframes' feedback into single UL subframe",
+          "eNB MAC must account for PUCCH ACK/NACK decoding errors — a false ACK (NACK decoded as ACK) leads to MAC/RLC layer recovery via ARQ"
+        ],
+        "expert_comment": "The 4-subframe HARQ feedback timing is one of the most fundamental timing constraints in LTE. It drives the minimum RTT of 8ms (4ms DL + 4ms feedback + 4ms retransmission if needed). This timing chain is implemented in hardware in real UEs — it cannot be broken by software processing delays. This is why the LTE L1/L2 split in real-time OS implementations is so timing-critical."
+      },
+
+      {
+        "primitive_name": "PHY-UL-GRANT-IND (PHY → MAC) — UL scheduling grant from PDCCH",
+        "also_known_as": "DCI Format 0 / DCI Format 0A delivery to MAC",
+        "direction": "PHY → MAC",
+        "spec_reference": "TS 36.213 §8.0, TS 36.321 §5.4",
+        "description": "eNB transmits a UL scheduling grant to UE via PDCCH (DCI Format 0 or 0A). UE PHY decodes PDCCH using C-RNTI and delivers the grant parameters to UE MAC. MAC then assembles a UL TB to be transmitted 4 subframes later on PUSCH.",
+        "dci_format_0_fields": [
+          "Flag (DCI 0 vs DCI 1A disambiguation): 1 bit",
+          "Hopping flag: frequency hopping on/off",
+          "Resource Block Assignment: first RB and number of RBs for PUSCH",
+          "MCS and RV: modulation and coding scheme index (0–28) + redundancy version",
+          "NDI: toggle to indicate new data",
+          "TPC command: 2-bit PUSCH power control command",
+          "Cyclic Shift for DMRS: used for UL MIMO or MU-MIMO",
+          "UL index / DAI (TDD only): downlink assignment index for HARQ feedback"
+        ],
+        "constraints": [
+          "Grant applies to PUSCH transmission exactly 4 subframes after PDCCH subframe (FDD)",
+          "MAC has exactly 4ms (4 TTIs) to assemble the UL TB after receiving the grant — a hard real-time deadline",
+          "TBS is fully determined by MCS index + RB allocation using tables in TS 36.213 Table 7.1.7.1-1",
+          "If MAC cannot meet the 4ms deadline (e.g., due to RLC processing delay), the PUSCH is transmitted with only MAC padding — a significant throughput waste"
+        ],
+        "expert_comment": "The 4ms PUSCH preparation deadline is one of the most demanding real-time constraints in any wireless protocol stack. This is why LTE UE baseband chips dedicate dedicated hardware accelerators for MAC PDU assembly, RLC PDU retrieval, and channel coding — all within a 4ms window. Any software latency in MAC-RLC interaction that exceeds this budget directly manifests as reduced UL throughput. This is a frequent bottleneck in software-defined radio (SDR) implementations."
+      },
+
+      {
+        "primitive_name": "PHY-DL-GRANT-IND (PHY → MAC) — DL scheduling grant from PDCCH",
+        "also_known_as": "DCI Format 1/1A/1B/2/2A delivery to MAC",
+        "direction": "PHY → MAC (at UE side, PHY informs MAC which DL subframe to monitor for PDSCH)",
+        "spec_reference": "TS 36.213 §7, TS 36.321 §5.5",
+        "description": "eNB transmits DL scheduling assignment via PDCCH (various DCI formats depending on transmission mode). UE PHY decodes PDCCH and passes DL assignment details to MAC. MAC uses this to direct PHY to decode PDSCH in the same subframe and to prepare HARQ ACK/NACK 4 subframes later.",
+        "dci_formats_for_dl": [
+          "DCI 1: Single codeword, non-frequency-selective scheduling (contiguous RBs)",
+          "DCI 1A: Compact single codeword (also used for RACH and paging)",
+          "DCI 1B: Single codeword with precoding info (TM6, closed-loop rank-1)",
+          "DCI 1C: Very compact, broadcast/paging",
+          "DCI 1D: Single codeword with DM-RS info",
+          "DCI 2: Two codewords, closed-loop spatial multiplexing (TM4)",
+          "DCI 2A: Two codewords, open-loop spatial multiplexing (TM3)"
+        ],
+        "key_fields": [
+          "PDSCH RB allocation: which RBs carry UE data",
+          "MCS per codeword: determines TBS",
+          "HARQ process number: which of 8 HARQ processes",
+          "NDI per codeword: new/retransmit indicator",
+          "RV per codeword: redundancy version",
+          "PUCCH TPC command: DL power control for... wait, this is PDSCH; TPC here is for PUCCH power",
+          "Precoding information (TM4/6/7/8/9): beamforming/precoding matrix indicator"
+        ],
+        "constraints": [
+          "UE must monitor PDCCH in every subframe during active communication — significant power consumption offset by DRX",
+          "UE blindly decodes PDCCH using multiple DCI format/aggregation level combinations (up to 44 blind decodes per subframe per LTE spec)",
+          "Aggregation level (1/2/4/8 CCEs) determines PDCCH robustness — higher AL for weaker UEs",
+          "DCI 2/2A are only used when RRC has configured TM3/TM4 (open/closed loop MIMO)"
+        ],
+        "expert_comment": "The sheer number of blind PDCCH decodes (up to 44) per subframe is a major UE power consumption factor. LTE designed this as a necessary trade-off for flexible scheduling without UE-specific control channel overhead. NR improved this significantly with PDCCH search space and Control Resource Set (CORESET) concepts, reducing unnecessary blind decodes. The transmission mode (TM) hierarchy in LTE PDCCH DCI is also significantly more complex than NR's unified DCI framework."
+      },
+
+      {
+        "primitive_name": "PHY-CQI-IND / Channel Quality Indication (PHY → MAC, then MAC → eNB MAC via PUSCH/PUCCH)",
+        "direction": "UE PHY → UE MAC (reporting trigger); UE MAC → PHY (CQI reporting request); eNB PHY → eNB MAC (received CQI)",
+        "spec_reference": "TS 36.213 §7.2, TS 36.331 §6.3.2 (CQI-ReportConfig)",
+        "description": "UE PHY measures DL channel quality using Cell-Specific Reference Signals (CRS) or CSI-RS. It computes CQI (Channel Quality Indicator), PMI (Precoding Matrix Indicator), and RI (Rank Indicator) and delivers these to MAC. MAC includes them in PUCCH (periodic reporting) or PUSCH (aperiodic reporting triggered by PDCCH TPC). eNB MAC receives these and uses them for link adaptation (MCS selection).",
+        "reporting_types": [
+          {
+            "type": "Periodic CQI",
+            "channel": "PUCCH Format 2/2a/2b",
+            "trigger": "Configured periodicity (2–160 ms via cqi-pmi-ConfigIndex)",
+            "content": "Wideband or subband CQI, PMI, RI"
+          },
+          {
+            "type": "Aperiodic CQI",
+            "channel": "PUSCH (piggybacked on UL data or standalone)",
+            "trigger": "PDCCH DCI with CQI request bit set",
+            "content": "More detailed: wideband + subband CQI for all subbands, PMI, RI"
+          }
+        ],
+        "cqi_table": "CQI index 0–15 maps to modulation order (QPSK/16QAM/64QAM) and code rate — eNB uses these to select MCS for next DL scheduling",
+        "constraints": [
+          "CQI reflects channel state ~5ms ago due to measurement + processing + reporting delay — link adaptation must account for this staleness",
+          "For fast fading channels, CQI may become stale before it is applied — outer loop link adaptation (OLLA) at eNB compensates for CQI inaccuracies by tracking HARQ BLER",
+          "RI indicates whether MIMO rank-2 (2-layer spatial multiplexing) or rank-1 is preferred",
+          "PMI is only relevant for codebook-based precoding (TM4/6); TM7/8/9 use UE-specific RS (DMRS) and don't rely on PMI"
+        ],
+        "expert_comment": "CQI-based link adaptation is the key to LTE's spectral efficiency. The combination of periodic CQI (for steady-state MCS selection) and aperiodic CQI (for burst refinement) is a good balance of overhead vs precision. Outer Loop Link Adaptation (OLLA) at the eNB — adjusting CQI offset based on observed HARQ ACK/NACK ratio — is universally implemented by vendors and is critical for maintaining 10% BLER target in practical deployments."
+      },
+
+      {
+        "primitive_name": "PHY-MEASUREMENT-IND: RSRP / RSRQ / SINR Measurements (PHY → MAC → RRC)",
+        "direction": "PHY → MAC (intermediate) → RRC (final consumer)",
+        "spec_reference": "TS 36.213 §5.1, TS 36.331 §5.5",
+        "description": "PHY continuously measures Reference Signal Received Power (RSRP) and Reference Signal Received Quality (RSRQ) from CRS of serving and neighbor cells. These measurements are filtered and passed upward. MAC uses RSRP for some internal decisions (e.g., PHR path loss estimation). RRC uses RSRP/RSRQ for handover decisions, cell reselection, and measurement reporting to eNB.",
+        "measurement_quantities": [
+          "RSRP: power of CRS REs averaged over measurement bandwidth; range -44 to -140 dBm (index 0–97)",
+          "RSRQ: ratio of N×RSRP to RSSI, range -3 to -19.5 dB (index 0–34)",
+          "SINR/RSSI: implementation-specific, not standardized reporting quantity but used internally"
+        ],
+        "mac_usage": "PHR calculation: UE computes path loss as P_CMAX - PHR = estimated path loss. Path loss = referenceSignalPower (from SIB2) - RSRP. MAC uses this for PHR reporting.",
+        "constraints": [
+          "L3 filtering (RRC-configured) must be applied before measurements are used for handover — prevents HO triggering on brief fades",
+          "L1 filtering (PHY-level averaging) is also applied per TS 36.213",
+          "MAC is largely a pass-through for these measurements — it doesn't make handover decisions itself"
+        ],
+        "expert_comment": "The dual-layer filtering (L1 at PHY and L3 at RRC) is essential for HO stability. Without filtering, fast Rayleigh fading would cause A3 events (neighbor stronger than serving) to trigger hundreds of times per second. The filterCoefficient parameter in measConfig is one of the most impactful RRC parameters for mobility robustness — too aggressive filtering causes HO delay (handover too late → radio link failure); too little filtering causes HO oscillation (ping-pong between cells)."
+      },
+
+      {
+        "primitive_name": "PHY-IN-SYNC / PHY-OUT-OF-SYNC (PHY → RRC via MAC)",
+        "direction": "PHY → MAC → RRC",
+        "spec_reference": "TS 36.213 §4.2, TS 36.331 §5.3.11",
+        "description": "PHY monitors downlink channel quality (PDCCH decoding SINR) and reports in-sync or out-of-sync events to higher layers. When SINR falls below Qout threshold for N310 consecutive reporting periods (200ms granularity), PHY reports OUT-OF-SYNC to RRC. This starts T310. If N311 in-sync events occur before T310 expires, T310 is cancelled. If T310 expires, RRC declares RLF.",
+        "thresholds": [
+          "Qout: out-of-sync threshold — 2% PDCCH BLER equivalent (approximately -6 dB SINR for QPSK code rate 1/3)",
+          "Qin: in-sync threshold — 2% PDCCH BLER at higher SINR level (approximately -4 dB)"
+        ],
+        "timers": [
+          "N310: number of consecutive out-of-sync indications before T310 starts (1, 2, 3, 4, 6, 8, 10, 20)",
+          "T310: RLF waiting timer (0ms–2000ms — 0ms means immediate RLF on N310 events)",
+          "N311: consecutive in-sync indications to cancel T310 (1–10)"
+        ],
+        "constraints": [
+          "PHY evaluates in/out-of-sync every 200ms based on DL subframe decoding statistics",
+          "T310 = 0 configuration means any N310 consecutive out-of-sync events immediately trigger RLF — extremely aggressive, rarely used",
+          "In carrier aggregation, only the PCell PHY triggers in/out-of-sync for RLF purposes"
+        ],
+        "expert_comment": "The Qout/Qin hysteresis mechanism is elegant — Qin > Qout prevents rapid oscillation between in-sync/out-of-sync states at the cell edge. The T310/N310/N311 triplet provides a configurable robustness dial. Networks in dense urban environments (many HO opportunities) use short T310; rural macrocell networks with fewer alternatives use longer T310 to allow more recovery time. The 200ms reporting granularity means the minimum observable RLF window is 200ms × N310."
+      },
+
+      {
+        "primitive_name": "PHY-Power-Control Interface: PHR MAC CE (MAC → PHY trigger and PHY → MAC measurement)",
+        "direction": "Bidirectional: PHY → MAC (path loss measurement) and MAC → PHY (UL power setting)",
+        "spec_reference": "TS 36.213 §5.1 (UL power control), TS 36.321 §5.4.6, §6.1.3.6",
+        "description": "UE MAC monitors when PHR (Power Headroom Report) must be transmitted and includes PHR MAC CE in UL MAC PDUs. PHY provides MAC with the current path loss estimate and maximum UE transmit power (P_CMAX) needed to compute power headroom. Simultaneously, MAC-received TPC commands (from PHY DCI decoding) feed into PHY's PUSCH and PUCCH power control algorithms.",
+        "phr_mac_ce": "1-octet CE: LCID=0x1A, PH (6-bit power headroom value, range -23 to +40 dB in 1 dB steps)",
+        "power_headroom_formula": "PH = P_CMAX - (10*log10(M_PUSCH) + P_O_PUSCH + alpha*PL + delta_TF + f_c) where PL=path loss, f_c=TPC accumulated correction",
+        "phr_triggers": [
+          "Prohibit timer expires AND path loss change > dl-PathlossChange dB (event-triggered)",
+          "Periodic PHR timer expires (time-triggered)",
+          "First UL grant after serving cell change"
+        ],
+        "constraints": [
+          "Extended PHR (for CA) reports separate power headroom per activated CC — added in LTE-Advanced",
+          "Negative PHR indicates UE is power-limited — eNB should reduce MCS or RB allocation",
+          "TPC accumulation at PHY is limited to prevent runaway power levels: f_c is bounded to prevent PUSCH power exceeding P_CMAX"
+        ],
+        "expert_comment": "PHR is the eNB scheduler's window into UE power constraints. Without PHR, the eNB allocates resources assuming the UE can always transmit at full MCS — a dangerous assumption for UEs at cell edge. A well-designed scheduler uses PHR to reduce MCS or switch to lower-order modulation when PHR is negative. In CA scenarios with multiple component carriers, extended PHR is critical because each CC has independent power constraints depending on simultaneous transmissions."
+      },
+
+      {
+        "primitive_name": "PHICH (Physical HARQ Indicator Channel) — eNB PHY → UE MAC, UL HARQ feedback",
+        "direction": "eNB PHY → UE MAC (via PHY decode of PHICH)",
+        "spec_reference": "TS 36.211 §6.9, TS 36.213 §8.3",
+        "description": "PHICH carries the UL HARQ acknowledgment from eNB to UE. After UE transmits on PUSCH (subframe n), eNB decodes it and sends ACK or NACK on PHICH in subframe n+4. UE PHY decodes PHICH and delivers ACK/NACK to UE MAC. If NACK, MAC retransmits the UL TB (non-adaptive) unless a new DCI 0 provides different resources (adaptive retransmission).",
+        "phich_format": "3 BPSK symbols carrying ACK (1) or NACK (0), spread over frequency domain, multiple PHICHs multiplexed via codes",
+        "constraints": [
+          "PHICH is limited to ACK/NACK — no resource information for retransmission (that comes from PDCCH DCI 0 for adaptive HARQ)",
+          "PHICH timing: fixed 4ms after PUSCH subframe for FDD; TDD has variable timing per TDD UL/DL configuration",
+          "PHICH group and sequence index are derived by UE from its PUSCH RB allocation — no explicit addressing needed",
+          "If PHICH is missed by UE (false ACK), eNB may detect misalignment via sequence number at RLC and trigger retransmission via RLC ARQ"
+        ],
+        "expert_comment": "PHICH is a remarkably compact channel — 3 BPSK bits carrying one of the most impactful decisions in the uplink protocol (retransmit or not). It is placed in the first OFDM symbol alongside PDCCH to ensure early decoding at the UE before PUSCH preparation starts. NR eliminated PHICH entirely, moving UL HARQ feedback to PDCCH-based DCI (always adaptive), which simplifies the design but increases PDCCH load."
+      },
+
+      {
+        "primitive_name": "PRACH Transmission Request (MAC → PHY) — Random Access Preamble",
+        "direction": "MAC → PHY",
+        "spec_reference": "TS 36.211 §5.7, TS 36.321 §5.1",
+        "description": "When MAC initiates RACH procedure, it instructs PHY to transmit a PRACH preamble with specific parameters on the physical random access channel. PHY generates the Zadoff-Chu sequence-based preamble and transmits it with the appropriate power level.",
+        "parameters": [
+          "preamble_index: 0–63, selects specific ZC root sequence and cyclic shift",
+          "PRACH_resource: subframe and frequency resource (PRACH configuration index from SIB2 → PRACH-ConfigInfo)",
+          "TargetPreamblePower: initial power + power ramping offset (PREAMBLE_POWER_RAMP_STEP × PREAMBLE_TRANSMISSION_COUNTER)",
+          "rootSequenceIndex: ZC root sequence index from SIB2"
+        ],
+        "constraints": [
+          "PRACH bandwidth: 6 RBs (864 kHz) regardless of system bandwidth",
+          "Preamble sequence length: 839 (Format 0–3, long) or 139 (Format 4, short)",
+          "PRACH resources occur periodically per PRACH configuration — not every subframe; MAC must wait for the next available PRACH occasion",
+          "Frequency domain position of PRACH is signaled in SIB2 (prach-FreqOffset)"
+        ],
+        "expert_comment": "The Zadoff-Chu based PRACH preamble has excellent PAPR and correlation properties — the eNB can simultaneously detect up to 64 different preambles in one PRACH occasion with near-perfect orthogonality. The cyclic shift design means the same root ZC sequence can generate multiple orthogonal preambles, allowing dense cell deployments to reduce inter-cell preamble collision risk without wasting root sequences."
+      }
+    ]
+  },
+
+  "summary_interaction_count": {
+    "mac_rlc": 5,
+    "mac_rrc": 7,
+    "mac_phy": 10,
+    "total": 22
+  },
+
+  "overall_expert_commentary": {
+    "architecture_assessment": "The MAC layer in LTE is an extraordinarily well-designed protocol layer — it serves as the real-time resource allocation engine that glues the reliability of RLC, the configuration intelligence of RRC, and the physical reality of PHY into a coherent system. Its interactions are carefully layered to maintain separation of concerns while meeting hard real-time deadlines.",
+    "key_design_principles": [
+      "Clean separation of HARQ (MAC) and ARQ (RLC): allows independent operation and failure recovery without tight coupling",
+      "Pull-model for RLC data: MAC drives data requests based on scheduler decisions, not RLC push — this gives the scheduler full control",
+      "RRC as configuration oracle: MAC never autonomously changes its own configuration — all parameter changes flow from RRC, ensuring network control over UE behavior",
+      "PHY as trusted execution layer: MAC submits TB requests and receives decoded results, delegating all RF complexity to PHY — a clean interface that enables diverse PHY implementations"
+    ],
+    "known_limitations": [
+      "BSR quantization introduces scheduler inaccuracy for bursty traffic",
+      "4ms PUSCH preparation deadline is a hard real-time constraint that limits software-defined implementations",
+      "CQI reporting latency (~5ms round trip) means link adaptation always operates on slightly stale channel state",
+      "DRX complexity (multiple timers, CA interactions) is a frequent source of implementation bugs"
+    ],
+    "comparison_to_nr": "5G NR improves several of these interfaces: PHY-MAC interactions benefit from flexible numerology (shorter TTIs in mmWave), NR MAC introduces configured grants (replacing SPS with more flexible patterns), PHICH is eliminated in favor of PDCCH-based HARQ feedback, and the BWP framework allows more dynamic PHY reconfiguration under MAC/RRC control. However, the fundamental MAC-RLC-RRC-PHY interaction philosophy is preserved in NR."
+  }
+}

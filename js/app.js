@@ -15,6 +15,7 @@
     { key: 'quran',  icon: '📖', label: 'Al-Qur\'an' },
     { key: 'hadith', icon: '📜', label: 'Hadith' },
     { key: 'carpool', icon: '🕌', label: 'Carpool' },
+    { key: 'lte', icon: '📡', label: 'LTE MAC' },
   ];
 
     const ROUTES = {
@@ -29,6 +30,7 @@
     quran:  () => import('./quran.js').then(m => m.QuranModule.render()),
     hadith: () => import('./hadith.js').then(m => m.HadithModule.render()),
     carpool: () => import('./carpool.js').then(m => m.CarpoolModule.render()),
+    lte: () => import('./lte.js').then(m => m.LteModule.render()),
   };
 
   /* ── Home (icon grid) ─────────────────────────────────────── */

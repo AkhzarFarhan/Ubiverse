@@ -278,6 +278,8 @@ const LteModule = (function () {
         ` : ''}
       </div>
     `;
+  }
+
   return { render };
 }());
 

@@ -294,11 +294,11 @@ const CarModule = (function () {
   function processCarData(arr, raw) {
     const lastEntry = arr.length > 0 ? arr[arr.length - 1] : null;
     const lastOdo   = lastEntry ? lastEntry.odometer : 0;
-    const distanceTraveled = raw.odometer - lastOdo;
+    const distanceTraveled = lastEntry ? raw.odometer - lastOdo : 0;
 
-    // Mileage: only if last entry was full tank AND distance > 0 AND fuel > 0
+    // Mileage: only if BOTH last entry and current entry are full tank, distance > 0, and fuel > 0
     let mileage = null;
-    if (lastEntry && lastEntry.fullTank && distanceTraveled > 0 && raw.fuelVol > 0) {
+    if (lastEntry && lastEntry.fullTank && raw.fullTank && distanceTraveled > 0 && raw.fuelVol > 0) {
       mileage = parseFloat(DIV(distanceTraveled, raw.fuelVol).toFixed(2));
     }
 
@@ -347,18 +347,17 @@ const CarModule = (function () {
   /* ── Summary ──────────────────────────────────────────────── */
   function renderSummary(arr) {
     let totalDist = 0, totalFuelVol = 0, totalFuelCost = 0, totalSvcCost = 0;
-    const mileages = [];
 
     arr.forEach(function (e) {
       totalDist     += (e.distanceTraveled || 0);
       totalFuelVol  += (e.fuelVolume  || 0);
       totalFuelCost += (e.totalCost   || 0);
       totalSvcCost  += (e.serviceCost || 0);
-      if (e.mileage != null) mileages.push(e.mileage);
     });
 
-    const avgMileage = mileages.length > 0
-      ? (mileages.reduce(function (a, b) { return a + b; }, 0) / mileages.length).toFixed(2)
+    // Weighted average mileage: total distance / total fuel consumed
+    const avgMileage = totalFuelVol > 0
+      ? DIV(totalDist, totalFuelVol).toFixed(2)
       : null;
 
     document.getElementById('cs-dist').textContent    = totalDist.toLocaleString() + ' km';

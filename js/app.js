@@ -16,6 +16,7 @@
     { key: 'hadith', icon: '📜', label: 'Hadith' },
     { key: 'carpool', icon: '🕌', label: 'Carpool' },
     { key: 'lte', icon: '📡', label: 'LTE MAC' },
+    { key: 'sudoku', icon: '🧩', label: 'Sudoku' },
   ];
 
     const ROUTES = {
@@ -31,6 +32,7 @@
     hadith: () => import('./hadith.js').then(m => m.HadithModule.render()),
     carpool: () => import('./carpool.js').then(m => m.CarpoolModule.render()),
     lte: () => import('./lte.js').then(m => m.LteModule.render()),
+    sudoku: () => import('./sudoku.js').then(m => m.SudokuModule.render()),
   };
 
   /* ── Home (icon grid) ─────────────────────────────────────── */

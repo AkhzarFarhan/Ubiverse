@@ -2115,3 +2115,355 @@ tbody tr:hover { background: #fafbff; }
   flex-direction: column;
   gap: 0.5rem;
 }
+
+/* ============================================================
+   Sudoku Module
+   ============================================================ */
+
+/* ── Difficulty pills ──────────────────────────────────────── */
+.sudoku-difficulty {
+  display: flex;
+  gap: .4rem;
+  margin-bottom: 1rem;
+}
+.sudoku-diff-btn {
+  flex: 1;
+  padding: .5rem .75rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: .85rem;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s, transform .1s;
+  text-align: center;
+}
+.sudoku-diff-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.sudoku-diff-btn.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+.sudoku-diff-btn:active { transform: scale(.96); }
+
+/* ── Toolbar (timer + actions) ─────────────────────────────── */
+.sudoku-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: .75rem;
+  padding: .6rem .85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.sudoku-timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+.sudoku-timer-icon { font-size: 1.1rem; }
+.sudoku-timer {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+.sudoku-toolbar-actions {
+  display: flex;
+  gap: .4rem;
+}
+
+/* ── Grid wrapper (for overlays) ───────────────────────────── */
+.sudoku-grid-wrapper {
+  position: relative;
+  max-width: 468px;
+  margin: 0 auto .75rem;
+}
+
+/* ── Grid ──────────────────────────────────────────────────── */
+.sudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  background: var(--surface);
+  border: 2.5px solid #1e293b;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  aspect-ratio: 1;
+  transition: filter .3s ease;
+  user-select: none;
+}
+.sudoku-grid.paused {
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* ── Cell ──────────────────────────────────────────────────── */
+.sudoku-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: 0.5px solid #cbd5e1;
+  cursor: pointer;
+  transition: background .12s;
+  overflow: hidden;
+  background: #fff;
+}
+.sudoku-cell:hover {
+  background: #f1f5f9;
+}
+
+/* Thick borders on 3×3 box boundaries */
+.sudoku-cell.border-top-thick    { border-top: 2.5px solid #1e293b; }
+.sudoku-cell.border-left-thick   { border-left: 2.5px solid #1e293b; }
+.sudoku-cell.border-bottom-thick { border-bottom: 2.5px solid #1e293b; }
+.sudoku-cell.border-right-thick  { border-right: 2.5px solid #1e293b; }
+
+/* Cell states */
+.sudoku-cell.given {
+  background: #f8fafc;
+}
+.sudoku-cell.selected {
+  background: #c7d2fe !important;
+  z-index: 1;
+}
+.sudoku-cell.highlighted {
+  background: #eef2ff;
+}
+.sudoku-cell.same-num {
+  background: #dbeafe;
+}
+.sudoku-cell.conflict {
+  background: #fee2e2;
+}
+.sudoku-cell.error-flash {
+  animation: sudoku-error-flash .4s ease 3;
+}
+
+@keyframes sudoku-error-flash {
+  0%, 100% { background: #fee2e2; }
+  50%      { background: #fca5a5; }
+}
+
+/* Cell value */
+.sudoku-cell-value {
+  font-size: clamp(1.1rem, 4.5vw, 1.75rem);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.sudoku-cell.given .sudoku-cell-value {
+  color: #1e293b;
+}
+.sudoku-cell:not(.given) .sudoku-cell-value {
+  color: #4338ca;
+  font-weight: 600;
+}
+.sudoku-cell.conflict .sudoku-cell-value {
+  color: #dc2626;
+}
+
+/* ── Candidate pencil marks ────────────────────────────────── */
+.sudoku-candidates {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  padding: 1px;
+}
+.sudoku-candidate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.4rem, 1.5vw, 0.65rem);
+  font-weight: 500;
+  color: transparent;
+  line-height: 1;
+  user-select: none;
+}
+.sudoku-candidate.visible {
+  color: #78849a;
+}
+
+/* ── Action buttons ────────────────────────────────────────── */
+.sudoku-actions {
+  display: flex;
+  justify-content: center;
+  gap: .6rem;
+  margin-bottom: .75rem;
+  max-width: 468px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.sudoku-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
+  padding: .5rem .85rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s;
+  font-family: var(--font);
+}
+.sudoku-action-btn:hover {
+  border-color: var(--color-primary);
+  background: #f0fdf4;
+}
+.sudoku-action-btn:active { transform: scale(.95); }
+.sudoku-action-btn.active {
+  background: #eef2ff;
+  border-color: #818cf8;
+}
+.sudoku-action-icon { font-size: 1.15rem; line-height: 1; }
+.sudoku-action-label {
+  font-size: .65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+/* ── Number pad ────────────────────────────────────────────── */
+.sudoku-numpad {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: .35rem;
+  max-width: 468px;
+  margin: 0 auto .75rem;
+}
+.sudoku-num-btn {
+  aspect-ratio: 1;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: clamp(1rem, 3.5vw, 1.3rem);
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .1s;
+}
+.sudoku-num-btn:hover {
+  border-color: var(--color-primary);
+  background: #f0fdf4;
+}
+.sudoku-num-btn:active {
+  transform: scale(.92);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* ── Pause overlay ─────────────────────────────────────────── */
+.sudoku-pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(2px);
+  border-radius: var(--radius-sm);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.sudoku-pause-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sudoku-pause-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 1.5rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.sudoku-pause-msg span:first-child { font-size: 2rem; }
+
+/* ── Win overlay ───────────────────────────────────────────── */
+.sudoku-win-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(3px);
+  border-radius: var(--radius-sm);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+}
+.sudoku-win-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sudoku-win-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2rem 3rem;
+  text-align: center;
+}
+.sudoku-win-emoji { font-size: 2.5rem; }
+.sudoku-win-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.sudoku-win-time {
+  font-size: .9rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Resume card ───────────────────────────────────────────── */
+.sudoku-resume-card {
+  max-width: 468px;
+  margin: 1rem auto;
+}
+
+/* ── Responsive tweaks ─────────────────────────────────────── */
+@media (max-width: 480px) {
+  .sudoku-grid-wrapper { max-width: 100%; }
+  .sudoku-actions { gap: .4rem; }
+  .sudoku-action-btn { padding: .4rem .55rem; }
+  .sudoku-numpad { gap: .25rem; }
+  .sudoku-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .sudoku-toolbar-actions { justify-content: center; }
+  .sudoku-timer-wrap { justify-content: center; }
+  .sudoku-pause-msg { padding: 1.25rem 1.5rem; }
+}

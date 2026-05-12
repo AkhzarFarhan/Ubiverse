@@ -50,6 +50,12 @@
       ".read": "auth != null",
       ".write": "auth != null"
     },
+    "sudoku": {
+      "$username": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
     "public_stats": {
       ".read": true,
       ".write": true

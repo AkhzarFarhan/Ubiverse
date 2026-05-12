@@ -145,6 +145,33 @@ const LteModule = (function () {
                   <div class="lte-expert-content" style="color: #1e40af;">${data.overall_expert_commentary.comparison_to_nr}</div>
                 </div>
               </div>
+
+              <!-- Diagrams -->
+              ${data.diagrams ? `
+                <div class="lte-overview-card" style="grid-column: 1 / -1; margin-top: 0.5rem;">
+                  <h3>📊 Architecture Diagrams</h3>
+                  <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">${data.diagrams.description}</p>
+                  <div style="display: grid; grid-template-columns: 1fr; gap: 2.5rem;">
+                    <div>
+                      <h4 style="margin-bottom: 0.75rem; color: var(--text);">Overall Protocol Architecture</h4>
+                      <div id="diagram-overall_architecture" style="background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; text-align: center; overflow: auto; min-height: 200px;"></div>
+                    </div>
+                    <div>
+                      <h4 style="margin-bottom: 0.75rem; color: var(--text);">MAC ↔ RLC DL Flow</h4>
+                      <div id="diagram-mac_rlc_dl_flow" style="background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; text-align: center; overflow: auto; min-height: 200px;"></div>
+                    </div>
+                    <div>
+                      <h4 style="margin-bottom: 0.75rem; color: var(--text);">RACH Procedure</h4>
+                      <div id="diagram-rach_procedure" style="background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; text-align: center; overflow: auto; min-height: 200px;"></div>
+                    </div>
+                    <div>
+                      <h4 style="margin-bottom: 0.75rem; color: var(--text);">HARQ Timing Constraints</h4>
+                      <div id="diagram-harq_timeline" style="background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; text-align: center; overflow: auto; min-height: 150px;"></div>
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
+
             </div>
           </div>
 
@@ -181,6 +208,19 @@ const LteModule = (function () {
         });
       });
     });
+
+    // Render Graphviz diagrams if available
+    if (data.diagrams && typeof d3 !== 'undefined') {
+      setTimeout(() => {
+        ['overall_architecture', 'mac_rlc_dl_flow', 'rach_procedure', 'harq_timeline'].forEach(key => {
+          if (data.diagrams[key]) {
+            try {
+              d3.select('#diagram-' + key).graphviz({zoom: false}).renderDot(data.diagrams[key]);
+            } catch(e) { console.error('Graphviz error for ' + key, e); }
+          }
+        });
+      }, 100);
+    }
   }
 
   function renderInteractionSection(id, sectionData) {
@@ -233,6 +273,13 @@ const LteModule = (function () {
         
         <div class="lte-card-desc">${prim.description}</div>
         
+        ${prim.example_scenario ? `
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius); padding: 1rem; margin-bottom: 1.25rem;">
+            <div style="font-weight: 700; color: #475569; margin-bottom: 0.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">🎬 Example Scenario</div>
+            <div style="color: var(--text); font-size: 0.95rem; line-height: 1.5;">${prim.example_scenario}</div>
+          </div>
+        ` : ''}
+        
         <div class="lte-info-grid">
           <div class="lte-info-box">
             <div class="lte-info-title">📚 Specification</div>
@@ -265,7 +312,13 @@ const LteModule = (function () {
           <div style="margin-bottom: 1rem; margin-top: 1.5rem;">
             <div class="lte-info-title" style="color: var(--color-danger);">⚠️ Constraints & Behaviors</div>
             <ul class="lte-list lte-constraint-list">
-              ${prim.constraints.map(c => `<li>${c}</li>`).join('')}
+              ${prim.constraints.map(c => {
+                if (c.startsWith('[Architecture Constraint]')) {
+                  const text = c.replace('[Architecture Constraint]', '').trim();
+                  return `<li style="color: #9f1239;"><span style="background: #fecdd3; color: #881337; padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.7rem; margin-right: 0.4rem; vertical-align: middle; font-weight: bold;">ARCHITECTURE</span><span style="font-weight: 500;">${text}</span></li>`;
+                }
+                return `<li>${c}</li>`;
+              }).join('')}
             </ul>
           </div>
         ` : ''}

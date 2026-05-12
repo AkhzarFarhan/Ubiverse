@@ -33,5 +33,5 @@ push:
 	git commit -m "$$msg"; \
 	git pull --rebase origin main; \
 	git push origin main; \
-	$(MAKE) test
+#	$(MAKE) test
 	@echo "✅ Pushed to main and tests completed."

@@ -31,6 +31,7 @@ async function buildJS() {
         'js/hadith.js',
         'js/carpool.js',
         'js/lte.js',
+        'js/sudoku.js',
         'sw.js'
       ],
       outdir: 'dist',

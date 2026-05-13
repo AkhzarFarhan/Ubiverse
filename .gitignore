@@ -3,3 +3,5 @@ js/env.js
 .env.local
 .env.*.local
 .DS_Store
+node_modules/
+dist/

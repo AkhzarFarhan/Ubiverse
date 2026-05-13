@@ -259,7 +259,7 @@ ul, ol { list-style: none; }
 .hidden   { display: none !important; }
 
 </style>
-  <link rel="stylesheet" href="css/style.css?v=cb80029e" />
+  <link rel="stylesheet" href="css/style.css?v=eeec3d22" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
@@ -343,6 +343,15 @@ ul, ol { list-style: none; }
       <a href="#hadith"  class="nav-link" data-page="hadith">
         <span class="nav-icon">📜</span> Hadith
       </a>
+      <a href="#carpool" class="nav-link" data-page="carpool">
+        <span class="nav-icon">🕌</span> Carpool
+      </a>
+      <a href="#lte" class="nav-link" data-page="lte">
+        <span class="nav-icon">📡</span> LTE MAC
+      </a>
+      <a href="#sudoku" class="nav-link" data-page="sudoku">
+        <span class="nav-icon">🧩</span> Sudoku
+      </a>
     </nav>
   </aside>
 
@@ -354,18 +363,23 @@ ul, ol { list-style: none; }
 
 <!-- Chart.js CDN -->
 
+<!-- Graphviz CDNs -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/@hpcc-js/wasm@2.14.1/dist/index.min.js"></script>
+<script src="https://unpkg.com/d3-graphviz@5.1.0/build/d3-graphviz.min.js"></script>
+
 <!-- Firebase SDK (compat version) -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
 <!-- Environment config (generated at deploy time; see js/env.js.example) -->
-<script src="js/env.js?v=cb80029e"></script>
+<script src="js/env.js?v=eeec3d22"></script>
 
 <!-- App scripts — order matters -->
-<script src="js/firebase.js?v=cb80029e"></script>
-<script src="js/utils.js?v=cb80029e" defer></script>
-<script src="js/app.js?v=cb80029e" defer></script>
+<script src="js/firebase.js?v=eeec3d22"></script>
+<script src="js/utils.js?v=eeec3d22" defer></script>
+<script src="js/app.js?v=eeec3d22" defer></script>
 
 <script>
   // Service Worker Registration

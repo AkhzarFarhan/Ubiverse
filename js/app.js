@@ -163,6 +163,12 @@
       } else {
         showApp(false);  // fresh sign-in, render the page
       }
+      
+      // Flush any queued offline changes now that we are authenticated
+      if (window.SyncQueue) {
+        window.SyncQueue.flush();
+        window.SyncQueue.updateIndicator();
+      }
     } else {
       window.AppState.username = '';
       window.AppState.displayName = '';

@@ -96,7 +96,7 @@ const DailyModule = (function () {
     document.getElementById('daily-rating').value  = '';
     document.querySelectorAll('.daily-rating-btn').forEach(function (b) { b.classList.remove('active'); });
 
-    showAlert('daily-alert', 'Entry added successfully!', 'success');
+    showAlert('daily-alert', result && result.synced === false ? 'Saved locally. Will sync when online.' : 'Entry added successfully!', result && result.synced === false ? 'warning' : 'success');
     renderList(cached);
   }
 

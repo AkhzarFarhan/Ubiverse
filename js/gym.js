@@ -79,7 +79,7 @@ const GymModule = (function () {
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
     document.querySelectorAll('.muscle-pill').forEach(function (b) { b.classList.remove('active'); });
-    showAlert('gym-alert', 'Workout logged successfully! 💪', 'success');
+    showAlert('gym-alert', result && result.synced === false ? 'Saved locally. Will sync when online.' : 'Workout logged successfully! 💪', result && result.synced === false ? 'warning' : 'success');
     renderList(arr);
   }
 

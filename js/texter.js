@@ -72,7 +72,7 @@ const TexterModule = (function () {
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
     document.getElementById('texter-note').value = '';
-    showAlert('texter-alert', 'Note saved!', 'success');
+    showAlert('texter-alert', result && result.synced === false ? 'Saved locally. Will sync when online.' : 'Note saved!', result && result.synced === false ? 'warning' : 'success');
     renderList(arr);
   }
 

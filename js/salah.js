@@ -156,7 +156,7 @@ const SalahModule = (function () {
       document.getElementById('salah-jamaat-' + i).checked = false;
     });
 
-    showAlert('salah-alert', 'Progress saved! 🕌', 'success');
+    showAlert('salah-alert', result && result.synced === false ? 'Saved locally. Will sync when online.' : 'Progress saved! 🕌', result && result.synced === false ? 'warning' : 'success');
     renderStats(arr);
     renderChart(arr);
     renderTable(arr);

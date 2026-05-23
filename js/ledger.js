@@ -219,7 +219,7 @@ const LedgerModule = (function () {
     document.getElementById('ledger-details').value = '';
 
     clearAlert('ledger-alert');
-    showAlert('ledger-alert', 'Transaction added!', 'success');
+    showAlert('ledger-alert', result && result.synced === false ? 'Saved locally. Will sync when online.' : 'Transaction added!', result && result.synced === false ? 'warning' : 'success');
     updateBalances(arr);
     renderTable(arr);
     renderMonthly(arr);

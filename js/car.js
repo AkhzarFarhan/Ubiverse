@@ -270,7 +270,7 @@ const CarModule = (function () {
     const result = await firebasePost(FIREBASE_PATH(), entry);
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
-    showAlert('car-alert', 'Entry saved! 🚗', 'success');
+    showAlert('car-alert', result && result.synced === false ? 'Saved locally. Will sync when online.' : 'Entry saved! 🚗', result && result.synced === false ? 'warning' : 'success');
 
     // Reset optional fields (keep fuel rate)
     document.getElementById('car-fuel-vol').value   = '';

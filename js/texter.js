@@ -174,7 +174,7 @@ const TexterModule = (function () {
       localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
       
       renderList(arr);
-      showAlert("texter-alert", "Text deleted.", "success");
+      showAlert("texter-alert", result && result.synced === false ? "Deleted locally. Will sync when online." : "Text deleted.", result && result.synced === false ? "warning" : "success");
     }
 
 

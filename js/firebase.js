@@ -28,6 +28,21 @@ const db   = firebase.database();
 /* ── CRUD helpers (offline-aware via SyncQueue) ───────────── */
 
 async function firebaseGet(path) {
+  if (window.SyncQueue) {
+    if (!window.SyncQueue.isOnline()) {
+      const err = new Error('Offline');
+      err.code = 'OFFLINE';
+      throw err;
+    }
+    if (window.SyncQueue.pendingCount() > 0) {
+      try {
+        await window.SyncQueue.flush();
+      } catch (e) {
+        console.warn('Sync queue flush failed before read:', e);
+      }
+    }
+  }
+
   try {
     const snapshot = await db.ref(path).once('value');
     return snapshot.val();

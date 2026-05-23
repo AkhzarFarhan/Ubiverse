@@ -15,6 +15,7 @@
 
   var _isOnline     = navigator.onLine;
   var _isFlushing   = false;
+  var _flushPromise = null;
   var _retryTimer   = null;
   var _retryDelay   = INITIAL_DELAY;
   var _listeners    = [];  // post-sync callbacks
@@ -134,14 +135,14 @@
   /* ── Flush queue ────────────────────────────────────────────── */
 
   function flush() {
-    if (_isFlushing) return;
+    if (_flushPromise) return _flushPromise;
 
     var queue = loadQueue();
-    if (queue.length === 0) return;
+    if (queue.length === 0) return Promise.resolve();
 
     if (!_isOnline) {
       scheduleRetry();
-      return;
+      return Promise.resolve();
     }
 
     _isFlushing = true;
@@ -180,10 +181,11 @@
       });
     });
 
-    chain.then(function () {
+    _flushPromise = chain.then(function () {
       saveSyncedIds(syncedIds);
       saveQueue(remaining);
       _isFlushing = false;
+      _flushPromise = null;
 
       if (synced > 0) {
         showSyncedToast(synced);
@@ -193,10 +195,14 @@
       if (remaining.length > 0) {
         scheduleRetry();
       }
-    }).catch(function () {
+    }).catch(function (err) {
       _isFlushing = false;
+      _flushPromise = null;
       scheduleRetry();
+      throw err;
     });
+
+    return _flushPromise;
   }
 
   /* ── Retry with backoff ─────────────────────────────────────── */

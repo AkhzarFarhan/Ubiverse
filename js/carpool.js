@@ -270,7 +270,7 @@ const CarpoolModule = (function () {
     };
 
     try {
-      await firebasePost(FIREBASE_PATH, rideData);
+      await firebasePostDirect(FIREBASE_PATH, rideData);
       savePrefill({
         owner_phone: ownerPhone,
         vehicle_type: vehicleType,
@@ -483,7 +483,7 @@ const CarpoolModule = (function () {
     }
 
     try {
-      await firebasePost(FIREBASE_PATH + '/' + rideId + '/passengers', { name: name, phone: phone });
+      await firebasePostDirect(FIREBASE_PATH + '/' + rideId + '/passengers', { name: name, phone: phone });
       showToast('✅ Seat booked successfully!', 'success');
       fetchAndRenderList();
     } catch (err) {
@@ -627,7 +627,7 @@ const CarpoolModule = (function () {
     };
 
     try {
-      await firebasePatch(FIREBASE_PATH + '/' + rideId, updatedData);
+      await firebasePatchDirect(FIREBASE_PATH + '/' + rideId, updatedData);
       showToast('Ride updated successfully!', 'success');
       renderAdminConsole();
     } catch (err) {
@@ -638,7 +638,7 @@ const CarpoolModule = (function () {
   async function deleteRide(rideId) {
     if (!confirm('Are you sure you want to delete this ride?')) return;
     try {
-      await firebaseDelete(FIREBASE_PATH + '/' + rideId);
+      await firebaseDeleteDirect(FIREBASE_PATH + '/' + rideId);
       showToast('Ride deleted successfully!', 'success');
       renderAdminConsole();
     } catch (err) {
@@ -649,7 +649,7 @@ const CarpoolModule = (function () {
   async function deletePassenger(rideId, passengerId) {
     if (!confirm('Remove this passenger?')) return;
     try {
-      await firebaseDelete(FIREBASE_PATH + '/' + rideId + '/passengers/' + passengerId);
+      await firebaseDeleteDirect(FIREBASE_PATH + '/' + rideId + '/passengers/' + passengerId);
       renderAdminConsole();
     } catch (err) {
       showToast('Error removing passenger: ' + err.message, 'error');

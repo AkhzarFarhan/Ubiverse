@@ -267,11 +267,7 @@ const CarModule = (function () {
     arr.push(entry);
 
     // Write to Firebase and update local cache
-    try {
-      await firebasePost(FIREBASE_PATH(), entry);
-    } catch (e) {
-      console.warn('Firebase write failed:', e);
-    }
+    const result = await firebasePost(FIREBASE_PATH(), entry);
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
     showAlert('car-alert', 'Entry saved! 🚗', 'success');

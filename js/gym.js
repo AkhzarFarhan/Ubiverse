@@ -73,11 +73,7 @@ const GymModule = (function () {
       timestamp: getKolkataTimestamp(),
     };
 
-    try {
-      await firebasePost(FIREBASE_PATH(), entry);
-    } catch (e) {
-      console.warn('Firebase write failed:', e);
-    }
+    const result = await firebasePost(FIREBASE_PATH(), entry);
     const arr = JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
     arr.unshift(entry);
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));

@@ -206,15 +206,14 @@ const LedgerModule = (function () {
     arr.push(entry);
 
     // Write to Firebase and update local cache
-    try {
-      await firebasePost(FIREBASE_PATH(), entry);
-    } catch (e) {
-      console.warn('Firebase write failed:', e);
-    }
+    const result = await firebasePost(FIREBASE_PATH(), entry, {
+      module: 'ledger',
+      onSync: function () { sendTelegramForLedger(entry, window.AppState.username); }
+    });
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 
-    // Send Telegram notification
-    sendTelegramForLedger(entry, window.AppState.username);
+    // Send Telegram notification immediately if synced, deferred if queued
+    if (result.synced) sendTelegramForLedger(entry, window.AppState.username);
 
     document.getElementById('ledger-amount').value  = '';
     document.getElementById('ledger-details').value = '';

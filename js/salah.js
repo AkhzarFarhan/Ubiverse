@@ -147,11 +147,7 @@ const SalahModule = (function () {
       date:      today,
     };
 
-    try {
-      await firebasePost(FIREBASE_PATH(), entry);
-    } catch (e) {
-      console.warn('Firebase write failed:', e);
-    }
+    const result = await firebasePost(FIREBASE_PATH(), entry);
     arr.push(entry);
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
 

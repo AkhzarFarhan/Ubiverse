@@ -178,7 +178,15 @@ const QuranModule = (function () {
   }
 
   /* ── Progress persistence ────────────────────────────────────── */
-  function loadProgress() {
+  async function loadProgress() {
+    try {
+      var data = await firebaseGet(FIREBASE_PATH());
+      if (data && typeof data === 'object') {
+        _progress = data;
+        localStorage.setItem(STORAGE_KEY(), JSON.stringify(_progress));
+        return;
+      }
+    } catch (_) { /* Firebase unavailable — fall back to localStorage */ }
     try {
       _progress = JSON.parse(localStorage.getItem(STORAGE_KEY())) || {};
     } catch (e) {
@@ -188,6 +196,7 @@ const QuranModule = (function () {
 
   function saveProgress() {
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(_progress));
+    firebasePut(FIREBASE_PATH(), _progress);
   }
 
   function markSurahProgress(surahIndex, lastAyah, completed) {
@@ -202,10 +211,10 @@ const QuranModule = (function () {
   }
 
   /* ── Render entry point ──────────────────────────────────────── */
-  function render() {
+  async function render() {
     _view = 'index';
     _currentSurah = 1;
-    loadProgress();
+    await loadProgress();
     renderIndex();
   }
 

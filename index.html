@@ -305,7 +305,8 @@ ul, ol { list-style: none; }
       </svg>
       Ubiverse
     </h1>
-    <span id="header-user"></span>
+    <span id="sync-indicator" class="sync-indicator" title="All synced"></span>
+  <span id="header-user"></span>
     <button id="signout-btn" class="btn btn-secondary btn-sm hidden">Sign Out</button>
   </header>
 
@@ -378,6 +379,7 @@ ul, ol { list-style: none; }
 
 <!-- App scripts — order matters -->
 <script src="js/firebase.js"></script>
+<script src="js/sync.js"></script>
 <script src="js/utils.js" defer></script>
 <script src="js/app.js" defer></script>
 

@@ -215,8 +215,7 @@ const TasbihModule = (function () {
 
     const total = _mode === 'standard' ? TOTAL_STANDARD : _customTarget;
     const record = { count: _count, target: total, mode: _mode, timestamp: getKolkataTimestamp() };
-    firebasePut(FIREBASE_PATH() + '/last', record)
-      .catch(function (e) { console.warn('Firebase write failed:', e); });
+    firebasePut(FIREBASE_PATH() + '/last', record);
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(getStateObj()));
   }
 

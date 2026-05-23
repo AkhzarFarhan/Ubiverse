@@ -86,12 +86,7 @@ const DailyModule = (function () {
       timestamp: getKolkataTimestamp(),
     };
 
-    // Write to Firebase
-    try {
-      await firebasePost(FIREBASE_PATH(), entry);
-    } catch (e) {
-      console.warn('Firebase write failed:', e);
-    }
+    const result = await firebasePost(FIREBASE_PATH(), entry);
     // Prepend to localStorage cache (synced from Firebase on page load)
     const cached = JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
     cached.unshift(entry);

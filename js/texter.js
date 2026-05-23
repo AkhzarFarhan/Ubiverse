@@ -66,11 +66,7 @@ const TexterModule = (function () {
       timestamp: getKolkataTimestamp(),
     };
 
-    try {
-      await firebasePost(FIREBASE_PATH(), entry);
-    } catch (e) {
-      console.warn('Firebase write failed:', e);
-    }
+    const result = await firebasePost(FIREBASE_PATH(), entry);
     const arr = JSON.parse(localStorage.getItem(STORAGE_KEY())) || [];
     arr.unshift(entry);
     localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
@@ -115,8 +111,8 @@ const TexterModule = (function () {
 
     try {
       await Promise.all([
-        firebasePost(FIREBASE_PATH(), ownerEntry),
-        firebasePost('texter_v2/' + targetUsername, sharedEntry)
+        firebasePostDirect(FIREBASE_PATH(), ownerEntry),
+        firebasePostDirect('texter_v2/' + targetUsername, sharedEntry)
       ]);
     } catch (e) {
       console.warn('Share failed:', e);
@@ -174,11 +170,7 @@ const TexterModule = (function () {
       arr.splice(noteIndex, 1);
       currentEntries = arr;
       
-      try {
-        await firebasePut(FIREBASE_PATH(), arr);
-      } catch (e) {
-        console.warn("Firebase put failed:", e);
-      }
+      const result = await firebasePut(FIREBASE_PATH(), arr);
       localStorage.setItem(STORAGE_KEY(), JSON.stringify(arr));
       
       renderList(arr);

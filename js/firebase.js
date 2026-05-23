@@ -25,7 +25,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.database();
 
-/* ── CRUD helpers ──────────────────────────────────────────── */
+/* ── CRUD helpers (offline-aware via SyncQueue) ───────────── */
 
 async function firebaseGet(path) {
   try {
@@ -37,7 +37,79 @@ async function firebaseGet(path) {
   }
 }
 
-async function firebasePost(path, data) {
+/**
+ * Post data to Firebase. Queues automatically if offline or slow.
+ * Returns { synced: boolean, key?: string, syncId?: string }.
+ * Never throws — offline writes are queued for later.
+ */
+async function firebasePost(path, data, options) {
+  if (window.SyncQueue) {
+    return window.SyncQueue.tryOrQueue('post', path, data, options);
+  }
+  // Fallback if sync.js not loaded yet
+  try {
+    const ref = await db.ref(path).push(data);
+    return { synced: true, key: ref.key };
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase write error: ' + (e.message || e), 'error');
+    return { synced: false };
+  }
+}
+
+/**
+ * Set data at Firebase path. Queues automatically if offline or slow.
+ * Never throws — offline writes are queued for later.
+ */
+async function firebasePut(path, data, options) {
+  if (window.SyncQueue) {
+    return window.SyncQueue.tryOrQueue('put', path, data, options);
+  }
+  try {
+    await db.ref(path).set(data);
+    return { synced: true };
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase write error: ' + (e.message || e), 'error');
+    return { synced: false };
+  }
+}
+
+/**
+ * Update data at Firebase path. Queues automatically if offline or slow.
+ * Never throws — offline writes are queued for later.
+ */
+async function firebasePatch(path, data, options) {
+  if (window.SyncQueue) {
+    return window.SyncQueue.tryOrQueue('patch', path, data, options);
+  }
+  try {
+    await db.ref(path).update(data);
+    return { synced: true };
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase update error: ' + (e.message || e), 'error');
+    return { synced: false };
+  }
+}
+
+/**
+ * Delete data at Firebase path. Queues automatically if offline or slow.
+ * Never throws — offline writes are queued for later.
+ */
+async function firebaseDelete(path, options) {
+  if (window.SyncQueue) {
+    return window.SyncQueue.tryOrQueue('delete', path, null, options);
+  }
+  try {
+    await db.ref(path).remove();
+    return { synced: true };
+  } catch (e) {
+    if (typeof window.showToast === 'function') window.showToast('Firebase delete error: ' + (e.message || e), 'error');
+    return { synced: false };
+  }
+}
+
+/* ── Direct CRUD helpers (bypass queue — for multi-user writes) ── */
+
+async function firebasePostDirect(path, data) {
   try {
     const ref = await db.ref(path).push(data);
     return { name: ref.key };
@@ -47,7 +119,7 @@ async function firebasePost(path, data) {
   }
 }
 
-async function firebasePut(path, data) {
+async function firebasePutDirect(path, data) {
   try {
     await db.ref(path).set(data);
     return true;
@@ -57,7 +129,7 @@ async function firebasePut(path, data) {
   }
 }
 
-async function firebasePatch(path, data) {
+async function firebasePatchDirect(path, data) {
   try {
     await db.ref(path).update(data);
     return true;
@@ -67,7 +139,7 @@ async function firebasePatch(path, data) {
   }
 }
 
-async function firebaseDelete(path) {
+async function firebaseDeleteDirect(path) {
   try {
     await db.ref(path).remove();
     return true;

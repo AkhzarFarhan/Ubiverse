@@ -210,7 +210,7 @@ async function getSavedDeviceId() {
   const username = window.AppState.username;
   if (!username) return null;
   try {
-    return await firebaseGet('Ubiverse/' + username + '/care/deviceId');
+    return await firebaseGet('ubiverse_care/' + username + '/deviceId');
   } catch (e) {
     console.warn('Could not read saved device ID:', e);
     return null;
@@ -220,7 +220,7 @@ async function getSavedDeviceId() {
 async function saveDeviceId(deviceId) {
   const username = window.AppState.username;
   if (!username) return;
-  await firebasePut('Ubiverse/' + username + '/care/deviceId', deviceId);
+  await firebasePut('ubiverse_care/' + username + '/deviceId', deviceId);
 }
 
 /* ── Main render ────────────────────────────────────────── */
@@ -377,7 +377,7 @@ async function handleChangeDevice() {
     currentDeviceId = null;
     const username = window.AppState.username;
     if (username) {
-      try { await firebaseDelete('Ubiverse/' + username + '/care/deviceId'); } catch(e) {}
+      try { await firebaseDelete('ubiverse_care/' + username + '/deviceId'); } catch(e) {}
     }
     renderSetup();
   }

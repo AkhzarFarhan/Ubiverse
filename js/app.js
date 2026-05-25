@@ -17,6 +17,7 @@
     { key: 'carpool', icon: '🕌', label: 'Carpool' },
     { key: 'lte', icon: '📡', label: 'LTE MAC' },
     { key: 'sudoku', icon: '🧩', label: 'Sudoku' },
+    { key: 'care',   icon: '👁️', label: 'Care' },
   ];
 
     const ROUTES = {
@@ -33,6 +34,7 @@
     carpool: () => import('./carpool.js').then(m => m.CarpoolModule.render()),
     lte: () => import('./lte.js').then(m => m.LteModule.render()),
     sudoku: () => import('./sudoku.js').then(m => m.SudokuModule.render()),
+    care:   () => import('./care.js').then(m => m.CareModule.render()),
   };
 
   /* ── Home (icon grid) ─────────────────────────────────────── */

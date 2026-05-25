@@ -2495,3 +2495,448 @@ tbody tr:hover { background: #fafbff; }
   70% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0); }
   100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
+
+/* ============================================================
+   Care Module — Parental Monitoring Dashboard
+   ============================================================ */
+
+/* ── Loading / Spinner ─────────────────────────────────────── */
+.care-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  gap: 1rem;
+  color: var(--text-muted);
+}
+.care-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: care-spin 0.7s linear infinite;
+}
+@keyframes care-spin { to { transform: rotate(360deg); } }
+
+/* ── Setup Screen ──────────────────────────────────────────── */
+.care-setup-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2rem 1.5rem;
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}
+.care-setup-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+.care-setup-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.care-setup-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  line-height: 1.55;
+}
+.care-setup-card .form-group { text-align: left; }
+.care-setup-card input[type="text"] {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+.care-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.care-header-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+.care-subheader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+.care-device-tag {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.care-countdown {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Filter Bar ────────────────────────────────────────────── */
+.care-filter-bar {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+.care-filter-btn {
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  font-family: var(--font);
+}
+.care-filter-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.care-filter-btn.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* ── Status Dot ────────────────────────────────────────────── */
+.care-status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 2px;
+}
+.care-dot-online  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); animation: care-pulse-green 2s infinite; }
+.care-dot-away    { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+.care-dot-offline { background: #ef4444; }
+
+@keyframes care-pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+  70% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* ── Card Base ─────────────────────────────────────────────── */
+.care-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  padding: 1.15rem;
+  margin-bottom: 0.85rem;
+  transition: box-shadow 0.15s ease;
+}
+.care-card:hover { box-shadow: var(--shadow); }
+
+.care-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--border);
+}
+.care-card-icon { font-size: 1.1rem; }
+.care-card-title {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.care-card-footer {
+  margin-top: 0.65rem;
+  font-size: 0.73rem;
+  color: var(--text-light);
+  text-align: right;
+}
+.care-empty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 1.5rem 0;
+  opacity: 0.8;
+}
+
+/* ── Device Card ───────────────────────────────────────────── */
+.care-device-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+.care-device-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.care-device-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-light);
+}
+.care-device-value {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* ── Permissions ───────────────────────────────────────────── */
+.care-perm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.care-perm-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.care-perm-icon { font-size: 0.9rem; flex-shrink: 0; }
+.care-perm-label {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.care-perm-status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.care-perm-status.granted { color: var(--color-success); }
+.care-perm-status.denied  { color: var(--color-danger); }
+
+/* ── Screen Activity ───────────────────────────────────────── */
+.care-screen-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+.care-screen-stat {
+  text-align: center;
+  padding: 0.75rem 0.5rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+.care-screen-stat-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+.care-screen-stat-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 0.25rem;
+}
+.care-screen-stat-desc {
+  font-size: 0.68rem;
+  color: var(--text-light);
+  margin-top: 0.1rem;
+}
+
+/* ── App Usage ─────────────────────────────────────────────── */
+.care-usage-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.85rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.85rem;
+}
+.care-usage-total-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+.care-usage-total-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: block;
+}
+.care-usage-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* App bar chart */
+.care-app-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.care-app-bar-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 140px) 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+.care-app-bar-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.care-app-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.care-app-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.care-app-bar-track {
+  height: 20px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.care-app-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary-light), var(--color-primary));
+  border-radius: 10px;
+  min-width: 6px;
+  transition: width 0.4s ease;
+}
+.care-app-bar-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 45px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── URL Visits ────────────────────────────────────────────── */
+.care-url-domains {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.care-domain-group {
+  border-bottom: 1px solid var(--border);
+}
+.care-domain-group:last-child { border-bottom: none; }
+
+.care-collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.3rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease;
+  border-radius: var(--radius-sm);
+}
+.care-collapsible-header:hover { background: var(--surface-2); }
+
+.care-domain-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.care-domain-icon { font-size: 0.9rem; flex-shrink: 0; }
+.care-domain-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.care-domain-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: #fef2f2;
+  color: #dc2626;
+  white-space: nowrap;
+}
+.care-domain-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+.care-domain-count {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.care-collapse-arrow {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  width: 16px;
+  text-align: center;
+}
+
+.care-url-list {
+  display: none;
+  padding: 0 0 0.5rem 1.8rem;
+}
+.care-url-list.open { display: block; }
+
+.care-url-item {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding: 0.2rem 0;
+  word-break: break-all;
+  line-height: 1.4;
+}
+.care-url-more {
+  font-size: 0.73rem;
+  color: var(--text-light);
+  font-style: italic;
+  padding: 0.2rem 0;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .care-setup-card { padding: 1.5rem 1rem; }
+  .care-device-grid { grid-template-columns: 1fr; }
+  .care-screen-stats { grid-template-columns: 1fr; }
+  .care-app-bar-row { grid-template-columns: minmax(70px, 100px) 1fr auto; }
+  .care-app-name { font-size: 0.75rem; }
+  .care-usage-summary { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .care-usage-meta { align-items: flex-start; flex-direction: row; gap: 0.75rem; }
+}

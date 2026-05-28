@@ -5,3 +5,14 @@ js/env.js
 .DS_Store
 node_modules/
 dist/
+
+# Python
+__pycache__/
+*.pyc
+win_env/
+
+# Build artifacts
+dist-test/
+
+# Editor backup files
+*.js.save

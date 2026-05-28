@@ -36,17 +36,12 @@
 - Use [Makefile](Makefile) in WSL/Git Bash and [make.ps1](make.ps1) in PowerShell.
 - `pushm` is the fast path for commit + push to `dev` + merge to `main`.
 
-## Testing rules
-- Add tests when changing calculation logic, data transforms, validation rules, or cross-module shared helpers.
-- Prefer small browser-native tests over introducing heavy test frameworks.
-- Do not add a complex frontend build/test toolchain unless explicitly requested.
-- If tests are added, keep them isolated from production runtime files and clearly document how to run them.
-- Test files should focus on deterministic logic first: formatting, ledger math, date handling, counter behavior, and data conversion helpers.
-- For UI-heavy changes, include at least a manual test checklist covering mobile layout, tap targets, auth flow, and persistence behavior.
+## Validation rules
+- Run `node validate.js` before pushing to catch structural issues (missing files, broken routes, module contract violations).
+- For UI-heavy changes, include a manual test checklist covering mobile layout, tap targets, auth flow, and persistence behavior.
 - When changing Firebase or `localStorage` interactions, test both the success path and fallback path.
-- When fixing a bug, add a test case or documented manual reproduction that would have caught the bug.
+- When fixing a bug, document manual reproduction steps that would have caught the bug.
 - Do not rely on real production credentials in tests; use mock data or safe local fixtures.
-- Keep test data anonymous and disposable.
 
 ## Manual test checklist rules
 - Verify login flow and sign-out behavior after auth-related changes.

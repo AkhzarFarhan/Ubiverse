@@ -33,7 +33,7 @@ Then work on the Ubiverse repository using the documented architecture and const
 - Do not add frameworks, build tools, or unnecessary dependencies
 - Preserve Firebase + localStorage behavior unless explicitly changing it
 - Update relevant `.md` docs if the behavior materially changes
-- Add tests or a manual test checklist when applicable
+- Run `node validate.js` to verify structural integrity after changes
 
 ### Implementation instructions
 - First summarize the current architecture relevant to this task
@@ -61,7 +61,7 @@ Constraints:
 - preserve existing architecture
 - keep Firebase/localStorage behavior intact unless needed
 - update docs if behavior changes
-- include test steps
+- run `node validate.js` before pushing
 
 ---
 

@@ -58,14 +58,6 @@ Branch model:
 ### Git Bash / WSL commands
 Defined in [Makefile](Makefile):
 - `make push`
-- `make merge`
-- `make pushm`
-
-### PowerShell commands
-Defined in [make.ps1](make.ps1):
-- `./make.ps1 push`
-- `./make.ps1 merge`
-- `./make.ps1 pushm`
 
 ## Operational notes
 - If history is rewritten with `git filter-repo`, the `origin` remote may be removed and must be re-added.

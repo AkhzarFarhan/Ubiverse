@@ -33,6 +33,7 @@ async function buildJS() {
         'js/lte.js',
         'js/sudoku.js',
         'js/care.js',
+        'js/focus.js',
         'sw.js'
       ],
       outdir: 'dist',
@@ -51,9 +52,9 @@ async function buildJS() {
 async function buildCSS() {
   try {
     await esbuild.build({
-      entryPoints: ['css/style.css'],
+      entryPoints: ['css/style.css', 'css/focus.css'],
       minify: true,
-      outfile: 'dist/css/style.css',
+      outdir: 'dist/css',
     });
     console.log('CSS build completed');
   } catch (error) {
@@ -88,6 +89,7 @@ async function copyAssets() {
 
   // Add version cache busting for static resources
   html = html.replace(/href="css\/style\.css"/g, `href="css/style.css?v=${buildHash}"`);
+  html = html.replace(/href="css\/focus\.css"/g, `href="css/focus.css?v=${buildHash}"`);
   html = html.replace(/src="js\/env\.js"/g, `src="js/env.js?v=${buildHash}"`);
   html = html.replace(/src="js\/firebase\.js"/g, `src="js/firebase.js?v=${buildHash}"`);
   html = html.replace(/src="js\/utils\.js"/g, `src="js/utils.js?v=${buildHash}"`);

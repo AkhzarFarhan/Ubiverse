@@ -2,7 +2,6 @@
 // Focus Prep - C/C++ Concepts & Coding Interview Patterns Module for Ubiverse.
 // Fetches data from assets/ and synchronizes user progress with Firebase + LocalStorage.
 
-import { objectToArray } from './utils.js';
 
 const FocusModule = (function () {
   'use strict';

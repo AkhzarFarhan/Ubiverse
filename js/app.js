@@ -18,6 +18,7 @@
     { key: 'lte', icon: '📡', label: 'LTE MAC' },
     { key: 'sudoku', icon: '🧩', label: 'Sudoku' },
     { key: 'care',   icon: '👁️', label: 'Care' },
+    { key: 'focus',  icon: '⚡', label: 'Focus Prep' },
   ];
 
     const ROUTES = {
@@ -35,6 +36,7 @@
     lte: () => import('./lte.js').then(m => m.LteModule.render()),
     sudoku: () => import('./sudoku.js').then(m => m.SudokuModule.render()),
     care:   () => import('./care.js').then(m => m.CareModule.render()),
+    focus:  () => import('./focus.js').then(m => m.FocusModule.render()),
   };
 
   /* ── Home (icon grid) ─────────────────────────────────────── */

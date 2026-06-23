@@ -4,35 +4,35 @@
    ============================================================ */
 
 .focus-container {
-    /* Custom Design Tokens */
-    --bg-primary: #0a0f1d;
-    --bg-secondary: #111827;
-    --bg-tertiary: #1f2937;
-    --border-color: #374151;
-    --border-glow: rgba(99, 102, 241, 0.15);
+    /* Custom Design Tokens mapped to Ubiverse theme */
+    --bg-primary: var(--bg);
+    --bg-secondary: var(--surface);
+    --bg-tertiary: var(--surface-2);
+    --border-color: var(--border);
+    --border-glow: rgba(16, 185, 129, 0.15);
     
-    --text-primary: #f9fafb;
-    --text-secondary: #9ca3af;
-    --text-muted: #6b7280;
+    --text-primary: var(--text);
+    --text-secondary: var(--text-muted);
+    --text-muted: var(--text-light);
     
-    --accent-indigo: #6366f1;
-    --accent-indigo-glow: rgba(99, 102, 241, 0.3);
-    --accent-cyan: #06b6d4;
-    --accent-emerald: #10b981;
-    --accent-rose: #f43f5e;
-    --accent-amber: #f59e0b;
+    --accent-indigo: var(--color-primary);
+    --accent-indigo-glow: rgba(16, 185, 129, 0.25);
+    --accent-cyan: #0d9488; /* Teal accent */
+    --accent-emerald: var(--color-primary);
+    --accent-rose: var(--color-danger);
+    --accent-amber: var(--color-warning);
     
-    --grad-primary: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
-    --grad-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    --grad-error: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-    --grad-success: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    --grad-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    --grad-warning: linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%);
+    --grad-error: linear-gradient(135deg, var(--color-danger) 0%, var(--color-danger-dark) 100%);
+    --grad-success: linear-gradient(135deg, var(--color-success) 0%, var(--color-primary-dark) 100%);
     
-    --border-radius-lg: 12px;
-    --border-radius-md: 8px;
-    --border-radius-sm: 4px;
-    --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --border-radius-lg: var(--radius-lg);
+    --border-radius-md: var(--radius);
+    --border-radius-sm: var(--radius-sm);
+    --shadow-premium: var(--shadow);
 
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font);
     background-color: var(--bg-primary);
     color: var(--text-primary);
     display: flex;
@@ -64,7 +64,7 @@
 /* ── Header Toolbar ────────────────────────────────────────── */
 .focus-header {
     height: 64px;
-    background: rgba(17, 24, 39, 0.9);
+    background: var(--bg-secondary);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -280,12 +280,12 @@
 }
 
 .focus-chapter-item:hover {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: var(--bg-tertiary);
 }
 
 .focus-chapter-item.active {
-    background-color: rgba(99, 102, 241, 0.08);
-    border-color: rgba(99, 102, 241, 0.2);
+    background-color: rgba(16, 185, 129, 0.08);
+    border-color: var(--accent-indigo);
 }
 
 .focus-chapter-left {
@@ -351,7 +351,7 @@
 
 /* Dashboard */
 .focus-hero-card {
-    background: radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), rgba(99, 102, 241, 0.04) 50%, transparent 100%), var(--bg-secondary);
+    background: radial-gradient(circle at top right, rgba(13, 148, 136, 0.08), rgba(16, 185, 129, 0.04) 50%, transparent 100%), var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-lg);
     padding: 24px;
@@ -623,8 +623,8 @@
 }
 
 .focus-key-points {
-    background-color: rgba(99, 102, 241, 0.02);
-    border: 1px solid rgba(99, 102, 241, 0.08);
+    background-color: rgba(16, 185, 129, 0.02);
+    border: 1px solid rgba(16, 185, 129, 0.08);
     border-radius: var(--border-radius-md);
     padding: 12px;
 }
@@ -684,7 +684,7 @@
     top: 1px;
     width: 3px;
     height: 7px;
-    border: solid #000;
+    border: solid #fff;
     border-width: 0 1.5px 1.5px 0;
     transform: rotate(45deg);
 }
@@ -744,14 +744,14 @@
 }
 
 .focus-alert-card.focus-pitfalls {
-    background-color: rgba(244, 63, 94, 0.02);
-    border: 1px solid rgba(244, 63, 94, 0.08);
+    background-color: rgba(244, 63, 94, 0.04);
+    border: 1px solid rgba(244, 63, 94, 0.15);
 }
 .focus-alert-card.focus-pitfalls h5 { color: var(--accent-rose); }
 
 .focus-alert-card.focus-tips {
-    background-color: rgba(6, 182, 212, 0.02);
-    border: 1px solid rgba(6, 182, 212, 0.08);
+    background-color: rgba(13, 148, 136, 0.04);
+    border: 1px solid rgba(13, 148, 136, 0.15);
 }
 .focus-alert-card.focus-tips h5 { color: var(--accent-cyan); }
 
@@ -804,12 +804,12 @@
 }
 
 .focus-tag-time {
-    background-color: rgba(99, 102, 241, 0.06);
+    background-color: rgba(16, 185, 129, 0.08);
     color: var(--accent-indigo);
 }
 
 .focus-tag-space {
-    background-color: rgba(6, 182, 212, 0.06);
+    background-color: rgba(13, 148, 136, 0.08);
     color: var(--accent-cyan);
 }
 
@@ -860,19 +860,19 @@
 
 .focus-difficulty-badge.easy,
 .focus-difficulty-badge.beginner {
-    background-color: rgba(16, 185, 129, 0.08);
+    background-color: rgba(16, 185, 129, 0.1);
     color: var(--accent-emerald);
 }
 
 .focus-difficulty-badge.medium,
 .focus-difficulty-badge.intermediate {
-    background-color: rgba(245, 158, 11, 0.08);
+    background-color: rgba(245, 158, 11, 0.1);
     color: var(--accent-amber);
 }
 
 .focus-difficulty-badge.hard,
 .focus-difficulty-badge.advanced {
-    background-color: rgba(244, 63, 94, 0.08);
+    background-color: rgba(244, 63, 94, 0.1);
     color: var(--accent-rose);
 }
 
@@ -900,7 +900,7 @@
 }
 
 .focus-problem-details {
-    background-color: rgba(255,255,255,0.01);
+    background-color: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     padding: 8px 12px;
     border-radius: var(--border-radius-md);
@@ -1073,13 +1073,13 @@
 
 .focus-option-label.graded-correct-card {
     border-color: var(--accent-emerald);
-    background-color: rgba(16, 185, 129, 0.03);
+    background-color: rgba(16, 185, 129, 0.06);
     color: var(--accent-emerald);
 }
 
 .focus-option-label.graded-incorrect-card {
     border-color: var(--accent-rose);
-    background-color: rgba(244, 63, 94, 0.03);
+    background-color: rgba(244, 63, 94, 0.06);
     color: var(--accent-rose);
 }
 
@@ -1182,4 +1182,103 @@
     .focus-alert-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ============================================================
+   Claude-like Code Box Overrides
+   ============================================================ */
+
+.focus-container pre[class*="language-"],
+.focus-container code[class*="language-"],
+.focus-container pre,
+.focus-container code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Segoe UI Mono', monospace !important;
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+    background: #f9fafb !important;
+    color: #1f2937 !important;
+    text-shadow: none !important;
+}
+
+.focus-container pre[class*="language-"] {
+    padding: 14px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+}
+
+.focus-code-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    background-color: #f9fafb;
+}
+
+.focus-code-card-header {
+    background-color: #f3f4f6;
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* Light Theme Syntax Highlighting for Prism (Claude style) */
+.focus-container .token.comment,
+.focus-container .token.prolog,
+.focus-container .token.doctype,
+.focus-container .token.cdata {
+    color: #6b7280 !important;
+    font-style: italic;
+}
+
+.focus-container .token.punctuation {
+    color: #374151 !important;
+}
+
+.focus-container .token.property,
+.focus-container .token.tag,
+.focus-container .token.boolean,
+.focus-container .token.number,
+.focus-container .token.constant,
+.focus-container .token.symbol,
+.focus-container .token.deleted {
+    color: #b45309 !important; /* amber/orange */
+}
+
+.focus-container .token.selector,
+.focus-container .token.attr-name,
+.focus-container .token.string,
+.focus-container .token.char,
+.focus-container .token.builtin,
+.focus-container .token.inserted {
+    color: #047857 !important; /* green */
+}
+
+.focus-container .token.operator,
+.focus-container .token.entity,
+.focus-container .token.url,
+.focus-container .language-css .token.string,
+.focus-container .style .token.string {
+    color: #0369a1 !important; /* blue */
+}
+
+.focus-container .token.atrule,
+.focus-container .token.attr-value,
+.focus-container .token.keyword {
+    color: #4338ca !important; /* indigo */
+    font-weight: 600;
+}
+
+.focus-container .token.function,
+.focus-container .token.class-name {
+    color: #0d9488 !important; /* teal */
+}
+
+.focus-container .token.regex,
+.focus-container .token.important,
+.focus-container .token.variable {
+    color: #be123c !important; /* rose */
 }

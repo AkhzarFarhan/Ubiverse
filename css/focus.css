@@ -45,6 +45,26 @@
     box-shadow: var(--shadow-premium);
 }
 
+/* Restore list markers stripped by global reset */
+.focus-container ul,
+.focus-container ol {
+    list-style: disc;
+    padding-left: 1.25em;
+}
+
+.focus-container ol {
+    list-style: decimal;
+}
+
+.focus-container .focus-chapter-list,
+.focus-container .focus-path-list,
+.focus-container .focus-quiz-options-list,
+.focus-container .focus-dashboard-stats,
+.focus-container .focus-search-list {
+    list-style: none;
+    padding-left: 0;
+}
+
 /* Scrollbars inside Focus module */
 .focus-container ::-webkit-scrollbar {
     width: 6px;
@@ -517,6 +537,32 @@
     color: var(--text-secondary);
 }
 
+.focus-back-btn {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+}
+
+.focus-back-btn:hover {
+    color: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+}
+
+.focus-back-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
 .focus-pattern-overview {
     border-top: 1px solid var(--border-color);
     padding-top: 12px;
@@ -912,6 +958,137 @@
     color: var(--text-secondary);
 }
 
+.focus-companies-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.focus-company-tag {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background-color: rgba(99, 102, 241, 0.08);
+    color: #6366f1;
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    letter-spacing: 0.02em;
+}
+
+.focus-signal-tags,
+.focus-variation-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.focus-signal-tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background-color: rgba(13, 148, 136, 0.06);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(13, 148, 136, 0.15);
+}
+
+.focus-variation-tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background-color: rgba(245, 158, 11, 0.06);
+    color: var(--accent-amber);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.focus-hints-section {
+    background-color: rgba(99, 102, 241, 0.03);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+}
+
+.focus-hints-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6366f1;
+    cursor: pointer;
+}
+
+.focus-hints-toggle:hover {
+    background-color: rgba(99, 102, 241, 0.04);
+}
+
+.focus-hints-content {
+    display: none;
+    padding: 0 12px 10px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.focus-hints-content.show {
+    display: block;
+}
+
+.focus-followups {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 10px 12px;
+    font-size: 0.78rem;
+}
+
+.focus-followups strong {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+}
+
+.focus-followups ul {
+    margin-top: 4px;
+}
+
+.focus-related-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.focus-related-tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background-color: rgba(16, 185, 129, 0.06);
+    color: var(--accent-emerald);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.focus-intuition-block {
+    font-size: 0.78rem;
+    background-color: rgba(99, 102, 241, 0.03);
+    border-left: 2px solid #6366f1;
+    padding: 8px 12px;
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
 .focus-problem-code-tabs {
     display: flex;
     border-bottom: 1px solid var(--border-color);
@@ -1181,6 +1358,9 @@
     }
     .focus-alert-grid {
         grid-template-columns: 1fr;
+    }
+    .focus-back-btn {
+        display: inline-flex;
     }
 }
 

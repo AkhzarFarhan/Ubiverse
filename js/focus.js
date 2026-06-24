@@ -228,7 +228,7 @@ const FocusModule = (function () {
     data.chapters.forEach(ch => {
       const itemKey = `${activeView}_${ch.id}`;
       const isCompleted = userProgress.completedChapters.includes(itemKey);
-      const completionPct = calculateChapterCompletion(ch);
+      const completionPct = calculateChapterCompletion(ch, activeView);
 
       const div = document.createElement('div');
       div.className = `focus-chapter-item ${activeChapterId === ch.id ? 'active' : ''} ${isCompleted ? 'completed' : ''}`;
@@ -248,8 +248,8 @@ const FocusModule = (function () {
     });
   }
 
-  function calculateChapterCompletion(chapter) {
-    if (activeView === 'concepts') {
+  function calculateChapterCompletion(chapter, view) {
+    if (view === 'concepts') {
       const topics = chapter.topics || [];
       if (topics.length === 0) return 0;
       let completed = 0;
@@ -339,7 +339,7 @@ const FocusModule = (function () {
       conceptsData.chapters.forEach(ch => {
         const itemKey = `concepts_${ch.id}`;
         const isCompleted = userProgress.completedChapters.includes(itemKey);
-        const compPct = calculateChapterCompletion(ch);
+        const compPct = calculateChapterCompletion(ch, 'concepts');
         const li = document.createElement('li');
         li.className = 'focus-path-item';
         li.addEventListener('click', () => {
@@ -358,7 +358,7 @@ const FocusModule = (function () {
       patternsData.chapters.forEach(ch => {
         const itemKey = `patterns_${ch.id}`;
         const isCompleted = userProgress.completedChapters.includes(itemKey);
-        const compPct = calculateChapterCompletion(ch);
+        const compPct = calculateChapterCompletion(ch, 'patterns');
         const li = document.createElement('li');
         li.className = 'focus-path-item';
         li.addEventListener('click', () => {
@@ -422,8 +422,16 @@ const FocusModule = (function () {
       activeTab = 'problems';
     }
 
+    const isConcepts = activeView === 'concepts';
+    const isPatterns = activeView === 'patterns';
+
     viewport.innerHTML = `
       <div class="focus-chapter-view">
+        <!-- Mobile back button -->
+        <button class="focus-back-btn" id="focus-back-btn">
+          <i data-lucide="arrow-left"></i> Back to Dashboard
+        </button>
+
         <!-- Header details card -->
         <header class="focus-chapter-header">
           <div class="focus-chapter-meta">
@@ -441,7 +449,7 @@ const FocusModule = (function () {
           <p class="focus-chapter-desc">${chapter.description}</p>
           
           <!-- Patterns Overview (Only patterns view) -->
-          ${activeView === 'patterns' ? `
+          ${isPatterns ? `
             <div class="focus-pattern-overview">
               <h4>Pattern Intuition</h4>
               <p>${marked.parse(chapter.patternOverview || '')}</p>
@@ -459,12 +467,16 @@ const FocusModule = (function () {
 
         <!-- Chapter internal navigation tabs -->
         <div class="focus-tabs-bar">
-          <button class="focus-tab ${activeTab === 'learn' ? 'active' : ''}" id="focus-tab-learn" style="display:${activeView === 'concepts' ? 'block' : 'none'}">
-            <i data-lucide="book-open"></i> Learn Concepts
-          </button>
-          <button class="focus-tab ${activeTab === 'problems' ? 'active' : ''}" id="focus-tab-problems" style="display:${activeView === 'patterns' ? 'block' : 'none'}">
-            <i data-lucide="code-2"></i> Coding Problems
-          </button>
+          ${isConcepts ? `
+            <button class="focus-tab ${activeTab === 'learn' ? 'active' : ''}" id="focus-tab-learn">
+              <i data-lucide="book-open"></i> Learn Concepts
+            </button>
+          ` : ''}
+          ${isPatterns ? `
+            <button class="focus-tab ${activeTab === 'problems' ? 'active' : ''}" id="focus-tab-problems">
+              <i data-lucide="code-2"></i> Coding Problems
+            </button>
+          ` : ''}
           <button class="focus-tab ${activeTab === 'quiz' ? 'active' : ''}" id="focus-tab-quiz">
             <i data-lucide="award"></i> Chapter Quiz
           </button>
@@ -472,8 +484,8 @@ const FocusModule = (function () {
 
         <!-- Panels Container -->
         <div class="focus-tab-panels">
-          <div id="focus-panel-learn" class="focus-panel" style="display:${activeTab === 'learn' ? 'flex' : 'none'}"></div>
-          <div id="focus-panel-problems" class="focus-panel" style="display:${activeTab === 'problems' ? 'flex' : 'none'}"></div>
+          ${isConcepts ? `<div id="focus-panel-learn" class="focus-panel" style="display:${activeTab === 'learn' ? 'flex' : 'none'}"></div>` : ''}
+          ${isPatterns ? `<div id="focus-panel-problems" class="focus-panel" style="display:${activeTab === 'problems' ? 'flex' : 'none'}"></div>` : ''}
           <div id="focus-panel-quiz" class="focus-panel" style="display:${activeTab === 'quiz' ? 'flex' : 'none'}"></div>
         </div>
       </div>
@@ -484,11 +496,17 @@ const FocusModule = (function () {
       toggleChapterCompletion(e.target.checked);
     });
 
-    const btnLearn = document.getElementById('focus-tab-learn');
-    btnLearn.addEventListener('click', () => switchTab('learn', chapter));
+    document.getElementById('focus-back-btn').addEventListener('click', () => showDashboard());
 
-    const btnProblems = document.getElementById('focus-tab-problems');
-    btnProblems.addEventListener('click', () => switchTab('problems', chapter));
+    if (isConcepts) {
+      const btnLearn = document.getElementById('focus-tab-learn');
+      btnLearn.addEventListener('click', () => switchTab('learn', chapter));
+    }
+
+    if (isPatterns) {
+      const btnProblems = document.getElementById('focus-tab-problems');
+      btnProblems.addEventListener('click', () => switchTab('problems', chapter));
+    }
 
     const btnQuiz = document.getElementById('focus-tab-quiz');
     btnQuiz.addEventListener('click', () => switchTab('quiz', chapter));

@@ -1,0 +1,192 @@
+{
+  "C:\\GitHub\\Ubiverse\\build.js": {
+    "mtime": 1782234915.1667411,
+    "ast_hash": "7e09d457fdcb23a8ad4323e34da71d4d",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\database.rules.json": {
+    "mtime": 1778610906.248965,
+    "ast_hash": "09d589756e094741e255fa0e708db436",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\package.json": {
+    "mtime": 1774280613.2542603,
+    "ast_hash": "c7dd004ba61a3ea0a3b25710ed62d48b",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\sw.js": {
+    "mtime": 1774282155.9906702,
+    "ast_hash": "eeb49b0040c0b03c54eaf11e164556a3",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\validate.js": {
+    "mtime": 1779971056.6302145,
+    "ast_hash": "13aad67ea96ef85dcaf312f36e06fb0c",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\assets\\3gpp-lte.json": {
+    "mtime": 1778608931.0422585,
+    "ast_hash": "95a5af7acb9a67a4bfddcb042c57c2d3",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\assets\\cpp_concepts.json": {
+    "mtime": 1782228538.668446,
+    "ast_hash": "f389f40c5a0b803bf7ba3a1a88e01cb8",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\assets\\interview_patterns.json": {
+    "mtime": 1782228541.4248288,
+    "ast_hash": "a2fd0e33d61195873113865f38fae02b",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\app.js": {
+    "mtime": 1782233969.5226154,
+    "ast_hash": "0ff768977761b40602e134a4b69efaaf",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\car.js": {
+    "mtime": 1779515202.585749,
+    "ast_hash": "01c29241ae340c2bb81c543f51ecaae1",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\care.js": {
+    "mtime": 1779738459.9767585,
+    "ast_hash": "176462123cbb1f3857f091e318a83cfb",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\carpool.js": {
+    "mtime": 1779514484.6981099,
+    "ast_hash": "9ba62e4006e736dcceb3512ff3746bbc",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\daily.js": {
+    "mtime": 1779515202.5647836,
+    "ast_hash": "0c11223297093830c26716afdd27a0d7",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\env.js": {
+    "mtime": 1774282441.4762394,
+    "ast_hash": "e987e4623354794b09744826ca70a08b",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\firebase.js": {
+    "mtime": 1779516218.1754632,
+    "ast_hash": "308aab0fcdbe47ebb299f9dd9a8a214c",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\focus.js": {
+    "mtime": 1782324537.299954,
+    "ast_hash": "4d82e199d5f0cb06a34f58f71f2d96e8",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\gym.js": {
+    "mtime": 1779515202.5678167,
+    "ast_hash": "b833a573bf17413c4c319d1ab4af94f1",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\hadith.js": {
+    "mtime": 1774444366.0173535,
+    "ast_hash": "01204ab958682cba381c64718bea5f1c",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\ledger.js": {
+    "mtime": 1779515202.5768943,
+    "ast_hash": "295b90015e165bf16f16a0071525d1f2",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\lte.js": {
+    "mtime": 1778609233.5339115,
+    "ast_hash": "9fe5de4992b12a9d6c3a1c7e3a688213",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\quran.js": {
+    "mtime": 1779514484.993363,
+    "ast_hash": "64e216a4c76c2873b49faa47aa176cc6",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\salah.js": {
+    "mtime": 1779515202.5722682,
+    "ast_hash": "c1e6bb790fa92e37fff881c1f665f716",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\sudoku.js": {
+    "mtime": 1778610838.5570714,
+    "ast_hash": "a7849202fab29d4e91daaa97a181b784",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\sync.js": {
+    "mtime": 1779516210.088906,
+    "ast_hash": "7b3d579a19b27417b941acc1a217a835",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\tasbih.js": {
+    "mtime": 1779514485.1631453,
+    "ast_hash": "0a074889cb6d4b8d4cf5d33a6bc02729",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\texter.js": {
+    "mtime": 1779516226.9019403,
+    "ast_hash": "d091bb852d653afee3b0c9c903e652a9",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\js\\utils.js": {
+    "mtime": 1773829575.0680053,
+    "ast_hash": "3a1f5c8aac01ddd7920dd1859bff03c9",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\AGENTS.md": {
+    "mtime": 1773815132.8475268,
+    "ast_hash": "c002866ebdb6c5b87fb53d7b246a3a95",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\architecture.md": {
+    "mtime": 1775235503.493188,
+    "ast_hash": "bd51ff6382ccc3f76362fc525ba5919d",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\current-state.md": {
+    "mtime": 1773815132.893088,
+    "ast_hash": "9aea286b8dc2db3db29fd9aeb3964dfd",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\index.html": {
+    "mtime": 1782234014.9935985,
+    "ast_hash": "353b7bf23d4e9d8e2bad59186165d3f2",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\modules.md": {
+    "mtime": 1777998696.0962677,
+    "ast_hash": "209d04ef0d87360a1912164fe6a74472",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\prompt-template.md": {
+    "mtime": 1779970946.5536537,
+    "ast_hash": "bb90d3f0d8e571a8f2232dfeda839c7f",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\README.md": {
+    "mtime": 1773160751.60383,
+    "ast_hash": "de9ae3f7f80c026c24262ea4405c7ee8",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\rules.md": {
+    "mtime": 1779970935.7846718,
+    "ast_hash": "fb3a61e0f14da1cbde02cb7d33f5aa02",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\skills.md": {
+    "mtime": 1773815133.0137434,
+    "ast_hash": "1512f7eb9f42d98a1249e4daa3e0fbc4",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\workflows.md": {
+    "mtime": 1779970959.1868527,
+    "ast_hash": "3faafbbb46a3cf05f9601ac876b351f7",
+    "semantic_hash": ""
+  },
+  "C:\\GitHub\\Ubiverse\\.github\\workflows\\deploy.yml": {
+    "mtime": 1774280724.2645142,
+    "ast_hash": "99dc62c090d55a2237425994648c53db",
+    "semantic_hash": ""
+  }
+}

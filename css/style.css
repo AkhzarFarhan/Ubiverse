@@ -2247,6 +2247,12 @@ tbody tr:hover { background: #fafbff; }
 .sudoku-cell.conflict {
   background: #fee2e2;
 }
+.sudoku-cell.can-place {
+  background: #dcfce7;
+}
+.sudoku-cell.cannot-place {
+  background: #fee2e2;
+}
 .sudoku-cell.error-flash {
   animation: sudoku-error-flash .4s ease 3;
 }

@@ -29,6 +29,7 @@ const SudokuModule = (function () {
   let _gameActive = false;
   let _saveTimeout = null;
   let _completed   = false;
+  let _highlightedNum = null; // number currently highlighted from numpad (1-9 or null)
 
   /* ── Puzzle Generation ───────────────────────────────────── */
 
@@ -296,6 +297,28 @@ const SudokuModule = (function () {
     return false;
   }
 
+  /** Check if num can be placed at (r,c) given current board state */
+  function canPlaceNumber(r, c, num) {
+    if (isGiven(r, c) || _board[r][c] !== 0) return false;
+    // Row
+    for (let i = 0; i < 9; i++) {
+      if (_board[r][i] === num) return false;
+    }
+    // Column
+    for (let i = 0; i < 9; i++) {
+      if (_board[i][c] === num) return false;
+    }
+    // Box
+    const br = Math.floor(r / 3) * 3;
+    const bc = Math.floor(c / 3) * 3;
+    for (let i = br; i < br + 3; i++) {
+      for (let j = bc; j < bc + 3; j++) {
+        if (_board[i][j] === num) return false;
+      }
+    }
+    return true;
+  }
+
   function placeNumber(r, c, num) {
     if (isGiven(r, c) || _completed) return;
 
@@ -514,9 +537,19 @@ const SudokuModule = (function () {
 
     // Number pad
     document.querySelectorAll('.sudoku-num-btn').forEach(btn => {
+      const num = parseInt(btn.dataset.num);
       btn.addEventListener('click', () => {
         if (!_selectedCell || !_gameActive || _paused || _completed) return;
-        placeNumber(_selectedCell.r, _selectedCell.c, parseInt(btn.dataset.num));
+        placeNumber(_selectedCell.r, _selectedCell.c, num);
+      });
+      btn.addEventListener('mouseenter', () => {
+        if (!_gameActive || _paused || _completed) return;
+        _highlightedNum = num;
+        renderGrid();
+      });
+      btn.addEventListener('mouseleave', () => {
+        _highlightedNum = null;
+        renderGrid();
       });
     });
 
@@ -693,12 +726,25 @@ const SudokuModule = (function () {
         // Same-number highlight
         const sameNum = _selectedCell && val !== 0 && val === _board[_selectedCell.r][_selectedCell.c];
 
+        // Numpad hover highlight: can-place / cannot-place
+        let canPlace = false;
+        let cannotPlace = false;
+        if (_highlightedNum !== null && !given && val === 0 && !_paused && !_completed) {
+          if (canPlaceNumber(r, c, _highlightedNum)) {
+            canPlace = true;
+          } else {
+            cannotPlace = true;
+          }
+        }
+
         let classes = 'sudoku-cell';
         if (given)     classes += ' given';
         if (selected)  classes += ' selected';
         if (highlight && !selected) classes += ' highlighted';
         if (conflict)  classes += ' conflict';
         if (sameNum && !selected) classes += ' same-num';
+        if (canPlace)  classes += ' can-place';
+        if (cannotPlace) classes += ' cannot-place';
 
         // Border classes for 3x3 box edges
         if (r % 3 === 0) classes += ' border-top-thick';

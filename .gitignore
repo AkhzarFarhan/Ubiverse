@@ -16,3 +16,4 @@ dist-test/
 
 # Editor backup files
 *.js.save
+.vscode/

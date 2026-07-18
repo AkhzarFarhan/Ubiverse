@@ -1,0 +1,141 @@
+# Android
+*.apk
+*.ap_
+*.aab
+*.aap
+*.jks
+*.keystore
+*.ks
+
+# Gradle
+.gradle/
+build/
+*/build/
+*/build/
+!*/src/main/**/build.gradle.kts
+!*/src/main/**/build.gradle
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration
+local.properties
+*.properties
+!gradle.properties
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+.vscode/
+*.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase
+google-services.json
+google-services.json.bak
+
+# Logs
+*.log
+
+# Test reports
+*/build/reports/
+*/build/outputs/
+
+# Kotlin
+*.kt.metadata
+
+# Room
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# ProGuard
+proguard/
+*.pro
+
+# Signed artifacts
+*.apk
+*.aab
+
+# Crashlytics
+crashlytics-build.properties
+fabric.properties
+
+# Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+build/
+.gradle/
+local.properties
+*.keystore
+!/gradle/wrapper/gradle-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+*/build/
+!*/src/main/**/build.gradle.kts
+!*/src/main/**/build.gradle
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration
+local.properties
+*.properties
+!gradle.properties
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+.vscode/
+*.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase
+google-services.json
+google-services.json.bak
+
+# Logs
+*.log
+
+# Test reports
+*/build/reports/
+*/build/outputs/
+
+# Kotlin
+*.kt.metadata
+
+# Room
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# ProGuard
+proguard/
+*.pro
+
+# Signed artifacts
+*.apk
+*.aab
+
+# Crashlytics
+crashlytics-build.properties
+fabric.properties

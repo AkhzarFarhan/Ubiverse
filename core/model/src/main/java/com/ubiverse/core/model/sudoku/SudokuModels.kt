@@ -1,10 +1,13 @@
 package com.ubiverse.core.model.sudoku
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
+@Entity(tableName = "sudoku_state")
 data class SudokuState(
+    @PrimaryKey val username: String = "",
     val puzzle: Array<IntArray>, // 9x9 initial clues
     val solution: Array<IntArray>, // 9x9 solved board
     val board: Array<IntArray>, // 9x9 user progress
@@ -14,7 +17,7 @@ data class SudokuState(
     val startedAt: String,
     val lastSavedAt: String,
     val completed: Boolean
-) : Serializable
+) : java.io.Serializable
 
 enum class SudokuDifficulty {
     Easy, Medium, Hard

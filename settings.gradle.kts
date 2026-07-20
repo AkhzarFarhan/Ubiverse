@@ -9,10 +9,13 @@ pluginManagement {
             if (requested.id.id == "com.android.application") {
                 useModule("com.android.tools.build:gradle:8.5.0")
             }
-            if (requested.id.id == "org.jetbrains.kotlin.android") {
+            if (requested.id.id == "org.jetbrains.kotlin.android" || requested.id.id == "kotlin-android" || requested.id.id == "kotlin-kapt") {
                 useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.24")
             }
-            if (requested.id.id == "com.google.dagger.hilt") {
+            if (requested.id.id == "org.jetbrains.kotlin.plugin.serialization") {
+                useModule("org.jetbrains.kotlin:kotlin-serialization:1.9.24")
+            }
+            if (requested.id.id == "com.google.dagger.hilt.android") {
                 useModule("com.google.dagger:hilt-android-gradle-plugin:2.51.1")
             }
             if (requested.id.id == "com.google.gms.google-services") {
@@ -45,7 +48,7 @@ include(":core:network")
 include(":core:testing")
 
 // Feature modules will be added as we implement them
-// include(":feature:daily")
+include(":feature:daily")
 // include(":feature:gym")
 // include(":feature:texter")
 // include(":feature:tasbih")

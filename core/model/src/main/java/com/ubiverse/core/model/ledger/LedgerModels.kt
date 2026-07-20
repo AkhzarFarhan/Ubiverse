@@ -1,11 +1,13 @@
 package com.ubiverse.core.model.ledger
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
+@Entity(tableName = "ledger_entry")
 data class LedgerEntry(
-    val transactionId: Int,
+    @PrimaryKey val transactionId: Int,
     val credit: Double,
     val debit: Double,
     val mode: String,
@@ -14,13 +16,13 @@ data class LedgerEntry(
     val bank: Double,
     val total: Double,
     val timestamp: String // "DD-MM-YYYY HH:MM:SS AM/PM"
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
 data class LedgerMode(
     val name: String,
     val shortCode: String
-) : Serializable
+) : java.io.Serializable
 
 object LedgerConstants {
     val MODES = listOf(
@@ -34,3 +36,11 @@ object LedgerConstants {
         LedgerMode("BankToCash", "BTC")
     )
 }
+
+@Serializable
+data class LedgerMonthlySummary(
+    val month: String, // "YYYY-MM"
+    val totalCredit: Double,
+    val totalDebit: Double
+) : java.io.Serializable
+

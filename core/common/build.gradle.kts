@@ -1,4 +1,5 @@
 plugins {
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-android")
     id("org.jetbrains.kotlin.plugin.serialization")
@@ -11,8 +12,6 @@ android {
     defaultConfig {
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -33,6 +32,14 @@ android {
         jvmTarget = "17"
         freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.14"
+    }
 }
 
 dependencies {
@@ -45,6 +52,13 @@ dependencies {
     // AndroidX
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+
+    // Compose (needed for AnnotatedString in Formatters.kt)
+    implementation(platform("androidx.compose:compose-bom:2024.02.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

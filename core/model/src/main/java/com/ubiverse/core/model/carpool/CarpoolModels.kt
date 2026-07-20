@@ -1,9 +1,11 @@
 package com.ubiverse.core.model.carpool
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
+@Entity(tableName = "carpool_ride")
 data class CarpoolRide(
     val ownerName: String,
     val ownerPhone: String,
@@ -13,8 +15,8 @@ data class CarpoolRide(
     val departureTime: String, // "HH:mm"
     val extraHelmet: Boolean,
     val pickupPoint: String?,
-    val createdAt: Long // timestamp
-) : Serializable
+    @PrimaryKey val createdAt: Long // timestamp
+) : java.io.Serializable
 
 @Serializable
 data class CarpoolPrefill(
@@ -25,4 +27,4 @@ data class CarpoolPrefill(
     val departureTime: String = "",
     val extraHelmet: Boolean = false,
     val pickupPoint: String = ""
-) : Serializable
+) : java.io.Serializable

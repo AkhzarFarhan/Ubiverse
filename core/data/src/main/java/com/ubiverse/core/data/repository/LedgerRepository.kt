@@ -10,22 +10,22 @@ import javax.inject.Singleton
 @Singleton
 class LedgerRepository @Inject constructor(
     private val database: AppDatabase
-) : LedgerRepository {
+)  {
 
-    override suspend fun addEntry(entry: LedgerEntry) {
+    suspend fun addEntry(entry: LedgerEntry) {
         database.ledgerDao().insert(entry)
     }
 
-    override fun getEntries(): Flow<List<LedgerEntry>> {
+    fun getEntries(): Flow<List<LedgerEntry>> {
         return database.ledgerDao().getAll()
     }
 
-    override fun getMonthlySummary(): Flow<List<LedgerMonthlySummary>> {
+    fun getMonthlySummary(): Flow<List<LedgerMonthlySummary>> {
         // TODO: Implement monthly aggregation
         return kotlinx.coroutines.flow.flowOf(emptyList())
     }
 
-    override suspend fun sync() {
+    suspend fun sync() {
         // TODO: Implement Firebase sync
     }
 }

@@ -18,8 +18,8 @@ interface CarpoolDao {
     @Query("SELECT * FROM carpool_ride ORDER BY createdAt DESC")
     fun getAll(): Flow<List<CarpoolRide>>
 
-    @Query("DELETE FROM carpool_ride WHERE rideId = :rideId")
-    suspend fun deleteById(rideId: String)
+    @Query("DELETE FROM carpool_ride WHERE createdAt = :createdAt")
+    suspend fun deleteById(createdAt: Long)
 
     @Query("DELETE FROM carpool_ride WHERE createdAt < :cutoff")
     suspend fun deleteOld(cutoff: Long)

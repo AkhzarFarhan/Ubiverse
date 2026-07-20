@@ -1,10 +1,13 @@
 package com.ubiverse.core.model.auth
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Entity(tableName = "user")
 data class User(
-    val uid: String,
+    @PrimaryKey val uid: String,
     val email: String,
     val displayName: String?,
     val photoUrl: String?,
@@ -14,7 +17,7 @@ data class User(
     companion object {
         fun fromFirebaseUser(firebaseUser: com.google.firebase.auth.FirebaseUser): User {
             val email = firebaseUser.email ?: ""
-            val username = email.takeBefore("@").lowercase()
+            val username = email.substringBefore("@").lowercase()
             val displayName = firebaseUser.displayName
             val firstName = displayName?.split(" ")?.first() ?: username
             return User(

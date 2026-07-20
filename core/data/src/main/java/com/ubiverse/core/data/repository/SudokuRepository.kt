@@ -9,17 +9,17 @@ import javax.inject.Singleton
 @Singleton
 class SudokuRepository @Inject constructor(
     private val database: AppDatabase
-) : SudokuRepository {
+)  {
 
-    override suspend fun saveState(state: SudokuState) {
+    suspend fun saveState(state: SudokuState) {
         database.sudokuDao().insert(state)
     }
 
-    override fun getState(): Flow<SudokuState?> {
+    fun getState(): Flow<SudokuState?> {
         return database.sudokuDao().getState("default")
     }
 
-    override suspend fun sync() {
+    suspend fun sync() {
         // TODO: Implement Firebase sync
     }
 }

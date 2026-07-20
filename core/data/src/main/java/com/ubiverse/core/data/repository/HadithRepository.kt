@@ -9,18 +9,18 @@ import javax.inject.Singleton
 @Singleton
 class HadithRepository @Inject constructor(
     private val database: AppDatabase
-) : HadithRepository {
+)  {
 
-    override fun getBooks(): Flow<List<HadithBook>> {
+    fun getBooks(): Flow<List<HadithBook>> {
         return database.hadithDao().getAll()
     }
 
-    override fun getHadiths(bookId: String): Flow<List<com.ubiverse.core.model.hadith.Hadith>> {
+    fun getHadiths(bookId: String): Flow<List<com.ubiverse.core.model.hadith.Hadith>> {
         // TODO: Implement hadith loading from assets
         return kotlinx.coroutines.flow.flowOf(emptyList())
     }
 
-    override suspend fun sync() {
+    suspend fun sync() {
         // TODO: Implement Firebase sync
     }
 }

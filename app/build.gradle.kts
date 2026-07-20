@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("kotlin-android")
     id("kotlin-kapt")
-    id("com.google.dagger.hilt")
+    id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
@@ -51,7 +51,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
 
     packagingOptions {
@@ -161,7 +161,7 @@ dependencies {
 
     // Charts
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-    implementation("com.robertlevonyan.views:Vico:1.1.0")
+    // implementation("com.robertlevonyan.views:Vico:1.1.0")
 
     // Network
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

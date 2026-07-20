@@ -5,6 +5,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.ubiverse.core.database.sync.SyncOperation
 import com.ubiverse.core.database.sync.SyncedId
+import com.ubiverse.core.database.sync.SyncQueueDao
+import com.ubiverse.core.database.sync.SyncedIdsDao
 import com.ubiverse.core.model.auth.User
 import com.ubiverse.core.model.daily.DailyEntry
 import com.ubiverse.core.model.gym.GymEntry

@@ -9,25 +9,25 @@ import javax.inject.Singleton
 @Singleton
 class CarpoolRepository @Inject constructor(
     private val database: AppDatabase
-) : CarpoolRepository {
+)  {
 
-    override suspend fun addRide(ride: CarpoolRide) {
+    suspend fun addRide(ride: CarpoolRide) {
         database.carpoolDao().insert(ride)
     }
 
-    override fun getRides(): Flow<List<CarpoolRide>> {
+    fun getRides(): Flow<List<CarpoolRide>> {
         return database.carpoolDao().getAll()
     }
 
-    override suspend fun deleteRide(rideId: String) {
-        database.carpoolDao().deleteById(rideId)
+    suspend fun deleteRide(createdAt: Long) {
+        database.carpoolDao().deleteById(createdAt)
     }
 
-    override suspend fun purgeOldRides() {
+    suspend fun purgeOldRides() {
         // TODO: Implement cutoff logic
     }
 
-    override suspend fun sync() {
+    suspend fun sync() {
         // TODO: Implement Firebase sync
     }
 }

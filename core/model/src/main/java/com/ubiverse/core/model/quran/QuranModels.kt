@@ -1,7 +1,7 @@
 package com.ubiverse.core.model.quran
 
+import androidx.room.Entity
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
 data class Surah(
@@ -9,21 +9,27 @@ data class Surah(
     val name: String, // Arabic name
     val ename: String, // English name
     val ayahs: Int
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
 data class Ayah(
     val index: Int,
     val text: String,
     val bismillah: String? = null
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
+@Entity(
+    tableName = "quran_progress",
+    primaryKeys = ["username", "surahIndex"]
+)
 data class QuranProgress(
+    val username: String = "",
+    val surahIndex: Int = 0,
     val lastAyah: Int = 0,
     val completed: Boolean = false,
     val timestamp: String = ""
-) : Serializable
+) : java.io.Serializable
 
 object QuranConstants {
     // Surah 1 (Al-Fatihah): Bismillah IS ayah 1

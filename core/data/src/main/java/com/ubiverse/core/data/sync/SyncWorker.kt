@@ -2,13 +2,14 @@ package com.ubiverse.core.data.sync
 
 import android.content.Context
 import androidx.work.CoroutineWorker
+import androidx.work.ListenableWorker.Result
 import androidx.work.WorkerParameters
 import com.ubiverse.core.database.AppDatabase
 import com.ubiverse.core.database.sync.SyncOperation
 import com.ubiverse.core.database.sync.SyncOperationType
 import com.ubiverse.core.database.sync.SyncedId
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.json.Json
 import javax.inject.Inject

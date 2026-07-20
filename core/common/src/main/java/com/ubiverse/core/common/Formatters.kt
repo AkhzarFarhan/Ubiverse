@@ -7,7 +7,9 @@ import androidx.compose.ui.text.withStyle
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format.DateTimeFormatter
+import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toLocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlinx.serialization.json.Json
 import java.text.NumberFormat
 import java.util.Locale
@@ -33,7 +35,7 @@ object Formatters {
 
     fun getKolkataTimestamp(): String {
         val now = Clock.System.now().toLocalDateTime(KOLKATA_ZONE)
-        return now.format(KOLKATA_FORMATTER)
+        return now.toJavaLocalDateTime().format(KOLKATA_FORMATTER)
     }
 
     // Kolkata date: "YYYY-MM-DD"
@@ -41,7 +43,7 @@ object Formatters {
 
     fun getKolkataDate(): String {
         val now = Clock.System.now().toLocalDateTime(KOLKATA_ZONE)
-        return now.format(KOLKATA_DATE_FORMATTER)
+        return now.toJavaLocalDateTime().format(KOLKATA_DATE_FORMATTER)
     }
 
     // Format "YYYY-MM-DD" to "DD MMM YYYY"
@@ -49,7 +51,7 @@ object Formatters {
 
     fun formatDate(dateStr: String): String {
         try {
-            val date = LocalDateTime.parse(dateStr + "T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            val date = java.time.LocalDateTime.parse(dateStr + "T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             return date.format(DISPLAY_DATE_FORMATTER)
         } catch (e: Exception) {
             return dateStr
@@ -82,15 +84,15 @@ object Formatters {
     fun formatDurationLong(ms: Long): String {
         if (ms <= 0) return "0 seconds"
         val totalSec = ms / 1000
-        if (totalSec < 60) return "${totalSec} second${if (totalSec != 1) "s" else ""}"
+        if (totalSec < 60) return "${totalSec} second${if (totalSec != 1L) "s" else ""}"
         val mins = totalSec / 60
         if (mins < 60) {
             val secs = totalSec % 60
-            return "${mins} min${if (mins != 1) "s" else ""}${if (secs > 0) " $secs s" else ""}"
+            return "${mins} min${if (mins != 1L) "s" else ""}${if (secs > 0) " $secs s" else ""}"
         }
         val hours = mins / 60
         val remMins = mins % 60
-        return "${hours} hr${if (hours != 1) "s" else ""}${if (remMins > 0) " $remMins min" else ""}"
+        return "${hours} hr${if (hours != 1L) "s" else ""}${if (remMins > 0) " $remMins min" else ""}"
     }
 
     // Time ago from epoch milliseconds
@@ -112,7 +114,7 @@ object Formatters {
 
     fun formatTime(epochMs: Long): String {
         val dt = kotlinx.datetime.Instant.fromEpochMilliseconds(epochMs).toLocalDateTime(KOLKATA_ZONE)
-        return dt.format(TIME_FORMATTER)
+        return dt.toJavaLocalDateTime().format(TIME_FORMATTER)
     }
 
     // Format date time from epoch
@@ -120,7 +122,7 @@ object Formatters {
 
     fun formatDateTime(epochMs: Long): String {
         val dt = kotlinx.datetime.Instant.fromEpochMilliseconds(epochMs).toLocalDateTime(KOLKATA_ZONE)
-        return dt.format(DATETIME_FORMATTER)
+        return dt.toJavaLocalDateTime().format(DATETIME_FORMATTER)
     }
 
     // Extract domain from URL

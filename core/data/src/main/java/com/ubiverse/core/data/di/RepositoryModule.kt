@@ -1,5 +1,6 @@
 package com.ubiverse.core.data.di
 
+import com.ubiverse.core.database.AppDatabase
 import com.ubiverse.core.data.repository.AuthRepository
 import com.ubiverse.core.data.repository.DailyRepository
 import com.ubiverse.core.data.repository.GymRepository
@@ -31,57 +32,57 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideDailyRepository(): DailyRepository = DailyRepository()
+    fun provideDailyRepository(database: AppDatabase): DailyRepository = DailyRepository(database)
 
     @Provides
     @Singleton
-    fun provideGymRepository(): GymRepository = GymRepository()
+    fun provideGymRepository(database: AppDatabase): GymRepository = GymRepository(database)
 
     @Provides
     @Singleton
-    fun provideTexterRepository(): TexterRepository = TexterRepository()
+    fun provideTexterRepository(database: AppDatabase): TexterRepository = TexterRepository(database)
 
     @Provides
     @Singleton
-    fun provideTasbihRepository(): TasbihRepository = TasbihRepository()
+    fun provideTasbihRepository(database: AppDatabase): TasbihRepository = TasbihRepository(database)
 
     @Provides
     @Singleton
-    fun provideLedgerRepository(): LedgerRepository = LedgerRepository()
+    fun provideLedgerRepository(database: AppDatabase): LedgerRepository = LedgerRepository(database)
 
     @Provides
     @Singleton
-    fun provideCarRepository(): CarRepository = CarRepository()
+    fun provideCarRepository(database: AppDatabase): CarRepository = CarRepository(database)
 
     @Provides
     @Singleton
-    fun provideSalahRepository(): SalahRepository = SalahRepository()
+    fun provideSalahRepository(database: AppDatabase): SalahRepository = SalahRepository(database)
 
     @Provides
     @Singleton
-    fun provideQuranRepository(): QuranRepository = QuranRepository()
+    fun provideQuranRepository(database: AppDatabase): QuranRepository = QuranRepository(database)
 
     @Provides
     @Singleton
-    fun provideHadithRepository(): HadithRepository = HadithRepository()
+    fun provideHadithRepository(database: AppDatabase): HadithRepository = HadithRepository(database)
 
     @Provides
     @Singleton
-    fun provideCarpoolRepository(): CarpoolRepository = CarpoolRepository()
+    fun provideCarpoolRepository(database: AppDatabase): CarpoolRepository = CarpoolRepository(database)
 
     @Provides
     @Singleton
-    fun provideSudokuRepository(): SudokuRepository = SudokuRepository()
+    fun provideSudokuRepository(database: AppDatabase): SudokuRepository = SudokuRepository(database)
 
     @Provides
     @Singleton
-    fun provideCareRepository(): CareRepository = CareRepository()
+    fun provideCareRepository(database: AppDatabase): CareRepository = CareRepository(database)
 
     @Provides
     @Singleton
-    fun provideFocusRepository(): FocusRepository = FocusRepository()
+    fun provideFocusRepository(database: AppDatabase): FocusRepository = FocusRepository(database)
 
     @Provides
     @Singleton
-    fun provideLteRepository(): LteRepository = LteRepository()
+    fun provideLteRepository(database: AppDatabase): LteRepository = LteRepository(database)
 }

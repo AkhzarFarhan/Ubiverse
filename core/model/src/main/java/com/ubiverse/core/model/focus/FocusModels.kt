@@ -1,7 +1,8 @@
 package com.ubiverse.core.model.focus
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
 data class FocusConceptChapter(
@@ -10,7 +11,7 @@ data class FocusConceptChapter(
     val icon: String,
     val difficulty: String,
     val topics: List<FocusTopic>
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
 data class FocusTopic(
@@ -19,14 +20,14 @@ data class FocusTopic(
     val content: String, // Markdown-ish
     val code: String? = null,
     val quiz: FocusQuiz? = null
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
 data class FocusQuiz(
     val question: String,
     val options: List<String>,
     val correctAnswer: Int
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
 data class FocusPatternChapter(
@@ -35,7 +36,7 @@ data class FocusPatternChapter(
     val icon: String,
     val difficulty: String,
     val problems: List<FocusProblem>
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
 data class FocusProblem(
@@ -47,12 +48,14 @@ data class FocusProblem(
     val solution: String,
     val code: String,
     val leetcodeLinks: List<String>
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
+@Entity(tableName = "focus_progress")
 data class FocusProgress(
+    @PrimaryKey val username: String = "",
     val completedTopics: List<String> = emptyList(),
     val completedProblems: List<String> = emptyList(),
     val completedChapters: List<String> = emptyList(),
     val quizScores: Map<String, Int> = emptyMap()
-) : Serializable
+) : java.io.Serializable

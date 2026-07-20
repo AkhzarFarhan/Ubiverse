@@ -1,20 +1,22 @@
 package com.ubiverse.core.model.salah
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
+@Entity(tableName = "salah_entry")
 data class SalahEntry(
     val prayers: IntArray, // [Fajr, Zohar, Asr, Maghrib, Isha] - cumulative debt
     val timestamp: String, // "DD-MM-YYYY HH:MM:SS AM/PM"
-    val date: String // "YYYY-MM-DD"
-) : Serializable
+    @PrimaryKey val date: String // "YYYY-MM-DD"
+) : java.io.Serializable
 
 @Serializable
 data class SalahPrediction(
     val predictedDays: IntArray,
     val actualDays: IntArray
-) : Serializable
+) : java.io.Serializable
 
 object SalahConstants {
     val PRAYERS = arrayOf("Fajr", "Zohar", "Asr", "Maghrib", "Isha")

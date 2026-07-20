@@ -1,11 +1,13 @@
 package com.ubiverse.core.model.car
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
+@Entity(tableName = "car_entry")
 data class CarEntry(
-    val date: String, // "YYYY-MM-DD"
+    @PrimaryKey val date: String, // "YYYY-MM-DD"
     val odometer: Double,
     val fuelVol: Double,
     val fuelCost: Double,
@@ -18,4 +20,4 @@ data class CarEntry(
     val notes: String,
     val distance: Double,
     val mileage: Double?
-) : Serializable
+) : java.io.Serializable

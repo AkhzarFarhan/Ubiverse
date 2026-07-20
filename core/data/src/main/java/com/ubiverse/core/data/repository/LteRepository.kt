@@ -9,9 +9,9 @@ import javax.inject.Singleton
 @Singleton
 class LteRepository @Inject constructor(
     private val database: AppDatabase
-) : LteRepository {
+)  {
 
-    override fun getSpec(): Flow<LteSpec> {
+    fun getSpec(): Flow<LteSpec> {
         // TODO: Load from assets
         return kotlinx.coroutines.flow.flowOf(LteSpec(
             title = "",
@@ -31,7 +31,7 @@ class LteRepository @Inject constructor(
         ))
     }
 
-    override suspend fun sync() {
+    suspend fun sync() {
         // TODO: Implement Firebase sync
     }
 }

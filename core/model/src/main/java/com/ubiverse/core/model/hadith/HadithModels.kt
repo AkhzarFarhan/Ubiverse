@@ -1,17 +1,19 @@
 package com.ubiverse.core.model.hadith
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
+@Entity(tableName = "hadith_book")
 data class HadithBook(
-    val id: Int,
+    @PrimaryKey val id: Int,
     val name: String, // Urdu name
     val count: Int
-) : Serializable
+) : java.io.Serializable
 
 @Serializable
 data class Hadith(
     val no: Int,
     val text: String
-) : Serializable
+) : java.io.Serializable

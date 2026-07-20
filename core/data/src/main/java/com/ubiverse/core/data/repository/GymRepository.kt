@@ -9,17 +9,17 @@ import javax.inject.Singleton
 @Singleton
 class GymRepository @Inject constructor(
     private val database: AppDatabase
-) : GymRepository {
+)  {
 
-    override suspend fun addEntry(entry: GymEntry) {
+    suspend fun addEntry(entry: GymEntry) {
         database.gymDao().insert(entry)
     }
 
-    override fun getEntries(): Flow<List<GymEntry>> {
+    fun getEntries(): Flow<List<GymEntry>> {
         return database.gymDao().getAll()
     }
 
-    override suspend fun sync() {
+    suspend fun sync() {
         // TODO: Implement Firebase sync
     }
 }

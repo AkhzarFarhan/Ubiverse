@@ -1,15 +1,18 @@
 package com.ubiverse.core.model.tasbih
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import java.io.Serializable
 
 @Serializable
+@Entity(tableName = "tasbih_state")
 data class TasbihState(
+    @PrimaryKey val username: String = "",
     val mode: TasbihMode = TasbihMode.Standard,
     val count: Int = 0,
     val phase: Int = 0,
     val customTarget: Int = 100
-) : Serializable
+) : java.io.Serializable
 
 enum class TasbihMode {
     Standard, Custom
@@ -20,7 +23,7 @@ data class TasbihPhase(
     val arabic: String,
     val label: String,
     val count: Int
-) : Serializable
+) : java.io.Serializable
 
 object TasbihConstants {
     val PHASES = listOf(

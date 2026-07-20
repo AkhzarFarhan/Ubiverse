@@ -1,10 +1,18 @@
 package com.ubiverse.core.designsystem.theme
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 // Colors matching the web app's CSS custom properties
 private val LightColorScheme = lightColorScheme(
@@ -30,7 +38,6 @@ private val LightColorScheme = lightColorScheme(
     inverseOnSurface = Color(0xFFF1F5F9),
     outlineVariant = Color(0xFFCBD5E1),
     scrim = Color.Black,
-    shadow = Color.Black,
     surfaceTint = Color(0xFF10B981),
 )
 
@@ -57,7 +64,6 @@ private val DarkColorScheme = darkColorScheme(
     inverseOnSurface = Color(0xFF1E293B),
     outlineVariant = Color(0xFF475569),
     scrim = Color.Black,
-    shadow = Color.Black,
     surfaceTint = Color(0xFF6EE7B7),
 )
 
@@ -69,112 +75,112 @@ fun Theme(
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
-        shapes = Shapes,
+        typography = AppTypography,
+        shapes = AppShapes,
         content = content
     )
 }
 
 // Typography matching web app's --font: 'Segoe UI', system-ui, -apple-system, sans-serif
-val Typography = androidx.compose.material3.Typography(
-    displayLarge = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+val AppTypography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         lineHeight = 40.sp,
         letterSpacing = 0.5.sp
     ),
-    displayMedium = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+    displayMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 36.sp,
         letterSpacing = 0.25.sp
     ),
-    displaySmall = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+    displaySmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
         lineHeight = 32.sp
     ),
-    headlineLarge = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+    headlineLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.5.sp
     ),
-    headlineMedium = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+    headlineMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         lineHeight = 28.sp
     ),
-    headlineSmall = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+    headlineSmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
         fontSize = 18.sp,
         lineHeight = 24.sp
     ),
-    titleLarge = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+    titleLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp
     ),
-    titleMedium = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+    titleMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp
     ),
-    titleSmall = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+    titleSmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
     ),
-    bodyLarge = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.15.sp
     ),
-    bodyMedium = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+    bodyMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.25.sp
     ),
-    bodySmall = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+    bodySmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.4.sp
     ),
-    labelLarge = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+    labelLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.1.sp
     ),
-    labelMedium = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+    labelMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
     ),
-    labelSmall = androidx.compose.material3.TextStyle(
-        fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+    labelSmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
         fontSize = 10.sp,
         lineHeight = 16.sp,
         letterSpacing = 0.5.sp
@@ -182,10 +188,10 @@ val Typography = androidx.compose.material3.Typography(
 )
 
 // Shapes matching web app's --radius: 10px, --radius-sm: 6px, --radius-lg: 16px
-val Shapes = androidx.compose.material3.Shapes(
-    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(4.dp),
-    small = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),    // --radius-sm
-    medium = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),  // --radius
-    large = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),   // --radius-lg
-    extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(28.dp)
+val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(6.dp),    // --radius-sm
+    medium = RoundedCornerShape(10.dp),  // --radius
+    large = RoundedCornerShape(16.dp),   // --radius-lg
+    extraLarge = RoundedCornerShape(28.dp)
 )
